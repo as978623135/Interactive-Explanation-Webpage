@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全能练考卷 七年级上册 历史 周末小卷 · 题目总索引</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header {
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .header h1 { font-size: 28px; color: #333; margin-bottom: 10px; }
+        .header .subtitle { font-size: 16px; color: #666; margin-bottom: 15px; }
+        .stats { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; }
+        .stat-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; padding: 12px 24px; border-radius: 10px; font-size: 14px;
+        }
+        .stat-item .num { font-size: 24px; font-weight: bold; display: block; }
+        .unit-section {
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        .unit-title {
+            font-size: 20px; color: #333; margin-bottom: 8px; padding-bottom: 10px;
+            border-bottom: 2px solid #667eea; display: flex; justify-content: space-between; align-items: center;
+        }
+        .unit-title .count {
+            font-size: 14px; color: #667eea; background: #f0f0ff; padding: 4px 12px; border-radius: 20px;
+        }
+        .week-list { margin-top: 15px; }
+        .week-item { margin-bottom: 15px; }
+        .week-title {
+            font-size: 15px; color: #555; margin-bottom: 8px; padding-left: 10px; border-left: 3px solid #764ba2;
+        }
+        .question-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px;
+        }
+        .q-link {
+            display: block; background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px;
+            padding: 8px 12px; text-align: center; text-decoration: none; color: #495057;
+            font-size: 13px; transition: all 0.2s;
+        }
+        .q-link:hover {
+            background: #667eea; color: white; border-color: #667eea; transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102,126,234,0.3);
+        }
+        .footer { text-align: center; color: rgba(255,255,255,0.8); font-size: 13px; margin-top: 20px; padding: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>全能练考卷 七年级上册 历史 周末小卷</h1>
+            <div class="subtitle">互动讲解网页课 · 题目总索引</div>
+            <div class="stats">
+                <div class="stat-item"><span class="num">474</span>道题目</div>
+                <div class="stat-item"><span class="num">6</span>个单元/类别</div>
+                <div class="stat-item"><span class="num">48</span>页试卷</div>
+                <div class="stat-item"><span class="num">即梦语音</span>音频讲解</div>
+            </div>
+        </div>
+        <div id="units-container"></div>
+        <div class="footer">
+            <p>全能练考卷 七年级上册 历史 周末小卷 · 互动讲解网页课</p>
+            <p>共474道题目 · 即梦语音合成音频讲解 · 五段结构化解析</p>
+        </div>
+    </div>
+    <script>
+        const allQuestions = ['p001_q01', 'p001_q02', 'p001_q03', 'p001_q04', 'p001_q05', 'p001_q06', 'p001_q07', 'p001_q08', 'p001_q09', 'p001_q10', 'p001_q11', 'p001_q12', 'p001_q13', 'p001_q14', 'p001_q15', 'p002_q01', 'p002_q02', 'p002_q03', 'p002_q04', 'p002_q05', 'p003_q01', 'p003_q02', 'p003_q03', 'p003_q04', 'p003_q05', 'p003_q06', 'p003_q07', 'p003_q08', 'p003_q09', 'p003_q10', 'p003_q11', 'p003_q12', 'p003_q13', 'p003_q14', 'p003_q15', 'p003_q16', 'p004_q01', 'p004_q02', 'p004_q03', 'p004_q04', 'p004_q05', 'p005_q01', 'p005_q02', 'p005_q03', 'p005_q04', 'p005_q05', 'p005_q06', 'p005_q07', 'p005_q08', 'p005_q09', 'p005_q10', 'p005_q11', 'p005_q12', 'p005_q13', 'p005_q14', 'p006_q01', 'p006_q02', 'p006_q03', 'p006_q04', 'p006_q05', 'p006_q06', 'p006_q07', 'p006_q08', 'p007_q01', 'p007_q02', 'p007_q03', 'p007_q04', 'p007_q05', 'p007_q06', 'p007_q07', 'p007_q08', 'p007_q09', 'p007_q10', 'p007_q11', 'p007_q12', 'p007_q13', 'p007_q14', 'p007_q15', 'p007_q16', 'p008_q01', 'p008_q02', 'p008_q03', 'p008_q04', 'p008_q05', 'p009_q01', 'p009_q02', 'p009_q03', 'p009_q04', 'p009_q05', 'p009_q06', 'p009_q07', 'p009_q08', 'p009_q09', 'p009_q10', 'p009_q11', 'p009_q12', 'p009_q13', 'p009_q14', 'p009_q15', 'p009_q16', 'p009_q17', 'p010_q01', 'p010_q02', 'p010_q03', 'p011_q01', 'p011_q02', 'p011_q03', 'p011_q04', 'p011_q05', 'p011_q06', 'p011_q07', 'p011_q08', 'p011_q09', 'p011_q10', 'p011_q11', 'p011_q12', 'p011_q13', 'p011_q14', 'p011_q15', 'p011_q16', 'p011_q17', 'p012_q01', 'p012_q02', 'p012_q03', 'p013_q01', 'p013_q02', 'p013_q03', 'p013_q04', 'p013_q05', 'p013_q06', 'p013_q07', 'p013_q08', 'p013_q09', 'p013_q10', 'p013_q11', 'p013_q12', 'p013_q13', 'p014_q01', 'p014_q02', 'p014_q03', 'p014_q04', 'p014_q05', 'p014_q06', 'p014_q07', 'p014_q08', 'p014_q09', 'p015_q01', 'p015_q02', 'p015_q03', 'p015_q04', 'p015_q05', 'p015_q06', 'p015_q07', 'p015_q08', 'p015_q09', 'p015_q10', 'p015_q11', 'p015_q12', 'p015_q13', 'p016_q01', 'p016_q02', 'p016_q03', 'p016_q04', 'p016_q05', 'p016_q06', 'p016_q07', 'p016_q08', 'p016_q09', 'p016_q10', 'p017_q01', 'p017_q02', 'p018_q01', 'p018_q02', 'p018_q03', 'p019_q01', 'p019_q02', 'p019_q03', 'p019_q04', 'p019_q05', 'p019_q06', 'p019_q07', 'p019_q08', 'p019_q09', 'p019_q10', 'p019_q11', 'p019_q12', 'p019_q13', 'p019_q14', 'p019_q15', 'p020_q01', 'p020_q02', 'p020_q03', 'p020_q04', 'p020_q05', 'p020_q06', 'p021_q01', 'p021_q02', 'p021_q03', 'p021_q04', 'p021_q05', 'p021_q06', 'p021_q07', 'p021_q08', 'p021_q09', 'p021_q10', 'p021_q11', 'p021_q12', 'p021_q13', 'p021_q14', 'p021_q15', 'p022_q01', 'p022_q02', 'p022_q03', 'p022_q04', 'p022_q05', 'p022_q06', 'p023_q01', 'p023_q02', 'p023_q03', 'p023_q04', 'p023_q05', 'p023_q06', 'p023_q07', 'p023_q08', 'p023_q09', 'p023_q10', 'p023_q11', 'p023_q12', 'p023_q13', 'p023_q14', 'p023_q15', 'p023_q16', 'p024_q01', 'p024_q02', 'p024_q03', 'p024_q04', 'p025_q01', 'p025_q02', 'p025_q03', 'p025_q04', 'p025_q05', 'p025_q06', 'p025_q07', 'p025_q08', 'p025_q09', 'p025_q10', 'p025_q11', 'p025_q12', 'p025_q13', 'p025_q14', 'p025_q15', 'p025_q16', 'p026_q01', 'p026_q02', 'p026_q03', 'p026_q04', 'p026_q05', 'p027_q01', 'p027_q02', 'p027_q03', 'p027_q04', 'p027_q05', 'p027_q06', 'p027_q07', 'p027_q08', 'p027_q09', 'p027_q10', 'p027_q11', 'p027_q12', 'p027_q13', 'p027_q14', 'p027_q15', 'p027_q16', 'p027_q17', 'p027_q18', 'p028_q01', 'p028_q02', 'p028_q03', 'p028_q04', 'p028_q05', 'p029_q01', 'p029_q02', 'p029_q03', 'p029_q04', 'p029_q05', 'p029_q06', 'p029_q07', 'p029_q08', 'p029_q09', 'p029_q10', 'p029_q11', 'p029_q12', 'p029_q13', 'p029_q14', 'p029_q15', 'p029_q16', 'p029_q17', 'p029_q18', 'p030_q01', 'p030_q02', 'p031_q01', 'p031_q02', 'p031_q03', 'p031_q04', 'p031_q05', 'p031_q06', 'p031_q07', 'p031_q08', 'p031_q09', 'p031_q10', 'p031_q11', 'p031_q12', 'p031_q13', 'p031_q14', 'p031_q15', 'p032_q01', 'p032_q02', 'p032_q03', 'p032_q04', 'p032_q05', 'p032_q06', 'p033_q01', 'p033_q02', 'p033_q03', 'p033_q04', 'p033_q05', 'p033_q06', 'p033_q07', 'p033_q08', 'p033_q09', 'p033_q10', 'p033_q11', 'p033_q12', 'p033_q13', 'p033_q14', 'p033_q15', 'p033_q16', 'p034_q01', 'p034_q02', 'p034_q03', 'p034_q04', 'p035_q01', 'p035_q02', 'p035_q03', 'p035_q04', 'p035_q05', 'p035_q06', 'p035_q07', 'p035_q08', 'p035_q09', 'p035_q10', 'p035_q11', 'p035_q12', 'p035_q13', 'p035_q14', 'p035_q15', 'p036_q01', 'p036_q02', 'p036_q03', 'p036_q04', 'p037_q01', 'p037_q02', 'p037_q03', 'p037_q04', 'p037_q05', 'p037_q06', 'p037_q07', 'p037_q08', 'p037_q09', 'p037_q10', 'p037_q11', 'p037_q12', 'p037_q13', 'p037_q14', 'p037_q15', 'p037_q16', 'p038_q01', 'p038_q02', 'p038_q03', 'p038_q04', 'p038_q05', 'p038_q06', 'p039_q01', 'p039_q02', 'p039_q03', 'p039_q04', 'p039_q05', 'p039_q06', 'p039_q07', 'p039_q08', 'p039_q09', 'p039_q10', 'p039_q11', 'p039_q12', 'p039_q13', 'p039_q14', 'p039_q15', 'p040_q01', 'p040_q02', 'p040_q03', 'p040_q04', 'p041_q01', 'p041_q02', 'p041_q03', 'p041_q04', 'p041_q05', 'p041_q06', 'p041_q07', 'p041_q08', 'p041_q09', 'p041_q10', 'p041_q11', 'p041_q12', 'p041_q13', 'p041_q14', 'p041_q15', 'p042_q01', 'p042_q02', 'p042_q03', 'p043_q01', 'p043_q02', 'p043_q03', 'p043_q04', 'p043_q05', 'p043_q06', 'p043_q07', 'p043_q08', 'p043_q09', 'p043_q10', 'p043_q11', 'p043_q12', 'p044_q01', 'p044_q02', 'p044_q03', 'p044_q04', 'p044_q05', 'p044_q06', 'p044_q07', 'p044_q08', 'p044_q09', 'p044_q10', 'p044_q11', 'p045_q01', 'p045_q02', 'p045_q03', 'p045_q04', 'p045_q05', 'p045_q06', 'p045_q07', 'p045_q08', 'p045_q09', 'p045_q10', 'p045_q11', 'p045_q12', 'p045_q13', 'p045_q14', 'p045_q15', 'p045_q16', 'p045_q17', 'p045_q18', 'p046_q01', 'p046_q02', 'p046_q03', 'p046_q04', 'p046_q05', 'p046_q06', 'p046_q07', 'p047_q01', 'p047_q02', 'p047_q03', 'p047_q04', 'p048_q01', 'p048_q02', 'p048_q03'];
+        const units = [
+            { name: "第一单元 · 中华文明的起源", pages: [1,2,3,4,5,6], count: 0, weeks: [
+                { name: "第1周 远古时期的人类活动、原始农业与史前社会", pages: [1,2] },
+                { name: "第2周 中华文明的起源", pages: [3,4] },
+                { name: "第一单元单元检测", pages: [5,6] }
+            ]},
+            { name: "第二单元 · 夏商周时期", pages: [7,8,9,10,11,12,13,14,15,16,17,18], count: 0, weeks: [
+                { name: "第3周 夏商西周王朝的更替", pages: [7,8] },
+                { name: "第4周 动荡变化中的春秋时期、战国时期的社会变革", pages: [9,10] },
+                { name: "第5周 百家争鸣、夏商周时期的科技与文化", pages: [11,12] },
+                { name: "第二单元单元检测", pages: [13,14] },
+                { name: "期中检测卷", pages: [15,16,17,18] }
+            ]},
+            { name: "第三单元 · 秦汉时期", pages: [19,20,21,22,23,24,25,26,27,28], count: 0, weeks: [
+                { name: "第6周 秦统一中国、秦末农民大起义", pages: [19,20] },
+                { name: "第7周 西汉建立和文景之治、大一统王朝的巩固", pages: [21,22] },
+                { name: "第8周 东汉的兴衰、丝绸之路的开通与经营西域", pages: [23,24] },
+                { name: "第9周 秦汉时期的科技与文化", pages: [25,26] },
+                { name: "第三单元单元检测", pages: [27,28] }
+            ]},
+            { name: "第四单元 · 三国两晋南北朝", pages: [29,30,31,32,33,34,35,36], count: 0, weeks: [
+                { name: "第10周 三国鼎立、西晋的短暂统一和北方各族的内迁", pages: [29,30] },
+                { name: "第11周 东晋南朝政治和江南地区开发、北朝政治和北方民族大交融", pages: [31,32] },
+                { name: "第12周 三国两晋南北朝时期的科技与文化", pages: [33,34] },
+                { name: "第四单元单元检测", pages: [35,36] }
+            ]},
+            { name: "专项复习", pages: [37,38,39,40,41,42,43,44], count: 0, weeks: [
+                { name: "第13周 封建大一统", pages: [37,38] },
+                { name: "第14周 创新措施", pages: [39,40] },
+                { name: "第15周 思想与科技文化", pages: [41,42] },
+                { name: "第16周 新课标", pages: [43,44] }
+            ]},
+            { name: "期末检测卷", pages: [45,46,47,48], count: 0, weeks: [
+                { name: "期末检测卷", pages: [45,46,47,48] }
+            ]}
+        ];
+        function getPage(qid) { return parseInt(qid.substring(1,4)); }
+        function getQNum(qid) { return parseInt(qid.substring(6,8)); }
+        const container = document.getElementById('units-container');
+        units.forEach((unit, ui) => {
+            const unitDiv = document.createElement('div');
+            unitDiv.className = 'unit-section';
+            const unitQuestions = allQuestions.filter(q => unit.pages.includes(getPage(q)));
+            unit.count = unitQuestions.length;
+            let html = '<div class="unit-title"><span>' + unit.name + '</span>';
+            html += '<span class="count">' + unit.count + '题 · 第' + unit.pages[0] + '-' + unit.pages[unit.pages.length-1] + '页</span></div>';
+            html += '<div class="week-list">';
+            unit.weeks.forEach(week => {
+                const weekQuestions = allQuestions.filter(q => week.pages.includes(getPage(q)));
+                if (weekQuestions.length === 0) return;
+                html += '<div class="week-item">';
+                html += '<div class="week-title">' + week.name + '（第' + week.pages[0] + '-' + week.pages[week.pages.length-1] + '页）</div>';
+                html += '<div class="question-grid">';
+                weekQuestions.forEach(q => {
+                    const page = getPage(q);
+                    const qnum = getQNum(q);
+                    html += '<a href="' + q + '.html" class="q-link" target="_blank">第' + page + '页第' + qnum + '题</a>';
+                });
+                html += '</div></div>';
+            });
+            html += '</div>';
+            unitDiv.innerHTML = html;
+            container.appendChild(unitDiv);
+        });
+    </script>
+</body>
+</html>

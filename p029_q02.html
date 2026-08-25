@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>历史互动讲解 · p029_q02</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#F4F3EE;font-family:'PingFang SC','Segoe UI',Arial,sans-serif;color:#1A1B1C;display:flex;justify-content:center;padding:20px 12px;}
+.wrap{max-width:680px;width:100%;}
+.header{text-align:center;margin-bottom:20px;}
+.header h1{font-size:20px;font-weight:700;background:linear-gradient(135deg,#9BBBF4,#B8D4F8);color:#fff;padding:16px 24px;border-radius:12px;letter-spacing:1px;box-shadow:0 2px 8px rgba(155,187,244,0.3);}
+.problem-card{background:#fff;border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,0.06);position:relative;}
+.problem-card .label{position:absolute;top:-10px;left:16px;background:#4A6FA5;color:#fff;font-size:12px;padding:2px 10px;border-radius:4px;}
+.problem-card img{width:100%;border-radius:8px;display:block;}
+.controls{display:flex;gap:8px;justify-content:center;margin-bottom:16px;flex-wrap:wrap;}
+.btn{padding:10px 20px;border:none;border-radius:8px;font-size:14px;cursor:pointer;transition:all 0.2s;}
+.btn-primary{background:#4A6FA5;color:#fff;}
+.btn-primary:hover{background:#3A5A8A;}
+.btn-gray{background:#E4E3DD;color:#6B7280;}
+.btn-gray:hover{background:#D4D3CD;}
+.audio-player{width:100%;margin-bottom:16px;}
+.audio-player audio{width:100%;}
+.progress-bar{height:6px;background:#E4E3DD;border-radius:3px;margin-bottom:16px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#F4D58D,#F0C060);width:0%;transition:width 0.3s;}
+.tabs{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06);}
+.tab-nav{display:flex;background:#F9F8F5;border-bottom:1px solid #E4E3DD;}
+.tab-btn{flex:1;padding:12px 8px;border:none;background:none;font-size:13px;cursor:pointer;color:#6B7280;transition:all 0.2s;border-bottom:2px solid transparent;}
+.tab-btn.active{color:#4A6FA5;border-bottom-color:#4A6FA5;background:#fff;}
+.tab-content{padding:16px;display:none;}
+.tab-content.active{display:block;}
+.tab-content h3{font-size:15px;color:#4A6FA5;margin-bottom:10px;}
+.tab-content p{font-size:14px;line-height:1.8;color:#374151;margin-bottom:8px;}
+.tab-content .answer{background:rgba(162,221,170,0.1);padding:10px;border-radius:8px;margin:10px 0;}
+.tab-content .mistake{background:rgba(234,102,104,0.1);padding:10px;border-radius:8px;margin:10px 0;}
+.knowledge-item{display:inline-block;background:rgba(155,187,244,0.15);color:#4A6FA5;padding:4px 10px;border-radius:4px;margin:4px;font-size:12px;}
+.footer{text-align:center;margin-top:20px;padding-top:16px;border-top:1px solid #E4E3DD;font-size:12px;color:#9CA3AF;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <h1>历史互动讲解 · p029_q02</h1>
+  </div>
+  
+  <div class="problem-card">
+    <div class="label">题目原文</div>
+    <img src="p029_q02.png" alt="题目图片">
+  </div>
+  
+  <div class="controls">
+    <button class="btn btn-primary" onclick="playAudio()">?? 播放讲解</button>
+    <button class="btn btn-gray" onclick="resetAudio()">? 重置</button>
+  </div>
+  
+  <div class="audio-player">
+    <audio id="audioPlayer" controls>
+      <source src="p029_q02.mp3" type="audio/wav">
+      您的浏览器不支持音频播放
+    </audio>
+  </div>
+  
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+  
+  <div class="tabs">
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="switchTab(0)">题目分析</button>
+      <button class="tab-btn" onclick="switchTab(1)">标准答案</button>
+      <button class="tab-btn" onclick="switchTab(2)">思路分析</button>
+      <button class="tab-btn" onclick="switchTab(3)">易错点</button>
+      <button class="tab-btn" onclick="switchTab(4)">知识图谱</button>
+    </div>
+    <div class="tab-content active" id="tab0">
+      <h3>题目分析</h3>
+      <p><strong>题型：</strong>选择题</p><p><strong>考查要点：</strong>本题考查对历史基础知识的理解和运用能力。</p><p><strong>题干分析：</strong>2. 学历史必须准确掌握人物、时空、事物三要素。下列三要素均正确的是 ()</p><p><strong>选项数量：</strong>4个选项</p>
+    </div>
+    <div class="tab-content" id="tab1">
+      <h3>标准答案</h3>
+      <div class="answer"><p>本题为选择题，请根据所学知识选择正确答案。</p><p><strong>解题提示：</strong>仔细阅读题干，结合历史背景知识，排除错误选项。</p></div>
+    </div>
+    <div class="tab-content" id="tab2">
+      <h3>思路分析</h3>
+      <p><strong>解题步骤：</strong></p><p>1. 仔细阅读题干和材料，理解题目考查的历史知识点。</p><p>2. 回忆相关历史背景、事件经过和影响。</p><p>3. 分析各选项（或问题），结合历史事实进行判断。</p><p>4. 注意题目中的时间、地点、人物等关键信息。</p><p><strong>关键词：</strong>2. 学历史必须准确掌握人物、时空、事物三要素。下列三要素均正确的是 ()</p>
+    </div>
+    <div class="tab-content" id="tab3">
+      <h3>易错点</h3>
+      <div class="mistake"><p><strong>常见错误：</strong></p><p>1. 混淆相似历史事件的时间、地点和人物。</p><p>2. 对历史概念的理解不准确，如封建、帝制等。</p><p>3. 忽略题干中的限定条件（时间、地点、角度等）。</p><p>4. 材料阅读不仔细，遗漏关键信息。</p><p>5. 答题不规范，缺少史论结合。</p></div>
+    </div>
+    <div class="tab-content" id="tab4">
+      <h3>知识图谱</h3>
+      <p><strong>学科：</strong>历史</p><p><strong>年级：</strong>七年级上册</p><p><strong>教材：</strong>人教版（RJ）</p><p><strong>知识点：</strong></p><div><span class="knowledge-item">中国古代史</span><span class="knowledge-item">三国两晋南北朝</span><span class="knowledge-item">政权分立</span><span class="knowledge-item">民族交融</span><span class="knowledge-item">江南开发</span></div><p style="margin-top:10px;"><strong>前置知识：</strong>中国历史朝代顺序、秦汉时期的历史发展</p><p><strong>关联知识：</strong>同时期世界历史、地理环境对历史发展的影响</p>
+    </div>
+  </div>
+  
+  <div class="footer">
+    <p>全能练考卷 · 七年级上册历史 · 互动讲解</p>
+  </div>
+</div>
+
+<script>
+var audio = document.getElementById('audioPlayer');
+var progressFill = document.getElementById('progressFill');
+
+audio.addEventListener('timeupdate', function() {
+  if (audio.duration) {
+    var percent = (audio.currentTime / audio.duration) * 100;
+    progressFill.style.width = percent + '%';
+  }
+});
+
+audio.addEventListener('ended', function() {
+  progressFill.style.width = '100%';
+});
+
+function playAudio() {
+  if (audio.paused) {
+    audio.play();
+  } else {
+    audio.pause();
+  }
+}
+
+function resetAudio() {
+  audio.pause();
+  audio.currentTime = 0;
+  progressFill.style.width = '0%';
+}
+
+function switchTab(index) {
+  var tabs = document.querySelectorAll('.tab-btn');
+  var contents = document.querySelectorAll('.tab-content');
+  tabs.forEach(function(t, i) {
+    t.classList.toggle('active', i === index);
+  });
+  contents.forEach(function(c, i) {
+    c.classList.toggle('active', i === index);
+  });
+}
+</script>
+</body>
+</html>
+
