@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第23题 火的使用与远古人类 - 互动讲解</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; background: #f5f7fa; color: #333; line-height: 1.8; padding: 20px; max-width: 960px; margin: 0 auto; padding-bottom: 40px; }
+.page-title { background: linear-gradient(135deg, #722ed1 0%, #9254de 100%); color: white; padding: 18px 30px; border-radius: 12px; text-align: center; margin-bottom: 16px; box-shadow: 0 4px 15px rgba(114,46,209,0.3); }
+.page-title h1 { font-size: 20px; margin-bottom: 4px; }
+.page-title .subtitle { font-size: 13px; opacity: 0.9; }
+.card { background: white; border-radius: 12px; padding: 18px 22px; margin-bottom: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+.modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; cursor: pointer; }
+.modal.active { display: flex; }
+.modal img { max-width: 92%; max-height: 92%; border-radius: 8px; }
+.original-question { border-left: 4px solid #722ed1; padding-left: 15px; }
+.original-question h3 { color: #722ed1; font-size: 15px; margin-bottom: 10px; }
+.question-text { font-size: 14px; line-height: 2; }
+.question-text .q-main { font-weight: bold; color: #333; margin-bottom: 8px; }
+.question-text .q-main.sync-highlight { background: #E3F2FD; padding: 2px 4px; border-radius: 4px; }
+.material-block { background: #f9f9f9; border-radius: 8px; padding: 12px 15px; margin: 10px 0; border-left: 3px solid #722ed1; }
+.material-block .material-title { font-weight: bold; color: #722ed1; font-size: 13px; margin-bottom: 4px; }
+.material-block .material-content { font-size: 13px; color: #555; line-height: 1.8; }
+.material-block .material-source { font-size: 11px; color: #999; margin-top: 4px; text-align: right; }
+.sub-question { margin-bottom: 16px; padding: 12px 15px; border-radius: 8px; background: #fafafa; transition: all 0.3s; border-left: 3px solid transparent; }
+.sub-question.active { background: #f6ffed; border-left-color: #52c41a; box-shadow: 0 2px 8px rgba(82,196,26,0.15); }
+.sub-question .q-title { font-weight: bold; color: #333; margin-bottom: 6px; font-size: 14px; }
+.sub-question .q-question { color: #555; font-size: 13px; margin-bottom: 6px; }
+.sub-question .q-answer { color: #2D8A1F; font-size: 13px; font-weight: 500; background: rgba(82,196,26,0.08); padding: 8px 12px; border-radius: 6px; margin-top: 6px; }
+.sub-question .q-detail { color: #666; font-size: 12px; margin-top: 6px; line-height: 1.7; }
+.tabs-container { margin-top: 0; }
+.tab-buttons { display: flex; gap: 6px; margin-bottom: 0; flex-wrap: wrap; }
+.tab-btn { padding: 8px 18px; border: 1px solid #ddd; background: #fafafa; border-radius: 8px 8px 0 0; cursor: pointer; font-size: 13px; transition: all 0.3s; font-weight: 500; }
+.tab-btn:hover { background: #f9f0ff; border-color: #722ed1; }
+.tab-btn.active { background: white; border-color: #e8e8e8; border-bottom-color: white; color: #722ed1; font-weight: bold; position: relative; top: 1px; }
+.tab-content { display: none; background: white; border: 1px solid #e8e8e8; border-radius: 0 8px 8px 8px; padding: 20px; min-height: 300px; }
+.tab-content.active { display: block; animation: fadeIn 0.3s; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+.summary-content { line-height: 2; font-size: 14px; }
+.summary-content .tip-box { background: #fffbe6; border-left: 4px solid #faad14; padding: 12px 15px; border-radius: 0 8px 8px 0; margin: 12px 0; }
+.summary-content .rule-box { background: #f9f0ff; border-left: 4px solid #722ed1; padding: 12px 15px; border-radius: 0 8px 8px 0; margin: 12px 0; }
+.summary-content ul { margin-left: 20px; margin-top: 6px; }
+.summary-content li { margin-bottom: 4px; }
+.error-content { line-height: 2; font-size: 14px; }
+.error-item { background: #fff2f0; border-left: 4px solid #f5222d; padding: 12px 15px; border-radius: 0 8px 8px 0; margin-bottom: 12px; }
+.error-item .error-title { color: #f5222d; font-weight: bold; margin-bottom: 4px; }
+.kg-content { line-height: 2; font-size: 14px; }
+.kg-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.kg-tag { padding: 5px 14px; background: #f9f0ff; color: #722ed1; border-radius: 14px; font-size: 12px; font-weight: 500; }
+.kg-group { margin-bottom: 14px; padding: 12px 15px; background: #f9f9f9; border-radius: 8px; }
+.kg-group .group-title { font-weight: bold; color: #722ed1; margin-bottom: 6px; font-size: 14px; }
+.kg-group .group-detail { font-size: 13px; color: #555; line-height: 1.8; }
+.audio-player { position: sticky; bottom: 0; background: white; border-top: 1px solid #e8e8e8; border-radius: 12px 12px 0 0; padding: 12px 20px; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index: 1000; margin-top: 16px; }
+.player-title { font-size: 13px; color: #666; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+.current-segment { color: #722ed1; font-weight: bold; font-size: 13px; }
+.total-progress { width: 100%; height: 6px; background: #e8e8e8; border-radius: 3px; cursor: pointer; margin-bottom: 6px; overflow: hidden; }
+.total-progress-bar { height: 100%; background: linear-gradient(90deg, #722ed1, #9254de); border-radius: 3px; width: 0%; transition: width 0.1s linear; }
+.time-display { font-size: 11px; color: #999; display: flex; justify-content: space-between; margin-bottom: 8px; }
+.controls { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.play-btn { width: 38px; height: 38px; border-radius: 50%; background: #722ed1; color: white; border: none; cursor: pointer; font-size: 15px; display: flex; align-items: center; justify-content: center; transition: all 0.3s; flex-shrink: 0; }
+.play-btn:hover { background: #531dab; transform: scale(1.05); }
+.nav-btn { padding: 5px 12px; border: 1px solid #ddd; background: white; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.3s; }
+.nav-btn:hover { border-color: #722ed1; color: #722ed1; }
+.nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.segment-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg-btn { padding: 4px 12px; border: 1px solid #ddd; background: white; border-radius: 14px; cursor: pointer; font-size: 12px; transition: all 0.3s; }
+.seg-btn:hover { border-color: #722ed1; }
+.seg-btn.active { background: #722ed1; color: white; border-color: #722ed1; }
+.seg-btn.played { background: #f6ffed; border-color: #52c41a; color: #52c41a; }
+</style>
+</head>
+<body>
+<div class="page-title">
+    <h1>第23题 火的使用与远古人类</h1>
+    <div class="subtitle">周末小卷7上历史 · 材料分析题 · 10分</div>
+</div>
+<div class="card original-question">
+    <h3>📋 题目原文</h3>
+    <div class="question-text">
+        <div class="q-main" id="questionText">
+            23.（10分）阅读下列材料，回答问题。
+        </div>
+        <div class="material-block">
+            <div class="material-title">材料一</div>
+            <div class="material-content">有了火，人们就开始吃熟食，缩短了消化过程，促进了体质的发展。火还可以照明、防寒、驱赶野兽。火的使用，增强了人们适应自然的能力，是人类进化过程中的一大进步。</div>
+        </div>
+        <div class="material-block">
+            <div class="material-title">材料二</div>
+            <div class="material-content">上古之世……民多疾病。有圣人作，钻燧取火，以化腥臊，而民说之，使王天下，号之曰燧人氏。</div>
+            <div class="material-source">——《韩非子》</div>
+        </div>
+        <p style="font-size:13px; color:#555; margin-top:10px; margin-bottom:4px;">(1) 材料一描述的是哪一远古人类？他们使用的是什么火？（2分）</p>
+        <p style="font-size:13px; color:#555; margin-bottom:4px;">(2) 材料二描述的是哪一远古人类？他们使用的是什么火？（2分）</p>
+        <p style="font-size:13px; color:#555; margin-bottom:4px;">(3) 火的使用对远古人类有什么意义？（3分）</p>
+        <p style="font-size:13px; color:#555;">(4) 除了火的使用，材料二中的远古人类在生产生活上还有哪些进步？（3分）</p>
+    </div>
+</div>
+<div class="tabs-container">
+    <div class="tab-buttons">
+        <button class="tab-btn active" onclick="switchTab(0)">题目讲解</button>
+        <button class="tab-btn" onclick="switchTab(1)">总结</button>
+        <button class="tab-btn" onclick="switchTab(2)">易错点</button>
+        <button class="tab-btn" onclick="switchTab(3)">知识图谱</button>
+        <button class="tab-btn" onclick="switchTab(4)">原题图片</button>
+    </div>
+    <div class="tab-content active" id="tab0">
+        <h3 style="color:#52c41a; margin-bottom:12px; font-size:15px;">✅ 题目讲解</h3>
+        <div class="sub-question" id="sq1">
+            <div class="q-title">(1) 材料一：北京人与天然火</div>
+            <div class="q-question">材料一描述的是哪一远古人类？他们使用的是什么火？</div>
+            <div class="q-answer">答案：北京人；使用天然火</div>
+            <div class="q-detail">
+                北京人距今约70万—20万年，已经会使用天然火，会长时间保存火种。<br>
+                利用火取暖、烧烤食物、照明、驱赶野兽。<br>
+                北京人发现于北京周口店，使用打制石器，过群居生活，以采集和狩猎为生。
+            </div>
+        </div>
+        <div class="sub-question" id="sq2">
+            <div class="q-title">(2) 材料二：山顶洞人与人工取火</div>
+            <div class="q-question">材料二描述的是哪一远古人类？他们使用的是什么火？</div>
+            <div class="q-answer">答案：山顶洞人；会人工取火（钻燧取火）</div>
+            <div class="q-detail">
+                "钻燧取火"即通过钻木摩擦取得火种，也就是人工取火。<br>
+                山顶洞人距今约3万年，已经会人工取火。<br>
+                山顶洞人发现于北京周口店龙骨山顶部的洞穴，掌握磨光和钻孔技术，用骨针缝制衣服，懂得爱美。
+            </div>
+        </div>
+        <div class="sub-question" id="sq3">
+            <div class="q-title">(3) 火的使用的意义</div>
+            <div class="q-question">火的使用对远古人类有什么意义？</div>
+            <div class="q-answer">答案：改善了生存条件，增强了适应自然的能力，是人类进化过程中的一大进步；学会用火是人类进化史上的里程碑。</div>
+            <div class="q-detail">
+                <strong>火的具体用途：</strong><br>
+                ① 取暖：抵御寒冷，能在更寒冷地区生存<br>
+                ② 烧烤食物：熟食易消化、有营养、更卫生，促进体质发展和大脑进化<br>
+                ③ 照明：延长活动时间<br>
+                ④ 驱赶野兽：保护安全<br><br>
+                <strong>历史意义：</strong>增强了适应自然的能力，是人类进化过程中的一大进步，学会用火是人类进化史上的里程碑。
+            </div>
+        </div>
+        <div class="sub-question" id="sq4">
+            <div class="q-title">(4) 山顶洞人的其他进步</div>
+            <div class="q-question">除了火的使用，材料二中的远古人类在生产生活上还有哪些进步？</div>
+            <div class="q-answer">答案：掌握磨光和钻孔技术；用骨针缝制衣服；懂得爱美；有安葬死者的习俗；过集体生活。</div>
+            <div class="q-detail">
+                山顶洞人除会人工取火外，还有以下进步：<br>
+                ① 掌握磨光和钻孔技术，能制作更精细的石器和骨器<br>
+                ② 用骨针缝制衣服，懂得穿衣保暖<br>
+                ③ 懂得爱美，制作装饰品（穿孔石珠、兽牙等）<br>
+                ④ 有安葬死者的习俗，在尸体周围撒赤铁矿粉末，有灵魂观念和原始宗教信仰<br>
+                ⑤ 过集体生活，共同劳动，共同分配食物，没有贫富贵贱差别
+            </div>
+        </div>
+    </div>
+    <div class="tab-content" id="tab1">
+        <div class="summary-content">
+            <h3 style="color:#fa8c16; margin-bottom:10px; font-size:15px;">💡 总结</h3>
+            <div class="rule-box">
+                <strong>本题核心：</strong>以两则材料考查火的使用及北京人、山顶洞人的相关知识。
+            </div>
+            <p><strong>四个小问答案要点：</strong></p>
+            <ul>
+                <li><strong>(1) 北京人：</strong>材料一描述北京人，使用天然火，距今约70万—20万年，会保存火种。</li>
+                <li><strong>(2) 山顶洞人：</strong>材料二描述山顶洞人，会人工取火（钻燧取火），距今约3万年。</li>
+                <li><strong>(3) 火的意义：</strong>改善生存条件，增强适应自然能力，是人类进化过程中的一大进步，学会用火是人类进化史上的里程碑。</li>
+                <li><strong>(4) 山顶洞人进步：</strong>掌握磨光和钻孔技术，用骨针缝制衣服，懂得爱美，有安葬死者习俗，过集体生活。</li>
+            </ul>
+            <div class="tip-box">
+                <strong>对比记忆：</strong>北京人（天然火、打制石器、群居）vs 山顶洞人（人工取火、磨光钻孔、骨针缝衣、爱美、集体生活）。
+            </div>
+        </div>
+    </div>
+    <div class="tab-content" id="tab2">
+        <div class="error-content">
+            <h3 style="color:#f5222d; margin-bottom:12px; font-size:15px;">⚠️ 易错点提醒</h3>
+            <div class="error-item">
+                <div class="error-title">易错点1：把北京人和山顶洞人混淆</div>
+                <p>北京人距今约70万—20万年，使用打制石器，使用天然火；山顶洞人距今约3万年，掌握磨光和钻孔技术，会人工取火。</p>
+            </div>
+            <div class="error-item">
+                <div class="error-title">易错点2：对天然火和人工取火的区别不理解</div>
+                <p>天然火是自然界产生的火（如雷电引起的森林火灾），北京人会使用并保存火种；人工取火是人类通过摩擦等方式自己取得火种，山顶洞人会人工取火，钻燧取火即人工取火。</p>
+            </div>
+            <div class="error-item">
+                <div class="error-title">易错点3：对火的使用的意义回答不完整</div>
+                <p>火的使用的意义不仅是取暖、烧烤食物，还包括照明、驱赶野兽，更重要的是，火的使用是人类进化过程中的一大进步，学会用火是人类进化史上的里程碑。</p>
+            </div>
+            <div class="error-item">
+                <div class="error-title">易错点4：对山顶洞人的进步回答不全面</div>
+                <p>山顶洞人的进步不仅是会人工取火，还包括掌握磨光和钻孔技术、用骨针缝制衣服、懂得爱美、有安葬死者的习俗、过集体生活等多个方面。</p>
+            </div>
+            <div class="error-item">
+                <div class="error-title">易错点5：对"钻燧取火"不理解</div>
+                <p>钻燧取火就是通过钻木摩擦的方式取得火种，也就是人工取火，这是山顶洞人的重要特征。</p>
+            </div>
+            <div class="error-item">
+                <div class="error-title">易错点6：对北京人保存火种的特点不熟悉</div>
+                <p>北京人不仅会使用天然火，还会长时间保存火种，这是北京人用火的重要特点。</p>
+            </div>
+        </div>
+    </div>
+    <div class="tab-content" id="tab3">
+        <div class="kg-content">
+            <h3 style="color:#722ed1; margin-bottom:12px; font-size:15px;">📚 知识图谱</h3>
+            <div class="kg-tags">
+                <span class="kg-tag">学科：历史</span>
+                <span class="kg-tag">年级：七年级上册</span>
+                <span class="kg-tag">教材：人教版（RJ）</span>
+                <span class="kg-tag">单元：第一单元 史前时期</span>
+            </div>
+            <div class="kg-group">
+                <div class="group-title">火的使用与远古人类的进步</div>
+                <div class="group-detail">
+                    <strong>1. 北京人</strong>
+                    <ul>
+                        <li>发现地点：北京周口店</li>
+                        <li>距今时间：约70万—20万年</li>
+                        <li>生产生活：使用打制石器，使用天然火，长时间保存火种，过群居生活，以采集和狩猎为生</li>
+                        <li>用火特点：使用天然火，会保存火种</li>
+                        <li>火的用途：取暖、烧烤食物、照明、驱赶野兽</li>
+                    </ul>
+                    <strong>2. 山顶洞人</strong>
+                    <ul>
+                        <li>发现地点：北京周口店龙骨山顶部的洞穴</li>
+                        <li>距今时间：约3万年</li>
+                        <li>生产生活：掌握磨光和钻孔技术，会人工取火，用骨针缝制衣服，懂得爱美，有安葬死者的习俗，过集体生活</li>
+                        <li>用火特点：会人工取火（钻燧取火）</li>
+                        <li>进步表现：掌握磨光和钻孔技术，用骨针缝制衣服，懂得爱美，有安葬死者的习俗，过集体生活</li>
+                    </ul>
+                    <strong>3. 火的使用</strong>
+                    <ul>
+                        <li>用途：取暖、烧烤食物、照明、驱赶野兽</li>
+                        <li>天然火：自然界中产生的火，北京人使用并保存火种</li>
+                        <li>人工取火：人类通过摩擦等方式自己取得火种，山顶洞人会人工取火</li>
+                        <li>意义：改善了生存条件，增强了适应自然的能力，是人类进化过程中的一大进步；学会用火是人类进化史上的里程碑</li>
+                    </ul>
+                    <strong>4. 北京人与山顶洞人对比</strong>
+                    <ul>
+                        <li>距今时间：北京人约70万—20万年，山顶洞人约3万年</li>
+                        <li>工具类型：北京人使用打制石器，山顶洞人掌握磨光和钻孔技术</li>
+                        <li>用火方式：北京人使用天然火，山顶洞人会人工取火</li>
+                        <li>生活方式：北京人过群居生活，山顶洞人过集体生活</li>
+                        <li>审美观念：北京人无明显审美观念，山顶洞人懂得爱美，有装饰品</li>
+                        <li>安葬习俗：北京人无安葬死者习俗，山顶洞人有安葬死者的习俗</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tab-content" id="tab4">
+        <h3 style="color:#faad14; margin-bottom:15px; font-size:15px;">📷 原题图片</h3>
+        <p style="color:#666; font-size:13px; margin-bottom:15px;">点击图片可放大查看</p>
+        <img src="images/p002_q23.png" alt="第23题原题" style="max-width:100%; border-radius:8px; cursor:pointer; border:1px solid #ddd;" onclick="showImage('images/p002_q23.png')">
+    </div>
+</div>
+<div class="modal" id="imageModal" onclick="closeModal()">
+    <img id="modalImage" src="" alt="放大图片">
+</div>
+<audio id="audioPlayer"></audio>
+<div class="audio-player">
+    <div class="player-title">
+        <span>🎧 音频讲解</span>
+        <span class="current-segment" id="currentSeg">引导语</span>
+    </div>
+    <div class="total-progress" id="totalProgress" onclick="seekTotal(event)">
+        <div class="total-progress-bar" id="totalProgressBar"></div>
+    </div>
+    <div class="time-display">
+        <span id="currentTime">00:00</span>
+        <span id="totalTime">00:00</span>
+    </div>
+    <div class="controls">
+        <button class="nav-btn" onclick="prevSegment()" id="prevBtn">⏮ 上一段</button>
+        <button class="play-btn" onclick="togglePlay()" id="playBtn">▶</button>
+        <button class="nav-btn" onclick="nextSegment()" id="nextBtn">下一段 ⏭</button>
+    </div>
+    <div class="segment-buttons" id="segmentButtons">
+        <button class="seg-btn active" onclick="jumpToSegment(0)">引导语</button>
+        <button class="seg-btn" onclick="jumpToSegment(1)">题目朗读</button>
+        <button class="seg-btn" onclick="jumpToSegment(2)">(1)北京人</button>
+        <button class="seg-btn" onclick="jumpToSegment(3)">(2)山顶洞人</button>
+        <button class="seg-btn" onclick="jumpToSegment(4)">(3)火的意义</button>
+        <button class="seg-btn" onclick="jumpToSegment(5)">(4)山顶洞人进步</button>
+    </div>
+</div>
+<script>
+const segments = [
+    {src: 'audio/segment1.mp3', name: '引导语', tab: 0, sq: null},
+    {src: 'audio/segment2.mp3', name: '题目朗读', tab: 0, sq: null},
+    {src: 'audio/segment3.mp3', name: '(1)北京人', tab: 0, sq: 'sq1'},
+    {src: 'audio/segment4.mp3', name: '(2)山顶洞人', tab: 0, sq: 'sq2'},
+    {src: 'audio/segment5.mp3', name: '(3)火的意义', tab: 0, sq: 'sq3'},
+    {src: 'audio/segment6.mp3', name: '(4)山顶洞人进步', tab: 0, sq: 'sq4'}
+];
+let currentSegment = 0;
+let isPlaying = false;
+let segmentDurations = new Array(segments.length).fill(0);
+let totalDuration = 0;
+let loadedCount = 0;
+const audio = document.getElementById('audioPlayer');
+const playBtn = document.getElementById('playBtn');
+const totalProgressBar = document.getElementById('totalProgressBar');
+const currentTimeEl = document.getElementById('currentTime');
+const totalTimeEl = document.getElementById('totalTime');
+const currentSegEl = document.getElementById('currentSeg');
+const segBtns = document.querySelectorAll('.seg-btn');
+const tabBtns = document.querySelectorAll('.tab-btn');
+const tabContents = document.querySelectorAll('.tab-content');
+segments.forEach((seg, index) => {
+    const tempAudio = new Audio(seg.src);
+    tempAudio.addEventListener('loadedmetadata', () => {
+        segmentDurations[index] = tempAudio.duration;
+        loadedCount++;
+        if (loadedCount === segments.length) {
+            totalDuration = segmentDurations.reduce((a, b) => a + b, 0);
+            totalTimeEl.textContent = formatTime(totalDuration);
+        }
+    });
+});
+function switchTab(index) {
+    tabBtns.forEach((btn, i) => btn.classList.toggle('active', i === index));
+    tabContents.forEach((content, i) => content.classList.toggle('active', i === index));
+}
+function clearSqHighlight() {
+    document.querySelectorAll('.sub-question').forEach(sq => sq.classList.remove('active'));
+}
+function highlightSq(sqId) {
+    if (!sqId) return;
+    const el = document.getElementById(sqId);
+    if (el) {
+        el.classList.add('active');
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+}
+function loadSegment(index) {
+    clearSqHighlight();
+    currentSegment = index;
+    audio.src = segments[index].src;
+    currentSegEl.textContent = segments[index].name;
+    updateSegButtons();
+    const tabIndex = segments[index].tab;
+    if (tabIndex >= 0) switchTab(tabIndex);
+    const sqId = segments[index].sq;
+    if (sqId) {
+        setTimeout(() => highlightSq(sqId), 300);
+    }
+}
+function togglePlay() {
+    if (isPlaying) { audio.pause(); playBtn.textContent = '▶'; isPlaying = false; }
+    else { audio.play(); playBtn.textContent = '⏸'; isPlaying = true; }
+}
+function prevSegment() { if (currentSegment > 0) { loadSegment(currentSegment - 1); if (isPlaying) audio.play(); } }
+function nextSegment() {
+    if (currentSegment < segments.length - 1) { loadSegment(currentSegment + 1); if (isPlaying) audio.play(); }
+    else { audio.pause(); playBtn.textContent = '▶'; isPlaying = false; }
+}
+function jumpToSegment(index) { loadSegment(index); if (isPlaying) audio.play(); }
+function updateSegButtons() {
+    segBtns.forEach((btn, index) => {
+        btn.classList.remove('active');
+        if (index < currentSegment) btn.classList.add('played');
+        else btn.classList.remove('played');
+    });
+    segBtns[currentSegment].classList.add('active');
+}
+audio.addEventListener('ended', () => {
+    if (currentSegment < segments.length - 1) nextSegment();
+    else { playBtn.textContent = '▶'; isPlaying = false; }
+});
+audio.addEventListener('timeupdate', () => {
+    if (totalDuration > 0) {
+        const elapsedBefore = segmentDurations.slice(0, currentSegment).reduce((a, b) => a + b, 0);
+        const totalElapsed = elapsedBefore + audio.currentTime;
+        totalProgressBar.style.width = (totalElapsed / totalDuration * 100) + '%';
+        currentTimeEl.textContent = formatTime(totalElapsed);
+    }
+});
+function seekTotal(event) {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const percent = (event.clientX - rect.left) / rect.width;
+    const targetTime = percent * totalDuration;
+    let accumulated = 0;
+    for (let i = 0; i < segments.length; i++) {
+        if (targetTime < accumulated + segmentDurations[i]) {
+            loadSegment(i);
+            audio.currentTime = targetTime - accumulated;
+            if (isPlaying) audio.play();
+            break;
+        }
+        accumulated += segmentDurations[i];
+    }
+}
+function formatTime(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+function showImage(src) {
+    document.getElementById('modalImage').src = src;
+    document.getElementById('imageModal').classList.add('active');
+}
+function closeModal() {
+    document.getElementById('imageModal').classList.remove('active');
+}
+loadSegment(0);
+</script>
+</body>
+</html>

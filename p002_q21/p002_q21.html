@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第21题 文物与房屋识别 - 互动讲解</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; background: #f5f7fa; color: #333; line-height: 1.8; padding: 20px; max-width: 960px; margin: 0 auto; padding-bottom: 40px; }
+.page-title { background: linear-gradient(135deg, #722ed1 0%, #9254de 100%); color: white; padding: 18px 30px; border-radius: 12px; text-align: center; margin-bottom: 16px; box-shadow: 0 4px 15px rgba(114,46,209,0.3); }
+.page-title h1 { font-size: 20px; margin-bottom: 4px; }
+.page-title .subtitle { font-size: 13px; opacity: 0.9; }
+.card { background: white; border-radius: 12px; padding: 18px 22px; margin-bottom: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+.modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; cursor: pointer; }
+.modal.active { display: flex; }
+.modal img { max-width: 92%; max-height: 92%; border-radius: 8px; }
+.original-question { border-left: 4px solid #722ed1; padding-left: 15px; }
+.original-question h3 { color: #722ed1; font-size: 15px; margin-bottom: 10px; }
+.question-text { font-size: 14px; line-height: 2; }
+.question-text .q-main { font-weight: bold; color: #333; margin-bottom: 8px; }
+.question-text .q-main.sync-highlight { background: #E3F2FD; padding: 2px 4px; border-radius: 4px; }
+.illustration-row { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; justify-content: center; }
+.illustration-item { text-align: center; cursor: pointer; }
+.illustration-item img { width: 80px; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd; transition: transform 0.2s; }
+.illustration-item img:hover { transform: scale(1.05); border-color: #722ed1; }
+.illustration-item .illu-label { font-size: 11px; color: #666; margin-top: 4px; }
+.sub-part { margin-bottom: 16px; padding: 12px 15px; border-radius: 8px; background: #fafafa; transition: all 0.3s; border-left: 3px solid transparent; }
+.sub-part.active { background: #f6ffed; border-left-color: #52c41a; box-shadow: 0 2px 8px rgba(82,196,26,0.15); }
+.sub-part .part-title { font-weight: bold; color: #333; margin-bottom: 6px; font-size: 14px; }
+.sub-part .part-question { color: #555; font-size: 13px; margin-bottom: 6px; }
+.sub-part .part-answer { color: #2D8A1F; font-size: 13px; font-weight: 500; background: rgba(82,196,26,0.08); padding: 8px 12px; border-radius: 6px; margin-top: 6px; }
+.sub-part .part-detail { color: #666; font-size: 12px; margin-top: 6px; line-height: 1.7; }
+.tabs-container { margin-top: 0; }
+.tab-buttons { display: flex; gap: 6px; margin-bottom: 0; flex-wrap: wrap; }
+.tab-btn { padding: 8px 18px; border: 1px solid #ddd; background: #fafafa; border-radius: 8px 8px 0 0; cursor: pointer; font-size: 13px; transition: all 0.3s; font-weight: 500; }
+.tab-btn:hover { background: #f9f0ff; border-color: #722ed1; }
+.tab-btn.active { background: white; border-color: #e8e8e8; border-bottom-color: white; color: #722ed1; font-weight: bold; position: relative; top: 1px; }
+.tab-content { display: none; background: white; border: 1px solid #e8e8e8; border-radius: 0 8px 8px 8px; padding: 20px; min-height: 300px; }
+.tab-content.active { display: block; animation: fadeIn 0.3s; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+.summary-content { line-height: 2; font-size: 14px; }
+.summary-content .tip-box { background: #fffbe6; border-left: 4px solid #faad14; padding: 12px 15px; border-radius: 0 8px 8px 0; margin: 12px 0; }
+.summary-content .rule-box { background: #f9f0ff; border-left: 4px solid #722ed1; padding: 12px 15px; border-radius: 0 8px 8px 0; margin: 12px 0; }
+.summary-content ul { margin-left: 20px; margin-top: 6px; }
+.summary-content li { margin-bottom: 4px; }
+.error-content { line-height: 2; font-size: 14px; }
+.error-item { background: #fff2f0; border-left: 4px solid #f5222d; padding: 12px 15px; border-radius: 0 8px 8px 0; margin-bottom: 12px; }
+.error-item .error-title { color: #f5222d; font-weight: bold; margin-bottom: 4px; }
+.kg-content { line-height: 2; font-size: 14px; }
+.kg-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.kg-tag { padding: 5px 14px; background: #f9f0ff; color: #722ed1; border-radius: 14px; font-size: 12px; font-weight: 500; }
+.kg-group { margin-bottom: 14px; padding: 12px 15px; background: #f9f9f9; border-radius: 8px; }
+.kg-group .group-title { font-weight: bold; color: #722ed1; margin-bottom: 6px; font-size: 14px; }
+.kg-group .group-detail { font-size: 13px; color: #555; line-height: 1.8; }
+.original-images-grid { display: flex; flex-wrap: wrap; gap: 15px; }
+.original-images-grid .orig-img { flex: 1; min-width: 280px; }
+.original-images-grid .orig-img img { max-width: 100%; border-radius: 8px; cursor: pointer; border: 1px solid #ddd; }
+.original-images-grid .orig-img .orig-label { font-size: 12px; color: #666; margin-top: 6px; text-align: center; }
+.audio-player { position: sticky; bottom: 0; background: white; border-top: 1px solid #e8e8e8; border-radius: 12px 12px 0 0; padding: 12px 20px; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index: 1000; margin-top: 16px; }
+.player-title { font-size: 13px; color: #666; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+.current-segment { color: #722ed1; font-weight: bold; font-size: 13px; }
+.total-progress { width: 100%; height: 6px; background: #e8e8e8; border-radius: 3px; cursor: pointer; margin-bottom: 6px; overflow: hidden; }
+.total-progress-bar { height: 100%; background: linear-gradient(90deg, #722ed1, #9254de); border-radius: 3px; width: 0%; transition: width 0.1s linear; }
+.time-display { font-size: 11px; color: #999; display: flex; justify-content: space-between; margin-bottom: 8px; }
+.controls { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.play-btn { width: 38px; height: 38px; border-radius: 50%; background: #722ed1; color: white; border: none; cursor: pointer; font-size: 15px; display: flex; align-items: center; justify-content: center; transition: all 0.3s; flex-shrink: 0; }
+.play-btn:hover { background: #531dab; transform: scale(1.05); }
+.nav-btn { padding: 5px 12px; border: 1px solid #ddd; background: white; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.3s; }
+.nav-btn:hover { border-color: #722ed1; color: #722ed1; }
+.nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.segment-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg-btn { padding: 4px 12px; border: 1px solid #ddd; background: white; border-radius: 14px; cursor: pointer; font-size: 12px; transition: all 0.3s; }
+.seg-btn:hover { border-color: #722ed1; }
+.seg-btn.active { background: #722ed1; color: white; border-color: #722ed1; }
+.seg-btn.played { background: #f6ffed; border-color: #52c41a; color: #52c41a; }
+</style>
+</head>
+<body>
+<div class="page-title">
+    <h1>第21题 文物与房屋识别</h1>
+    <div class="subtitle">周末小卷7上历史 · 材料分析题 · 12分</div>
+</div>
+<div class="card original-question">
+    <h3>📋 题目原文</h3>
+    <div class="question-text">
+        <div class="q-main" id="questionText">
+            21.（12分）观察图片，回答问题。
+        </div>
+        <div class="illustration-row">
+            <div class="illustration-item" onclick="showImage('images/p002_q21_图1.png')">
+                <img src="images/p002_q21_图1.png" alt="图1">
+                <div class="illu-label">图1</div>
+            </div>
+            <div class="illustration-item" onclick="showImage('images/p002_q21_图2.png')">
+                <img src="images/p002_q21_图2.png" alt="图2">
+                <div class="illu-label">图2</div>
+            </div>
+            <div class="illustration-item" onclick="showImage('images/p002_q21_图3.png')">
+                <img src="images/p002_q21_图3.png" alt="图3">
+                <div class="illu-label">图3</div>
+            </div>
+            <div class="illustration-item" onclick="showImage('images/p002_q21_图4.png')">
+                <img src="images/p002_q21_图4.png" alt="图4">
+                <div class="illu-label">图4</div>
+            </div>
+            <div class="illustration-item" onclick="showImage('images/p002_q21_图5.png')">
+                <img src="images/p002_q21_图5.png" alt="图5">
+                <div class="illu-label">图5</div>
+            </div>
+            <div class="illustration-item" onclick="showImage('images/p002_q21_图6.png')">
+                <img src="images/p002_q21_图6.png" alt="图6">
+                <div class="illu-label">图6</div>
+            </div>
+        </div>
+        <p style="font-size:13px; color:#555; margin-bottom:8px;"><strong>（1）文物识别</strong></p>
+        <p style="font-size:13px; color:#555; margin-bottom:4px;">①图1是____的头部复原像，该古人类生活在距今约70万—20万年。（1分）</p>
+        <p style="font-size:13px; color:#555; margin-bottom:4px;">②图2是____使用的骨针，反映出几万年前他们已掌握____技术。（3分）</p>
+        <p style="font-size:13px; color:#555; margin-bottom:4px;">③图3是____使用的____（彩色/黑色）陶器。（2分）</p>
+        <p style="font-size:13px; color:#555; margin-bottom:8px;">④图4是____使用的陶器，他们还会制作玉器和乐器。（1分）</p>
+        <p style="font-size:13px; color:#555; margin-bottom:8px;"><strong>（2）</strong></p>
+        <p style="font-size:13px; color:#555; margin-bottom:4px;">①请分别写出图5和图6中的房屋名称。（2分）图5是____。图6是____。</p>
+        <p style="font-size:13px; color:#555; margin-bottom:4px;">②居住在图5房屋中的居民种植的粮食作物是____；居住在图6房屋中的居民主要种植的粮食作物是____。（2分）</p>
+        <p style="font-size:13px; color:#555;">③图5和图6中的房屋样式不同，其主要原因是____。（1分）</p>
+    </div>
+</div>
+<div class="tabs-container">
+    <div class="tab-buttons">
+        <button class="tab-btn active" onclick="switchTab(0)">小题1 文物识别</button>
+        <button class="tab-btn" onclick="switchTab(1)">小题2 房屋识别</button>
+        <button class="tab-btn" onclick="switchTab(2)">总结</button>
+        <button class="tab-btn" onclick="switchTab(3)">易错点</button>
+        <button class="tab-btn" onclick="switchTab(4)">知识图谱</button>
+        <button class="tab-btn" onclick="switchTab(5)">原题图片</button>
+    </div>
+    <div class="tab-content active" id="tab0">
+        <h3 style="color:#52c41a; margin-bottom:12px; font-size:15px;">✅ 小题1：文物识别</h3>
+        <div class="sub-part" id="part1">
+            <div class="part-title">① 图1：北京人头部复原像</div>
+            <div class="part-question">图1是____的头部复原像，该古人类生活在距今约70万—20万年。</div>
+            <div class="part-answer">答案：北京人</div>
+            <div class="part-detail">北京人发现于北京周口店，距今约70万—20万年，使用打制石器，会使用天然火，过群居生活。北京人的头部还保留着猿的一些特征，如眉骨粗大、颧骨高突、嘴巴前伸。</div>
+        </div>
+        <div class="sub-part" id="part2">
+            <div class="part-title">② 图2：山顶洞人骨针</div>
+            <div class="part-question">图2是____使用的骨针，反映出几万年前他们已掌握____技术。</div>
+            <div class="part-answer">答案：山顶洞人；磨光和钻孔</div>
+            <div class="part-detail">山顶洞人发现于北京周口店龙骨山顶部的洞穴，距今约3万年。山顶洞人已经掌握了磨光和钻孔技术，能够制作精细的骨针，用骨针缝制衣服。他们还会人工取火，懂得爱美，有安葬死者的习俗。</div>
+        </div>
+        <div class="sub-part" id="part3">
+            <div class="part-title">③ 图3：半坡人彩陶</div>
+            <div class="part-question">图3是____使用的____（彩色/黑色）陶器。</div>
+            <div class="part-answer">答案：半坡人；彩色</div>
+            <div class="part-detail">图3是人面鱼纹陶盆，是半坡人使用的彩色陶器（彩陶）。半坡人发现于陕西西安半坡村，距今约6000年，种植粟，居住半地穴式房屋，使用磨制石器，制作彩陶。人面鱼纹陶盆是半坡彩陶的代表作品，图案是人面和鱼纹的组合，具有神秘的象征意义。</div>
+        </div>
+        <div class="sub-part" id="part4">
+            <div class="part-title">④ 图4：河姆渡人陶器</div>
+            <div class="part-question">图4是____使用的陶器，他们还会制作玉器和乐器。</div>
+            <div class="part-answer">答案：河姆渡人</div>
+            <div class="part-detail">图4是猪纹黑陶钵，是河姆渡人使用的陶器。河姆渡人发现于浙江余姚河姆渡，距今约7000年，种植水稻，居住干栏式房屋，使用骨耜等磨制石器，制作黑陶，会挖水井。河姆渡人还会制作玉器和乐器，如玉璜、玉玦等玉器，以及骨哨等乐器。</div>
+        </div>
+    </div>
+    <div class="tab-content" id="tab1">
+        <h3 style="color:#52c41a; margin-bottom:12px; font-size:15px;">✅ 小题2：房屋识别</h3>
+        <div class="sub-part" id="part5">
+            <div class="part-title">① 房屋名称</div>
+            <div class="part-question">请分别写出图5和图6中的房屋名称。</div>
+            <div class="part-answer">答案：图5是半地穴式房屋；图6是干栏式房屋</div>
+            <div class="part-detail">图5是半地穴式房屋，一部分在地下，一部分在地上，屋顶是圆锥形的，用茅草覆盖，是半坡人居住的房屋。图6是干栏式房屋，高架在木桩上，房屋高于地面，用木桩支撑，上面是木板搭建的房屋，是河姆渡人居住的房屋。</div>
+        </div>
+        <div class="sub-part" id="part6">
+            <div class="part-title">② 种植的粮食作物</div>
+            <div class="part-question">居住在图5房屋中的居民种植的粮食作物是____；居住在图6房屋中的居民主要种植的粮食作物是____。</div>
+            <div class="part-answer">答案：图5（半坡人）种植粟；图6（河姆渡人）种植水稻</div>
+            <div class="part-detail">图5是半地穴式房屋，是半坡人居住的，半坡人生活在黄河流域（陕西西安），气候干燥，适合种植粟（小米）。图6是干栏式房屋，是河姆渡人居住的，河姆渡人生活在长江流域（浙江余姚），气候温暖湿润，雨水充沛，适合种植水稻。</div>
+        </div>
+        <div class="sub-part" id="part7">
+            <div class="part-title">③ 房屋样式不同的原因</div>
+            <div class="part-question">图5和图6中的房屋样式不同，其主要原因是____。</div>
+            <div class="part-answer">答案：地理环境不同</div>
+            <div class="part-detail">半坡人生活在黄河流域，气候干燥，冬季寒冷，风沙大，半地穴式房屋一部分在地下，可以保暖防风，适合黄河流域干燥寒冷的地理环境。河姆渡人生活在长江流域，气候温暖湿润，雨水多，地面潮湿，干栏式房屋高于地面，可以通风防潮，防止虫蛇，适合长江流域温暖湿润的地理环境。所以两种房屋样式不同的主要原因是地理环境不同。</div>
+        </div>
+    </div>
+    <div class="tab-content" id="tab2">
+        <div class="summary-content">
+            <h3 style="color:#fa8c16; margin-bottom:10px; font-size:15px;">💡 总结</h3>
+            <div class="rule-box">
+                <strong>本题核心：</strong>以文物图片和房屋图片为材料，考查中国早期人类和原始农耕居民的相关知识。
+            </div>
+            <p><strong>第一部分 文物识别：</strong></p>
+            <ul>
+                <li>图1：北京人头部复原像，距今约70万—20万年，使用打制石器，使用天然火</li>
+                <li>图2：山顶洞人骨针，距今约3万年，掌握磨光和钻孔技术，会人工取火</li>
+                <li>图3：半坡人彩陶（人面鱼纹陶盆），距今约6000年，种植粟，居住半地穴式房屋</li>
+                <li>图4：河姆渡人陶器（猪纹黑陶钵），距今约7000年，种植水稻，居住干栏式房屋，制作黑陶，会制作玉器和乐器</li>
+            </ul>
+            <p><strong>第二部分 房屋识别：</strong></p>
+            <ul>
+                <li>图5：半地穴式房屋，半坡人居住，种植粟</li>
+                <li>图6：干栏式房屋，河姆渡人居住，种植水稻</li>
+                <li>房屋样式不同的主要原因：地理环境不同（黄河流域干燥寒冷 vs 长江流域温暖湿润）</li>
+            </ul>
+        </div>
+    </div>
+    <div class="tab-content" id="tab3">
+        <div class="error-content">
+            <h3 style="color:#f5222d; margin-bottom:12px; font-size:15px;">⚠️ 易错点提醒</h3>
+            <div class="error-item">
+                <div class="error-title">易错点1：把北京人和山顶洞人混淆</div>
+                <p>北京人距今约70万—20万年，使用打制石器，使用天然火；山顶洞人距今约3万年，掌握磨光和钻孔技术，会人工取火，用骨针缝制衣服。</p>
+            </div>
+            <div class="error-item">
+                <div class="error-title">易错点2：把半坡人和河姆渡人混淆</div>
+                <p>半坡人在黄河流域，种植粟，居住半地穴式房屋，制作彩陶；河姆渡人在长江流域，种植水稻，居住干栏式房屋，制作黑陶。</p>
+            </div>
+            <div class="error-item">
+                <div class="error-title">易错点3：把彩陶和黑陶混淆</div>
+                <p>半坡人制作彩陶，色彩鲜艳，代表是人面鱼纹陶盆；河姆渡人制作黑陶，颜色发黑，代表是猪纹黑陶钵。</p>
+            </div>
+            <div class="error-item">
+                <div class="error-title">易错点4：对房屋样式的特点不熟悉</div>
+                <p>半地穴式房屋一部分在地下，保暖防风，适合干燥寒冷的环境；干栏式房屋高于地面，通风防潮，适合温暖湿润的环境。</p>
+            </div>
+            <div class="error-item">
+                <div class="error-title">易错点5：误认为房屋样式不同的原因是生活习惯不同</div>
+                <p>实际上，地理环境不同才是主要原因，生活习惯也是由地理环境决定的。</p>
+            </div>
+            <div class="error-item">
+                <div class="error-title">易错点6：对骨针反映的技术不熟悉</div>
+                <p>骨针反映了山顶洞人掌握了磨光和钻孔技术，不是简单的打制技术。</p>
+            </div>
+        </div>
+    </div>
+    <div class="tab-content" id="tab4">
+        <div class="kg-content">
+            <h3 style="color:#722ed1; margin-bottom:12px; font-size:15px;">📚 知识图谱</h3>
+            <div class="kg-tags">
+                <span class="kg-tag">学科：历史</span>
+                <span class="kg-tag">年级：七年级上册</span>
+                <span class="kg-tag">教材：人教版（RJ）</span>
+                <span class="kg-tag">单元：第一、二单元 史前时期</span>
+                <span class="kg-tag">跨学科：地理</span>
+            </div>
+            <div class="kg-group">
+                <div class="group-title">中国早期人类与原始农耕居民</div>
+                <div class="group-detail">
+                    <strong>1. 北京人</strong>
+                    <ul>
+                        <li>发现地点：北京周口店</li>
+                        <li>距今时间：约70万—20万年</li>
+                        <li>生产生活：使用打制石器，使用天然火，长时间保存火种，过群居生活，以采集和狩猎为生</li>
+                        <li>代表文物：头部复原像</li>
+                    </ul>
+                    <strong>2. 山顶洞人</strong>
+                    <ul>
+                        <li>发现地点：北京周口店龙骨山顶部的洞穴</li>
+                        <li>距今时间：约3万年</li>
+                        <li>生产生活：掌握磨光和钻孔技术，会人工取火，用骨针缝制衣服，懂得爱美，有安葬死者的习俗</li>
+                        <li>代表文物：骨针</li>
+                    </ul>
+                    <strong>3. 半坡居民</strong>
+                    <ul>
+                        <li>发现地点：陕西西安半坡村（黄河流域）</li>
+                        <li>距今时间：约6000年</li>
+                        <li>房屋样式：半地穴式房屋</li>
+                        <li>生产生活：种植粟，使用磨制石器，饲养猪狗等家畜，制作彩陶，会纺织制衣</li>
+                        <li>代表文物：人面鱼纹陶盆</li>
+                    </ul>
+                    <strong>4. 河姆渡居民</strong>
+                    <ul>
+                        <li>发现地点：浙江余姚河姆渡（长江流域）</li>
+                        <li>距今时间：约7000年</li>
+                        <li>房屋样式：干栏式房屋</li>
+                        <li>生产生活：种植水稻，使用骨耜等磨制石器，饲养猪狗水牛等家畜，制作黑陶，会挖水井，还会制作玉器和乐器</li>
+                        <li>代表文物：猪纹黑陶钵</li>
+                    </ul>
+                    <strong>5. 地理环境对人类生活的影响</strong>
+                    <ul>
+                        <li>气候影响房屋样式：温暖湿润地区住干栏式房屋，干燥寒冷地区住半地穴式房屋</li>
+                        <li>自然资源影响生产：水源丰富地区种植水稻，土地肥沃地区种植粟</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tab-content" id="tab5">
+        <h3 style="color:#faad14; margin-bottom:15px; font-size:15px;">📷 原题图片</h3>
+        <p style="color:#666; font-size:13px; margin-bottom:15px;">点击图片可放大查看</p>
+        <div class="original-images-grid">
+            <div class="orig-img">
+                <img src="images/p002_q21_1.png" alt="第21题原题第1部分" onclick="showImage('images/p002_q21_1.png')">
+                <div class="orig-label">原题第1部分</div>
+            </div>
+            <div class="orig-img">
+                <img src="images/p002_q21_2.png" alt="第21题原题第2部分" onclick="showImage('images/p002_q21_2.png')">
+                <div class="orig-label">原题第2部分</div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="imageModal" onclick="closeModal()">
+    <img id="modalImage" src="" alt="放大图片">
+</div>
+<audio id="audioPlayer"></audio>
+<div class="audio-player">
+    <div class="player-title">
+        <span>🎧 音频讲解</span>
+        <span class="current-segment" id="currentSeg">引导语</span>
+    </div>
+    <div class="total-progress" id="totalProgress" onclick="seekTotal(event)">
+        <div class="total-progress-bar" id="totalProgressBar"></div>
+    </div>
+    <div class="time-display">
+        <span id="currentTime">00:00</span>
+        <span id="totalTime">00:00</span>
+    </div>
+    <div class="controls">
+        <button class="nav-btn" onclick="prevSegment()" id="prevBtn">⏮ 上一段</button>
+        <button class="play-btn" onclick="togglePlay()" id="playBtn">▶</button>
+        <button class="nav-btn" onclick="nextSegment()" id="nextBtn">下一段 ⏭</button>
+    </div>
+    <div class="segment-buttons" id="segmentButtons">
+        <button class="seg-btn active" onclick="jumpToSegment(0)">引导语</button>
+        <button class="seg-btn" onclick="jumpToSegment(1)">题目朗读</button>
+        <button class="seg-btn" onclick="jumpToSegment(2)">(1)①北京人</button>
+        <button class="seg-btn" onclick="jumpToSegment(3)">(1)②山顶洞人</button>
+        <button class="seg-btn" onclick="jumpToSegment(4)">(1)③半坡人</button>
+        <button class="seg-btn" onclick="jumpToSegment(5)">(1)④河姆渡人</button>
+        <button class="seg-btn" onclick="jumpToSegment(6)">(2)①房屋</button>
+        <button class="seg-btn" onclick="jumpToSegment(7)">(2)②作物</button>
+        <button class="seg-btn" onclick="jumpToSegment(8)">(2)③原因</button>
+        <button class="seg-btn" onclick="jumpToSegment(9)">总结</button>
+        <button class="seg-btn" onclick="jumpToSegment(10)">易错点</button>
+        <button class="seg-btn" onclick="jumpToSegment(11)">知识图谱</button>
+    </div>
+</div>
+<script>
+const segments = [
+    {src: 'audio/segment1.mp3', name: '引导语', tab: 0, part: null},
+    {src: 'audio/segment2.mp3', name: '题目朗读', tab: 0, part: null},
+    {src: 'audio/segment3.mp3', name: '(1)①北京人', tab: 0, part: 'part1'},
+    {src: 'audio/segment4.mp3', name: '(1)②山顶洞人', tab: 0, part: 'part2'},
+    {src: 'audio/segment5.mp3', name: '(1)③半坡人', tab: 0, part: 'part3'},
+    {src: 'audio/segment6.mp3', name: '(1)④河姆渡人', tab: 0, part: 'part4'},
+    {src: 'audio/segment7.mp3', name: '(2)①房屋', tab: 1, part: 'part5'},
+    {src: 'audio/segment8.mp3', name: '(2)②作物', tab: 1, part: 'part6'},
+    {src: 'audio/segment9.mp3', name: '(2)③原因', tab: 1, part: 'part7'},
+    {src: 'audio/segment10.mp3', name: '总结', tab: 2, part: null},
+    {src: 'audio/segment11.mp3', name: '易错点', tab: 3, part: null},
+    {src: 'audio/segment12.mp3', name: '知识图谱', tab: 4, part: null}
+];
+let currentSegment = 0;
+let isPlaying = false;
+let segmentDurations = new Array(segments.length).fill(0);
+let totalDuration = 0;
+let loadedCount = 0;
+const audio = document.getElementById('audioPlayer');
+const playBtn = document.getElementById('playBtn');
+const totalProgressBar = document.getElementById('totalProgressBar');
+const currentTimeEl = document.getElementById('currentTime');
+const totalTimeEl = document.getElementById('totalTime');
+const currentSegEl = document.getElementById('currentSeg');
+const segBtns = document.querySelectorAll('.seg-btn');
+const tabBtns = document.querySelectorAll('.tab-btn');
+const tabContents = document.querySelectorAll('.tab-content');
+segments.forEach((seg, index) => {
+    const tempAudio = new Audio(seg.src);
+    tempAudio.addEventListener('loadedmetadata', () => {
+        segmentDurations[index] = tempAudio.duration;
+        loadedCount++;
+        if (loadedCount === segments.length) {
+            totalDuration = segmentDurations.reduce((a, b) => a + b, 0);
+            totalTimeEl.textContent = formatTime(totalDuration);
+        }
+    });
+});
+function switchTab(index) {
+    tabBtns.forEach((btn, i) => btn.classList.toggle('active', i === index));
+    tabContents.forEach((content, i) => content.classList.toggle('active', i === index));
+}
+function clearPartHighlight() {
+    document.querySelectorAll('.sub-part').forEach(p => p.classList.remove('active'));
+}
+function highlightPart(partId) {
+    if (!partId) return;
+    const el = document.getElementById(partId);
+    if (el) {
+        el.classList.add('active');
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+}
+function loadSegment(index) {
+    clearPartHighlight();
+    currentSegment = index;
+    audio.src = segments[index].src;
+    currentSegEl.textContent = segments[index].name;
+    updateSegButtons();
+    const tabIndex = segments[index].tab;
+    if (tabIndex >= 0) switchTab(tabIndex);
+    const partId = segments[index].part;
+    if (partId) {
+        setTimeout(() => highlightPart(partId), 300);
+    }
+}
+function togglePlay() {
+    if (isPlaying) { audio.pause(); playBtn.textContent = '▶'; isPlaying = false; }
+    else { audio.play(); playBtn.textContent = '⏸'; isPlaying = true; }
+}
+function prevSegment() { if (currentSegment > 0) { loadSegment(currentSegment - 1); if (isPlaying) audio.play(); } }
+function nextSegment() {
+    if (currentSegment < segments.length - 1) { loadSegment(currentSegment + 1); if (isPlaying) audio.play(); }
+    else { audio.pause(); playBtn.textContent = '▶'; isPlaying = false; }
+}
+function jumpToSegment(index) { loadSegment(index); if (isPlaying) audio.play(); }
+function updateSegButtons() {
+    segBtns.forEach((btn, index) => {
+        btn.classList.remove('active');
+        if (index < currentSegment) btn.classList.add('played');
+        else btn.classList.remove('played');
+    });
+    segBtns[currentSegment].classList.add('active');
+}
+audio.addEventListener('ended', () => {
+    if (currentSegment < segments.length - 1) nextSegment();
+    else { playBtn.textContent = '▶'; isPlaying = false; }
+});
+audio.addEventListener('timeupdate', () => {
+    if (totalDuration > 0) {
+        const elapsedBefore = segmentDurations.slice(0, currentSegment).reduce((a, b) => a + b, 0);
+        const totalElapsed = elapsedBefore + audio.currentTime;
+        totalProgressBar.style.width = (totalElapsed / totalDuration * 100) + '%';
+        currentTimeEl.textContent = formatTime(totalElapsed);
+    }
+});
+function seekTotal(event) {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const percent = (event.clientX - rect.left) / rect.width;
+    const targetTime = percent * totalDuration;
+    let accumulated = 0;
+    for (let i = 0; i < segments.length; i++) {
+        if (targetTime < accumulated + segmentDurations[i]) {
+            loadSegment(i);
+            audio.currentTime = targetTime - accumulated;
+            if (isPlaying) audio.play();
+            break;
+        }
+        accumulated += segmentDurations[i];
+    }
+}
+function formatTime(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+function showImage(src) {
+    document.getElementById('modalImage').src = src;
+    document.getElementById('imageModal').classList.add('active');
+}
+function closeModal() {
+    document.getElementById('imageModal').classList.remove('active');
+}
+loadSegment(0);
+</script>
+</body>
+</html>

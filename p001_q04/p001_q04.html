@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第4题 石器与工具使用 - 互动讲解</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; background: #f5f7fa; color: #333; line-height: 1.8; padding: 20px; max-width: 960px; margin: 0 auto; padding-bottom: 40px; }
+.page-title { background: linear-gradient(135deg, #722ed1 0%, #9254de 100%); color: white; padding: 18px 30px; border-radius: 12px; text-align: center; margin-bottom: 16px; box-shadow: 0 4px 15px rgba(114,46,209,0.3); }
+.page-title h1 { font-size: 20px; margin-bottom: 4px; }
+.page-title .subtitle { font-size: 13px; opacity: 0.9; }
+.card { background: white; border-radius: 12px; padding: 18px 22px; margin-bottom: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+.modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; cursor: pointer; }
+.modal.active { display: flex; }
+.modal img { max-width: 92%; max-height: 92%; border-radius: 8px; }
+.original-question { border-left: 4px solid #722ed1; padding-left: 15px; }
+.original-question h3 { color: #722ed1; font-size: 15px; margin-bottom: 10px; }
+.question-text { font-size: 14px; line-height: 2; }
+.question-text .q-main { font-weight: bold; color: #333; margin-bottom: 8px; }
+.question-text .q-main.sync-highlight { background: #E3F2FD; padding: 2px 4px; border-radius: 4px; }
+.answer-bracket { color: #7C3AED; font-weight: bold; }
+.answer-bracket.show { color: #2D8A1F; }
+.option-item { padding: 10px 15px; border-radius: 8px; background: #fafafa; border: 1px solid #e0e0e0; margin-bottom: 8px; cursor: pointer; transition: all 0.3s; }
+.option-item:hover { border-color: #722ed1; }
+.option-item.correct { background: rgba(82,196,26,0.18); border-color: #52c41a; }
+.option-item.wrong { background: rgba(234,102,104,0.18); border-color: #ea6668; }
+.option-item.sync-correct { background: rgba(82,196,26,0.18); border-color: #52c41a; }
+.option-item.sync-wrong { background: rgba(234,102,104,0.18); border-color: #ea6668; }
+.option-letter { font-weight: bold; margin-right: 8px; }
+.option-analysis { color: #52c41a; font-size: 13px; margin-top: 6px; display: none; }
+.option-item.show-analysis .option-analysis { display: block; }
+.tabs-container { margin-top: 0; }
+.tab-buttons { display: flex; gap: 6px; margin-bottom: 0; flex-wrap: wrap; }
+.tab-btn { padding: 8px 18px; border: 1px solid #ddd; background: #fafafa; border-radius: 8px 8px 0 0; cursor: pointer; font-size: 13px; transition: all 0.3s; font-weight: 500; }
+.tab-btn:hover { background: #f9f0ff; border-color: #722ed1; }
+.tab-btn.active { background: white; border-color: #e8e8e8; border-bottom-color: white; color: #722ed1; font-weight: bold; position: relative; top: 1px; }
+.tab-content { display: none; background: white; border: 1px solid #e8e8e8; border-radius: 0 8px 8px 8px; padding: 20px; min-height: 300px; }
+.tab-content.active { display: block; animation: fadeIn 0.3s; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+.sub-question { margin-bottom: 14px; padding: 12px 15px; border-radius: 8px; background: #fafafa; transition: all 0.3s; border-left: 3px solid transparent; }
+.sub-question.active { background: #f6ffed; border-left-color: #52c41a; box-shadow: 0 2px 8px rgba(82,196,26,0.15); }
+.sub-question .q-title { font-weight: bold; color: #333; margin-bottom: 4px; font-size: 14px; }
+.sub-question .detail { color: #666; font-size: 13px; margin-top: 4px; line-height: 1.7; }
+.summary-content { line-height: 2; font-size: 14px; }
+.summary-content .tip-box { background: #fffbe6; border-left: 4px solid #faad14; padding: 12px 15px; border-radius: 0 8px 8px 0; margin: 12px 0; }
+.summary-content .rule-box { background: #f9f0ff; border-left: 4px solid #722ed1; padding: 12px 15px; border-radius: 0 8px 8px 0; margin: 12px 0; }
+.summary-content ul { margin-left: 20px; margin-top: 6px; }
+.summary-content li { margin-bottom: 4px; }
+.error-content { line-height: 2; font-size: 14px; }
+.error-item { background: #fff2f0; border-left: 4px solid #f5222d; padding: 12px 15px; border-radius: 0 8px 8px 0; margin-bottom: 12px; }
+.error-item .error-title { color: #f5222d; font-weight: bold; margin-bottom: 4px; }
+.kg-content { line-height: 2; font-size: 14px; }
+.kg-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.kg-tag { padding: 5px 14px; background: #f9f0ff; color: #722ed1; border-radius: 14px; font-size: 12px; font-weight: 500; }
+.kg-group { margin-bottom: 14px; padding: 12px 15px; background: #f9f9f9; border-radius: 8px; }
+.kg-group .group-title { font-weight: bold; color: #722ed1; margin-bottom: 6px; font-size: 14px; }
+.kg-group .group-detail { font-size: 13px; color: #555; line-height: 1.8; }
+.audio-player { position: sticky; bottom: 0; background: white; border-top: 1px solid #e8e8e8; border-radius: 12px 12px 0 0; padding: 12px 20px; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index: 1000; margin-top: 16px; }
+.player-title { font-size: 13px; color: #666; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+.current-segment { color: #722ed1; font-weight: bold; font-size: 13px; }
+.total-progress { width: 100%; height: 6px; background: #e8e8e8; border-radius: 3px; cursor: pointer; margin-bottom: 6px; overflow: hidden; }
+.total-progress-bar { height: 100%; background: linear-gradient(90deg, #722ed1, #9254de); border-radius: 3px; width: 0%; transition: width 0.1s linear; }
+.time-display { font-size: 11px; color: #999; display: flex; justify-content: space-between; margin-bottom: 8px; }
+.controls { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.play-btn { width: 38px; height: 38px; border-radius: 50%; background: #722ed1; color: white; border: none; cursor: pointer; font-size: 15px; display: flex; align-items: center; justify-content: center; transition: all 0.3s; flex-shrink: 0; }
+.play-btn:hover { background: #531dab; transform: scale(1.05); }
+.nav-btn { padding: 5px 12px; border: 1px solid #ddd; background: white; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.3s; }
+.nav-btn:hover { border-color: #722ed1; color: #722ed1; }
+.nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.segment-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg-btn { padding: 4px 12px; border: 1px solid #ddd; background: white; border-radius: 14px; cursor: pointer; font-size: 12px; transition: all 0.3s; }
+.seg-btn:hover { border-color: #722ed1; }
+.seg-btn.active { background: #722ed1; color: white; border-color: #722ed1; }
+.seg-btn.played { background: #f6ffed; border-color: #52c41a; color: #52c41a; }
+</style>
+</head>
+<body>
+<div class="page-title">
+    <h1>第4题 石器与工具使用</h1>
+    <div class="subtitle">周末小卷7上历史 · 选择题 · 古人类生产生活</div>
+</div>
+<div class="card original-question">
+    <h3>📋 题目原文</h3>
+    <div class="question-text">
+        <div class="q-main" id="questionText">
+            在蓝田人遗址中，考古学家相继发现了尖状器、石片、石球等石器；郧县人遗址文化层中出土了石锤、石片、砍砸器、刮削器等石器。这些出土的石器表明他们<span class="answer-bracket" id="answerBracket">（&nbsp;&nbsp;）</span>
+        </div>
+        <div class="option-item" id="optionA" onclick="checkAnswer(this, false)">
+            <span class="option-letter">A.</span>是我国境内最早的古人类
+            <div class="option-analysis">❌ 错误。我国境内最早的古人类是元谋人，不是蓝田人和郧县人。</div>
+        </div>
+        <div class="option-item" id="optionB" onclick="checkAnswer(this, true)">
+            <span class="option-letter">B.</span>已经能够制作和使用工具
+            <div class="option-analysis">✅ 正确。出土的多种石器（尖状器、砍砸器、刮削器等）直接表明他们能够制作和使用工具。</div>
+        </div>
+        <div class="option-item" id="optionC" onclick="checkAnswer(this, false)">
+            <span class="option-letter">C.</span>掌握了磨光和钻孔的技术
+            <div class="option-analysis">❌ 错误。磨光和钻孔技术是山顶洞人掌握的，蓝田人和郧县人使用的是打制石器。</div>
+        </div>
+        <div class="option-item" id="optionD" onclick="checkAnswer(this, false)">
+            <span class="option-letter">D.</span>已经演化发展为早期智人
+            <div class="option-analysis">❌ 错误。蓝田人和郧县人属于直立人，不是早期智人。</div>
+        </div>
+    </div>
+</div>
+<div class="tabs-container">
+    <div class="tab-buttons">
+        <button class="tab-btn active" onclick="switchTab(0)">题目讲解</button>
+        <button class="tab-btn" onclick="switchTab(1)">总结</button>
+        <button class="tab-btn" onclick="switchTab(2)">易错点</button>
+        <button class="tab-btn" onclick="switchTab(3)">知识图谱</button>
+        <button class="tab-btn" onclick="switchTab(4)">原题图片</button>
+    </div>
+    <div class="tab-content active" id="tab0">
+        <h3 style="color:#52c41a; margin-bottom:12px; font-size:15px;">✅ 题目讲解</h3>
+        <div class="sub-question" id="explain0">
+            <div class="q-title">解题思路</div>
+            <div class="detail">
+                本题考查从考古发现中推断古人类生产生活方式的能力。解题关键是理解石器与工具使用的关系。
+                <br><br>
+                <strong>材料关键词：</strong>尖状器、石片、石球、石锤、砍砸器、刮削器等石器
+                <br><br>
+                <strong>分析：</strong>这些石器都是古人类制作和使用的工具。尖状器用于挖掘，砍砸器用于砍砸，刮削器用于刮削，石片用于切割，石球用于投掷，石锤用于敲打。石器的出土直接表明蓝田人和郧县人已经能够制作和使用工具。
+                <br><br>
+                <strong>逐项分析：</strong>
+                <ul>
+                    <li>A. 是我国境内最早的古人类 — 错误，最早的是元谋人</li>
+                    <li>B. 已经能够制作和使用工具 — 与材料直接相关 ✓</li>
+                    <li>C. 掌握了磨光和钻孔的技术 — 错误，这是山顶洞人的技术</li>
+                    <li>D. 已经演化发展为早期智人 — 错误，他们属于直立人</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="tab-content" id="tab1">
+        <div class="summary-content">
+            <h3 style="color:#fa8c16; margin-bottom:10px; font-size:15px;">💡 总结与解题技巧</h3>
+            <div class="rule-box">
+                <strong>核心结论：</strong>会不会制造工具是人和动物的根本区别。出土石器表明古人类已经能够制作和使用工具。
+            </div>
+            <div class="tip-box">
+                <strong>解题技巧：</strong>看到"出土石器""打制石器""磨制石器"等关键词，就要想到"制作和使用工具"。这是人与动物的根本区别之一。
+            </div>
+            <p><strong>打制石器 vs 磨制石器：</strong></p>
+            <ul>
+                <li><strong>打制石器</strong>（旧石器时代）：元谋人、北京人、蓝田人、郧县人使用，如尖状器、砍砸器、刮削器</li>
+                <li><strong>磨制石器</strong>（新石器时代）：山顶洞人掌握磨光和钻孔技术，如骨针</li>
+            </ul>
+            <p><strong>石器类型与用途：</strong></p>
+            <ul>
+                <li>尖状器 — 挖掘</li>
+                <li>砍砸器 — 砍砸</li>
+                <li>刮削器 — 刮削</li>
+                <li>石片 — 切割</li>
+                <li>石球 — 投掷</li>
+                <li>石锤 — 敲打</li>
+            </ul>
+        </div>
+    </div>
+    <div class="tab-content" id="tab2">
+        <div class="error-content">
+            <h3 style="color:#f5222d; margin-bottom:12px; font-size:15px;">⚠️ 易错点提醒</h3>
+            <div class="error-item">
+                <div class="error-title">易错点1：混淆不同古人类的地位</div>
+                <p>元谋人是我国境内目前已确认的<strong>最早的古人类</strong>，蓝田人和郧县人不是，不要记混。</p>
+            </div>
+            <div class="error-item">
+                <div class="error-title">易错点2：混淆打制石器和磨制石器</div>
+                <p>蓝田人和郧县人使用的是<strong>打制石器</strong>，山顶洞人掌握了<strong>磨光和钻孔技术</strong>，不要混淆。</p>
+            </div>
+            <div class="error-item">
+                <div class="error-title">易错点3：混淆人类演化阶段</div>
+                <p>蓝田人和郧县人属于<strong>直立人</strong>，早期智人如尼安德特人距今更近，不要混淆。</p>
+            </div>
+            <div class="error-item">
+                <div class="error-title">易错点4：没有抓住材料中的关键信息</div>
+                <p>题目中的关键信息是出土了多种石器，这直接表明能够制作和使用工具，而不是表明其他内容。</p>
+            </div>
+            <div class="error-item">
+                <div class="error-title">易错点5：误认为只要说法正确就可以选</div>
+                <p>做材料分析题时，必须选择与材料<strong>直接相关</strong>的选项，而不是只要说法正确就选。</p>
+            </div>
+        </div>
+    </div>
+    <div class="tab-content" id="tab3">
+        <div class="kg-content">
+            <h3 style="color:#722ed1; margin-bottom:12px; font-size:15px;">📚 知识图谱</h3>
+            <div class="kg-tags">
+                <span class="kg-tag">学科：历史</span>
+                <span class="kg-tag">年级：七年级上册</span>
+                <span class="kg-tag">教材：人教版（RJ）</span>
+                <span class="kg-tag">单元：第一单元 史前时期</span>
+            </div>
+            <div class="kg-group">
+                <div class="group-title">核心知识点：中国境内古人类的生产生活方式</div>
+                <div class="group-detail">
+                    <strong>1. 人与动物的根本区别</strong>
+                    <ul>
+                        <li>会不会制造工具是人和动物的根本区别</li>
+                        <li>使用工具是人类特有的能力</li>
+                    </ul>
+                    <strong>2. 打制石器与磨制石器</strong>
+                    <ul>
+                        <li>打制石器（旧石器时代）：元谋人、北京人、蓝田人、郧县人</li>
+                        <li>磨制石器（新石器时代）：山顶洞人掌握磨光和钻孔技术</li>
+                    </ul>
+                    <strong>3. 代表性古人类对比</strong>
+                    <ul>
+                        <li>元谋人：云南 | 约170万年 | 最早 | 知道使用火</li>
+                        <li>北京人：北京 | 约70-20万年 | 打制石器 | 天然火 | 群居</li>
+                        <li>蓝田人：陕西 | 约115-70万年 | 打制石器</li>
+                        <li>郧县人：湖北 | 约100万年 | 打制石器</li>
+                        <li>山顶洞人：北京 | 约3万年 | 磨光钻孔 | 人工取火 | 骨针</li>
+                    </ul>
+                    <strong>4. 石器类型与用途</strong>
+                    <ul>
+                        <li>尖状器 — 挖掘</li>
+                        <li>砍砸器 — 砍砸</li>
+                        <li>刮削器 — 刮削</li>
+                        <li>石片 — 切割</li>
+                        <li>石球 — 投掷</li>
+                        <li>石锤 — 敲打</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="kg-group">
+                <div class="group-title">材料分析题解题方法</div>
+                <div class="group-detail">
+                    <ol>
+                        <li>提取关键词（石器类型、出土地点、距今时间等）</li>
+                        <li>分析关键词的含义和关系</li>
+                        <li>逐一排除说法错误的选项</li>
+                        <li>在说法正确的选项中，选择与材料直接相关的选项</li>
+                        <li>验证答案是否符合材料主旨</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tab-content" id="tab4">
+        <h3 style="color:#faad14; margin-bottom:15px; font-size:15px;">📷 原题图片</h3>
+        <p style="color:#666; font-size:13px; margin-bottom:15px;">点击图片可放大查看</p>
+        <img src="images/p001_q04.png" alt="第4题原题" style="max-width:100%; border-radius:8px; cursor:pointer; border:1px solid #ddd;" onclick="showImage('images/p001_q04.png')">
+    </div>
+</div>
+<div class="modal" id="imageModal" onclick="closeModal()">
+    <img id="modalImage" src="" alt="放大图片">
+</div>
+<audio id="audioPlayer"></audio>
+<div class="audio-player">
+    <div class="player-title">
+        <span>🎧 音频讲解</span>
+        <span class="current-segment" id="currentSeg">引导语</span>
+    </div>
+    <div class="total-progress" id="totalProgress" onclick="seekTotal(event)">
+        <div class="total-progress-bar" id="totalProgressBar"></div>
+    </div>
+    <div class="time-display">
+        <span id="currentTime">00:00</span>
+        <span id="totalTime">00:00</span>
+    </div>
+    <div class="controls">
+        <button class="nav-btn" onclick="prevSegment()" id="prevBtn">⏮ 上一段</button>
+        <button class="play-btn" onclick="togglePlay()" id="playBtn">▶</button>
+        <button class="nav-btn" onclick="nextSegment()" id="nextBtn">下一段 ⏭</button>
+    </div>
+    <div class="segment-buttons" id="segmentButtons">
+        <button class="seg-btn active" onclick="jumpToSegment(0)">引导语</button>
+        <button class="seg-btn" onclick="jumpToSegment(1)">题目朗读</button>
+        <button class="seg-btn" onclick="jumpToSegment(2)">选项A</button>
+        <button class="seg-btn" onclick="jumpToSegment(3)">选项C</button>
+        <button class="seg-btn" onclick="jumpToSegment(4)">选项D</button>
+        <button class="seg-btn" onclick="jumpToSegment(5)">选项B</button>
+        <button class="seg-btn" onclick="jumpToSegment(6)">总结</button>
+        <button class="seg-btn" onclick="jumpToSegment(7)">易错点</button>
+        <button class="seg-btn" onclick="jumpToSegment(8)">知识图谱</button>
+    </div>
+</div>
+<script>
+const segments = [
+    {src: 'audio/segment1.mp3', name: '引导语', tab: 0, highlight: null},
+    {src: 'audio/segment2.mp3', name: '题目朗读', tab: 0, highlight: 'question'},
+    {src: 'audio/segment3.mp3', name: '选项A', tab: 0, highlight: 'optionA'},
+    {src: 'audio/segment4.mp3', name: '选项C', tab: 0, highlight: 'optionC'},
+    {src: 'audio/segment5.mp3', name: '选项D', tab: 0, highlight: 'optionD'},
+    {src: 'audio/segment6.mp3', name: '选项B', tab: 0, highlight: 'optionB'},
+    {src: 'audio/segment7.mp3', name: '总结', tab: 1, highlight: null},
+    {src: 'audio/segment8.mp3', name: '易错点', tab: 2, highlight: null},
+    {src: 'audio/segment9.mp3', name: '知识图谱', tab: 3, highlight: null}
+];
+let currentSegment = 0;
+let isPlaying = false;
+let segmentDurations = [0,0,0,0,0,0,0,0,0];
+let totalDuration = 0;
+let loadedCount = 0;
+const audio = document.getElementById('audioPlayer');
+const playBtn = document.getElementById('playBtn');
+const totalProgressBar = document.getElementById('totalProgressBar');
+const currentTimeEl = document.getElementById('currentTime');
+const totalTimeEl = document.getElementById('totalTime');
+const currentSegEl = document.getElementById('currentSeg');
+const segBtns = document.querySelectorAll('.seg-btn');
+const tabBtns = document.querySelectorAll('.tab-btn');
+const tabContents = document.querySelectorAll('.tab-content');
+segments.forEach((seg, index) => {
+    const tempAudio = new Audio(seg.src);
+    tempAudio.addEventListener('loadedmetadata', () => {
+        segmentDurations[index] = tempAudio.duration;
+        loadedCount++;
+        if (loadedCount === segments.length) {
+            totalDuration = segmentDurations.reduce((a, b) => a + b, 0);
+            totalTimeEl.textContent = formatTime(totalDuration);
+        }
+    });
+});
+function switchTab(index) {
+    tabBtns.forEach((btn, i) => btn.classList.toggle('active', i === index));
+    tabContents.forEach((content, i) => content.classList.toggle('active', i === index));
+}
+function clearHighlight() {
+    document.getElementById('questionText').classList.remove('sync-highlight');
+    document.getElementById('answerBracket').classList.remove('show');
+    document.getElementById('answerBracket').innerHTML = '（&nbsp;&nbsp;）';
+    ['optionA','optionB','optionC','optionD'].forEach(id => {
+        document.getElementById(id).classList.remove('sync-correct', 'sync-wrong');
+    });
+}
+function applyHighlight(type) {
+    if (!type) return;
+    if (type === 'question') {
+        document.getElementById('questionText').classList.add('sync-highlight');
+    } else if (type === 'optionA') {
+        document.getElementById('optionA').classList.add('sync-wrong');
+    } else if (type === 'optionB') {
+        document.getElementById('optionB').classList.add('sync-correct');
+        document.getElementById('answerBracket').classList.add('show');
+        document.getElementById('answerBracket').innerHTML = '（B）';
+    } else if (type === 'optionC') {
+        document.getElementById('optionC').classList.add('sync-wrong');
+    } else if (type === 'optionD') {
+        document.getElementById('optionD').classList.add('sync-wrong');
+    }
+}
+function loadSegment(index) {
+    clearHighlight();
+    currentSegment = index;
+    audio.src = segments[index].src;
+    currentSegEl.textContent = segments[index].name;
+    updateSegButtons();
+    const tabIndex = segments[index].tab;
+    if (tabIndex >= 0) switchTab(tabIndex);
+    const highlightType = segments[index].highlight;
+    if (highlightType) {
+        setTimeout(() => applyHighlight(highlightType), 200);
+    }
+}
+function checkAnswer(el, isCorrect) {
+    if (isCorrect) { el.classList.add('correct'); el.classList.add('show-analysis'); }
+    else { el.classList.add('wrong'); el.classList.add('show-analysis'); }
+}
+function togglePlay() {
+    if (isPlaying) { audio.pause(); playBtn.textContent = '▶'; isPlaying = false; }
+    else { audio.play(); playBtn.textContent = '⏸'; isPlaying = true; }
+}
+function prevSegment() { if (currentSegment > 0) { loadSegment(currentSegment - 1); if (isPlaying) audio.play(); } }
+function nextSegment() {
+    if (currentSegment < segments.length - 1) { loadSegment(currentSegment + 1); if (isPlaying) audio.play(); }
+    else { audio.pause(); playBtn.textContent = '▶'; isPlaying = false; }
+}
+function jumpToSegment(index) { loadSegment(index); if (isPlaying) audio.play(); }
+function updateSegButtons() {
+    segBtns.forEach((btn, index) => {
+        btn.classList.remove('active');
+        if (index < currentSegment) btn.classList.add('played');
+        else btn.classList.remove('played');
+    });
+    segBtns[currentSegment].classList.add('active');
+}
+audio.addEventListener('ended', () => {
+    if (currentSegment < segments.length - 1) nextSegment();
+    else { playBtn.textContent = '▶'; isPlaying = false; }
+});
+audio.addEventListener('timeupdate', () => {
+    if (totalDuration > 0) {
+        const elapsedBefore = segmentDurations.slice(0, currentSegment).reduce((a, b) => a + b, 0);
+        const totalElapsed = elapsedBefore + audio.currentTime;
+        totalProgressBar.style.width = (totalElapsed / totalDuration * 100) + '%';
+        currentTimeEl.textContent = formatTime(totalElapsed);
+    }
+});
+function seekTotal(event) {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const percent = (event.clientX - rect.left) / rect.width;
+    const targetTime = percent * totalDuration;
+    let accumulated = 0;
+    for (let i = 0; i < segments.length; i++) {
+        if (targetTime < accumulated + segmentDurations[i]) {
+            loadSegment(i);
+            audio.currentTime = targetTime - accumulated;
+            if (isPlaying) audio.play();
+            break;
+        }
+        accumulated += segmentDurations[i];
+    }
+}
+function formatTime(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+function showImage(src) {
+    document.getElementById('modalImage').src = src;
+    document.getElementById('imageModal').classList.add('active');
+}
+function closeModal() {
+    document.getElementById('imageModal').classList.remove('active');
+}
+loadSegment(0);
+</script>
+</body>
+</html>

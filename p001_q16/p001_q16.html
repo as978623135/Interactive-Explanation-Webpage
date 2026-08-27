@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第16题 仰韶彩陶与审美观念 - 互动讲解</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; background: #f5f7fa; color: #333; line-height: 1.8; padding: 20px; max-width: 960px; margin: 0 auto; padding-bottom: 40px; }
+.page-title { background: linear-gradient(135deg, #722ed1 0%, #9254de 100%); color: white; padding: 18px 30px; border-radius: 12px; text-align: center; margin-bottom: 16px; box-shadow: 0 4px 15px rgba(114,46,209,0.3); }
+.page-title h1 { font-size: 20px; margin-bottom: 4px; }
+.page-title .subtitle { font-size: 13px; opacity: 0.9; }
+.card { background: white; border-radius: 12px; padding: 18px 22px; margin-bottom: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+.modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; cursor: pointer; }
+.modal.active { display: flex; }
+.modal img { max-width: 92%; max-height: 92%; border-radius: 8px; }
+.original-question { border-left: 4px solid #722ed1; padding-left: 15px; }
+.original-question h3 { color: #722ed1; font-size: 15px; margin-bottom: 10px; }
+.question-text { font-size: 14px; line-height: 2; }
+.question-text .q-main { font-weight: bold; color: #333; margin-bottom: 8px; }
+.question-text .q-main.sync-highlight { background: #E3F2FD; padding: 2px 4px; border-radius: 4px; }
+.answer-bracket { color: #7C3AED; font-weight: bold; }
+.answer-bracket.show { color: #2D8A1F; }
+.pottery-images { display: flex; justify-content: space-around; align-items: flex-end; margin: 15px 0; gap: 10px; }
+.pottery-item { text-align: center; flex: 1; }
+.pottery-item .pottery-placeholder { width: 100px; height: 80px; background: #e8e8e8; border-radius: 6px; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #999; }
+.pottery-item .pottery-name { font-size: 11px; color: #666; margin-top: 6px; font-weight: 500; line-height: 1.4; }
+.option-item { padding: 10px 15px; border-radius: 8px; background: #fafafa; border: 1px solid #e0e0e0; margin-bottom: 8px; cursor: pointer; transition: all 0.3s; }
+.option-item:hover { border-color: #722ed1; }
+.option-item.correct { background: rgba(82,196,26,0.18); border-color: #52c41a; }
+.option-item.wrong { background: rgba(234,102,104,0.18); border-color: #ea6668; }
+.option-item.sync-correct { background: rgba(82,196,26,0.18); border-color: #52c41a; }
+.option-item.sync-wrong { background: rgba(234,102,104,0.18); border-color: #ea6668; }
+.option-letter { font-weight: bold; margin-right: 8px; }
+.option-analysis { color: #52c41a; font-size: 13px; margin-top: 6px; display: none; }
+.option-item.show-analysis .option-analysis { display: block; }
+.tabs-container { margin-top: 0; }
+.tab-buttons { display: flex; gap: 6px; margin-bottom: 0; flex-wrap: wrap; }
+.tab-btn { padding: 8px 18px; border: 1px solid #ddd; background: #fafafa; border-radius: 8px 8px 0 0; cursor: pointer; font-size: 13px; transition: all 0.3s; font-weight: 500; }
+.tab-btn:hover { background: #f9f0ff; border-color: #722ed1; }
+.tab-btn.active { background: white; border-color: #e8e8e8; border-bottom-color: white; color: #722ed1; font-weight: bold; position: relative; top: 1px; }
+.tab-content { display: none; background: white; border: 1px solid #e8e8e8; border-radius: 0 8px 8px 8px; padding: 20px; min-height: 300px; }
+.tab-content.active { display: block; animation: fadeIn 0.3s; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+.sub-question { margin-bottom: 14px; padding: 12px 15px; border-radius: 8px; background: #fafafa; transition: all 0.3s; border-left: 3px solid transparent; }
+.sub-question.active { background: #f6ffed; border-left-color: #52c41a; box-shadow: 0 2px 8px rgba(82,196,26,0.15); }
+.sub-question .q-title { font-weight: bold; color: #333; margin-bottom: 4px; font-size: 14px; }
+.sub-question .detail { color: #666; font-size: 13px; margin-top: 4px; line-height: 1.7; }
+.summary-content { line-height: 2; font-size: 14px; }
+.summary-content .tip-box { background: #fffbe6; border-left: 4px solid #faad14; padding: 12px 15px; border-radius: 0 8px 8px 0; margin: 12px 0; }
+.summary-content .rule-box { background: #f9f0ff; border-left: 4px solid #722ed1; padding: 12px 15px; border-radius: 0 8px 8px 0; margin: 12px 0; }
+.summary-content ul { margin-left: 20px; margin-top: 6px; }
+.summary-content li { margin-bottom: 4px; }
+.error-content { line-height: 2; font-size: 14px; }
+.error-item { background: #fff2f0; border-left: 4px solid #f5222d; padding: 12px 15px; border-radius: 0 8px 8px 0; margin-bottom: 12px; }
+.error-item .error-title { color: #f5222d; font-weight: bold; margin-bottom: 4px; }
+.kg-content { line-height: 2; font-size: 14px; }
+.kg-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.kg-tag { padding: 5px 14px; background: #f9f0ff; color: #722ed1; border-radius: 14px; font-size: 12px; font-weight: 500; }
+.kg-group { margin-bottom: 14px; padding: 12px 15px; background: #f9f9f9; border-radius: 8px; }
+.kg-group .group-title { font-weight: bold; color: #722ed1; margin-bottom: 6px; font-size: 14px; }
+.kg-group .group-detail { font-size: 13px; color: #555; line-height: 1.8; }
+.audio-player { position: sticky; bottom: 0; background: white; border-top: 1px solid #e8e8e8; border-radius: 12px 12px 0 0; padding: 12px 20px; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index: 1000; margin-top: 16px; }
+.player-title { font-size: 13px; color: #666; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+.current-segment { color: #722ed1; font-weight: bold; font-size: 13px; }
+.total-progress { width: 100%; height: 6px; background: #e8e8e8; border-radius: 3px; cursor: pointer; margin-bottom: 6px; overflow: hidden; }
+.total-progress-bar { height: 100%; background: linear-gradient(90deg, #722ed1, #9254de); border-radius: 3px; width: 0%; transition: width 0.1s linear; }
+.time-display { font-size: 11px; color: #999; display: flex; justify-content: space-between; margin-bottom: 8px; }
+.controls { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.play-btn { width: 38px; height: 38px; border-radius: 50%; background: #722ed1; color: white; border: none; cursor: pointer; font-size: 15px; display: flex; align-items: center; justify-content: center; transition: all 0.3s; flex-shrink: 0; }
+.play-btn:hover { background: #531dab; transform: scale(1.05); }
+.nav-btn { padding: 5px 12px; border: 1px solid #ddd; background: white; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.3s; }
+.nav-btn:hover { border-color: #722ed1; color: #722ed1; }
+.nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.segment-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg-btn { padding: 4px 12px; border: 1px solid #ddd; background: white; border-radius: 14px; cursor: pointer; font-size: 12px; transition: all 0.3s; }
+.seg-btn:hover { border-color: #722ed1; }
+.seg-btn.active { background: #722ed1; color: white; border-color: #722ed1; }
+.seg-btn.played { background: #f6ffed; border-color: #52c41a; color: #52c41a; }
+</style>
+</head>
+<body>
+<div class="page-title">
+    <h1>第16题 仰韶彩陶与审美观念</h1>
+    <div class="subtitle">周末小卷7上历史 · 选择题 · 新课标史料实证</div>
+</div>
+<div class="card original-question">
+    <h3>📋 题目原文</h3>
+    <div class="question-text">
+        <div class="q-main" id="questionText">
+            仰韶文化的重要特征是制作彩陶。其施彩的陶器有盆、钵、瓶、罐等，图案包括鱼、鸟、花、太阳、星辰和几何纹样等。下面这些陶器的造型和图案可以共同印证我国原始居民<span class="answer-bracket" id="answerBracket">（&nbsp;&nbsp;）</span>
+        </div>
+        <div class="pottery-images">
+            <div class="pottery-item">
+                <div class="pottery-placeholder">人面鱼纹陶盆</div>
+                <div class="pottery-name">陕西半坡出土的<br>人面鱼纹陶盆</div>
+            </div>
+            <div class="pottery-item">
+                <div class="pottery-placeholder">鲵鱼纹陶瓶</div>
+                <div class="pottery-name">甘肃甘谷出土的<br>鲵鱼纹陶瓶</div>
+            </div>
+            <div class="pottery-item">
+                <div class="pottery-placeholder">回旋勾连纹陶盆</div>
+                <div class="pottery-name">山西临汾出土的<br>回旋勾连纹陶盆</div>
+            </div>
+        </div>
+        <div class="option-item" id="optionA" onclick="checkAnswer(this, false)">
+            <span class="option-letter">A.</span>开始定居生活
+            <div class="option-analysis">❌ 错误。彩陶的造型和图案不能直接印证定居生活，定居生活的证据是房屋遗址。</div>
+        </div>
+        <div class="option-item" id="optionB" onclick="checkAnswer(this, true)">
+            <span class="option-letter">B.</span>具有朴素的审美观念
+            <div class="option-analysis">✅ 正确。彩陶有美观的造型和丰富精美的图案，说明原始居民懂得美化器物，具有朴素的审美观念。</div>
+        </div>
+        <div class="option-item" id="optionC" onclick="checkAnswer(this, false)">
+            <span class="option-letter">C.</span>生产分工细化
+            <div class="option-analysis">❌ 错误。彩陶的造型和图案不能直接印证生产分工细化。</div>
+        </div>
+        <div class="option-item" id="optionD" onclick="checkAnswer(this, false)">
+            <span class="option-letter">D.</span>仍然以狩猎为主
+            <div class="option-analysis">❌ 错误。仰韶文化已经是原始农耕文化，不是以狩猎为主，彩陶上的动物纹样只是装饰图案。</div>
+        </div>
+    </div>
+</div>
+<div class="tabs-container">
+    <div class="tab-buttons">
+        <button class="tab-btn active" onclick="switchTab(0)">题目讲解</button>
+        <button class="tab-btn" onclick="switchTab(1)">总结</button>
+        <button class="tab-btn" onclick="switchTab(2)">易错点</button>
+        <button class="tab-btn" onclick="switchTab(3)">知识图谱</button>
+        <button class="tab-btn" onclick="switchTab(4)">原题图片</button>
+    </div>
+    <div class="tab-content active" id="tab0">
+        <h3 style="color:#52c41a; margin-bottom:12px; font-size:15px;">✅ 题目讲解</h3>
+        <div class="sub-question" id="explain0">
+            <div class="q-title">解题思路</div>
+            <div class="detail">
+                本题考查从彩陶的造型和图案中推断历史信息的能力。解题关键是分析彩陶的造型和图案反映了什么。
+                <br><br>
+                <strong>彩陶特征分析：</strong>
+                <ul>
+                    <li><strong>造型方面：</strong>有盆、钵、瓶、罐等多种造型，不仅实用，而且美观，说明原始居民在制作陶器时不仅考虑实用性，还考虑了造型的美观</li>
+                    <li><strong>图案方面：</strong>图案包括鱼、鸟、花、太阳、星辰和几何纹样等，种类非常丰富，而且绘制精美，如人面鱼纹组合巧妙、鲵鱼形象生动、回旋勾连纹流畅优美</li>
+                </ul>
+                <br>
+                <strong>结论：</strong>这些精美的造型和图案说明原始居民已经懂得美化器物，追求美的享受，具有朴素的审美观念。
+                <br><br>
+                <strong>逐项分析：</strong>
+                <ul>
+                    <li>A. 开始定居生活 — 需要房屋遗址等证据，彩陶不能直接印证</li>
+                    <li>B. 具有朴素的审美观念 — 精美造型和丰富图案直接反映审美观念 ✓</li>
+                    <li>C. 生产分工细化 — 需要手工业作坊遗址等证据，彩陶不能直接印证</li>
+                    <li>D. 仍然以狩猎为主 — 仰韶文化已是原始农耕文化，动物纹样只是装饰</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="tab-content" id="tab1">
+        <div class="summary-content">
+            <h3 style="color:#fa8c16; margin-bottom:10px; font-size:15px;">💡 总结与解题技巧</h3>
+            <div class="rule-box">
+                <strong>核心结论：</strong>彩陶有多种美观的造型，有丰富精美的图案，说明原始居民已经懂得美化器物，追求美的享受，具有朴素的审美观念。
+            </div>
+            <div class="tip-box">
+                <strong>解题技巧：</strong>做史料实证题时，必须基于文物的<strong>特征</strong>来推断历史信息，看到精美的造型和丰富的图案就要想到审美观念。
+            </div>
+            <p><strong>仰韶文化彩陶：</strong></p>
+            <ul>
+                <li>器型：盆、钵、瓶、罐等</li>
+                <li>图案：鱼纹、鸟纹、花纹、太阳纹、星辰纹、几何纹样等</li>
+                <li>代表器物：陕西半坡人面鱼纹陶盆、甘肃甘谷鲵鱼纹陶瓶、山西临汾回旋勾连纹陶盆</li>
+                <li>历史意义：彩陶是仰韶文化的重要特征，反映了原始居民的审美观念和艺术水平</li>
+            </ul>
+            <p><strong>原始居民的审美观念：</strong></p>
+            <ul>
+                <li>器物美化：在实用器物上绘制精美图案，追求美观</li>
+                <li>造型艺术：陶器造型多样美观</li>
+                <li>绘画艺术：彩陶图案丰富，绘制精美，包括动物纹、植物纹、几何纹等</li>
+                <li>装饰艺术：用色彩和图案装饰器物，追求美的享受</li>
+            </ul>
+        </div>
+    </div>
+    <div class="tab-content" id="tab2">
+        <div class="error-content">
+            <h3 style="color:#f5222d; margin-bottom:12px; font-size:15px;">⚠️ 易错点提醒</h3>
+            <div class="error-item">
+                <div class="error-title">易错点1：误认为彩陶的出现就能印证定居生活</div>
+                <p>虽然彩陶与定居生活有关，但彩陶的造型和图案本身不能直接印证定居生活，定居生活的证据是房屋遗址、聚落遗址等。</p>
+            </div>
+            <div class="error-item">
+                <div class="error-title">易错点2：误认为彩陶上的动物纹样就能说明以狩猎为主</div>
+                <p>彩陶上的鱼纹、鸟纹等只是装饰图案，不能说明生产方式。仰韶文化已经是原始农耕文化，农业是主要生产方式。</p>
+            </div>
+            <div class="error-item">
+                <div class="error-title">易错点3：误认为精美的彩陶就能说明生产分工细化</div>
+                <p>虽然彩陶的制作需要技术，但彩陶的造型和图案本身不能直接说明生产分工细化，生产分工细化的证据是专门的手工业作坊遗址等。</p>
+            </div>
+            <div class="error-item">
+                <div class="error-title">易错点4：没有抓住材料中的关键信息</div>
+                <p>材料中的关键信息是"造型和图案"，看到精美的造型和丰富的图案就要想到审美观念。</p>
+            </div>
+            <div class="error-item">
+                <div class="error-title">易错点5：对仰韶文化的特征不熟悉</div>
+                <p>仰韶文化是新石器时代黄河中游的原始农耕文化，特征是彩陶、半地穴式房屋、磨制石器，原始居民种植粟，饲养家畜，不是以狩猎为主。</p>
+            </div>
+        </div>
+    </div>
+    <div class="tab-content" id="tab3">
+        <div class="kg-content">
+            <h3 style="color:#722ed1; margin-bottom:12px; font-size:15px;">📚 知识图谱</h3>
+            <div class="kg-tags">
+                <span class="kg-tag">学科：历史</span>
+                <span class="kg-tag">年级：七年级上册</span>
+                <span class="kg-tag">教材：人教版（RJ）</span>
+                <span class="kg-tag">单元：第二单元 原始农耕生活</span>
+            </div>
+            <div class="kg-group">
+                <div class="group-title">核心知识点：仰韶文化彩陶与原始居民的审美观念</div>
+                <div class="group-detail">
+                    <strong>1. 仰韶文化基本信息</strong>
+                    <ul>
+                        <li>发现地点：河南渑池仰韶村</li>
+                        <li>分布区域：黄河中游地区</li>
+                        <li>年代：距今约7000年至5000年</li>
+                        <li>文化特征：彩陶、半地穴式房屋、磨制石器</li>
+                        <li>代表遗址：半坡遗址、姜寨遗址、庙底沟遗址</li>
+                    </ul>
+                    <strong>2. 仰韶文化彩陶</strong>
+                    <ul>
+                        <li>器型：盆、钵、瓶、罐等</li>
+                        <li>图案：鱼纹、鸟纹、花纹、太阳纹、星辰纹、几何纹样等</li>
+                        <li>代表器物：陕西半坡人面鱼纹陶盆、甘肃甘谷鲵鱼纹陶瓶、山西临汾回旋勾连纹陶盆</li>
+                        <li>历史意义：彩陶是仰韶文化的重要特征，反映了原始居民的审美观念和艺术水平</li>
+                    </ul>
+                    <strong>3. 原始居民的审美观念</strong>
+                    <ul>
+                        <li>器物美化：在实用器物上绘制精美图案，追求美观</li>
+                        <li>造型艺术：陶器造型多样美观</li>
+                        <li>绘画艺术：彩陶图案丰富，绘制精美，包括动物纹、植物纹、几何纹等</li>
+                        <li>装饰艺术：用色彩和图案装饰器物，追求美的享受</li>
+                    </ul>
+                    <strong>4. 半坡居民基本信息</strong>
+                    <ul>
+                        <li>发现地点：陕西西安半坡村</li>
+                        <li>距今时间：约6000年</li>
+                        <li>生产生活：种植粟，使用磨制石器，居住半地穴式房屋，饲养家畜，制作彩陶</li>
+                        <li>历史地位：仰韶文化的典型代表，黄河流域原始农耕居民的代表</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="kg-group">
+                <div class="group-title">史料实证核心素养</div>
+                <div class="group-detail">
+                    <p>史料实证是指对获取的史料进行辨析，并运用可信的史料努力重现历史真实的态度与方法。</p>
+                    <p>做史料实证题时，必须基于考古文物，分析文物的特征，推断文物能证明的历史信息，不能脱离文物主观臆断。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tab-content" id="tab4">
+        <h3 style="color:#faad14; margin-bottom:15px; font-size:15px;">📷 原题图片</h3>
+        <p style="color:#666; font-size:13px; margin-bottom:15px;">点击图片可放大查看</p>
+        <img src="images/p001_q16.png" alt="第16题原题" style="max-width:100%; border-radius:8px; cursor:pointer; border:1px solid #ddd;" onclick="showImage('images/p001_q16.png')">
+    </div>
+</div>
+<div class="modal" id="imageModal" onclick="closeModal()">
+    <img id="modalImage" src="" alt="放大图片">
+</div>
+<audio id="audioPlayer"></audio>
+<div class="audio-player">
+    <div class="player-title">
+        <span>🎧 音频讲解</span>
+        <span class="current-segment" id="currentSeg">引导语</span>
+    </div>
+    <div class="total-progress" id="totalProgress" onclick="seekTotal(event)">
+        <div class="total-progress-bar" id="totalProgressBar"></div>
+    </div>
+    <div class="time-display">
+        <span id="currentTime">00:00</span>
+        <span id="totalTime">00:00</span>
+    </div>
+    <div class="controls">
+        <button class="nav-btn" onclick="prevSegment()" id="prevBtn">⏮ 上一段</button>
+        <button class="play-btn" onclick="togglePlay()" id="playBtn">▶</button>
+        <button class="nav-btn" onclick="nextSegment()" id="nextBtn">下一段 ⏭</button>
+    </div>
+    <div class="segment-buttons" id="segmentButtons">
+        <button class="seg-btn active" onclick="jumpToSegment(0)">引导语</button>
+        <button class="seg-btn" onclick="jumpToSegment(1)">题目朗读</button>
+        <button class="seg-btn" onclick="jumpToSegment(2)">选项A</button>
+        <button class="seg-btn" onclick="jumpToSegment(3)">选项C</button>
+        <button class="seg-btn" onclick="jumpToSegment(4)">选项D</button>
+        <button class="seg-btn" onclick="jumpToSegment(5)">选项B</button>
+        <button class="seg-btn" onclick="jumpToSegment(6)">总结</button>
+        <button class="seg-btn" onclick="jumpToSegment(7)">易错点</button>
+        <button class="seg-btn" onclick="jumpToSegment(8)">知识图谱</button>
+    </div>
+</div>
+<script>
+const segments = [
+    {src: 'audio/segment1.mp3', name: '引导语', tab: 0, highlight: null},
+    {src: 'audio/segment2.mp3', name: '题目朗读', tab: 0, highlight: 'question'},
+    {src: 'audio/segment3.mp3', name: '选项A', tab: 0, highlight: 'optionA'},
+    {src: 'audio/segment4.mp3', name: '选项C', tab: 0, highlight: 'optionC'},
+    {src: 'audio/segment5.mp3', name: '选项D', tab: 0, highlight: 'optionD'},
+    {src: 'audio/segment6.mp3', name: '选项B', tab: 0, highlight: 'optionB'},
+    {src: 'audio/segment7.mp3', name: '总结', tab: 1, highlight: null},
+    {src: 'audio/segment8.mp3', name: '易错点', tab: 2, highlight: null},
+    {src: 'audio/segment9.mp3', name: '知识图谱', tab: 3, highlight: null}
+];
+let currentSegment = 0;
+let isPlaying = false;
+let segmentDurations = [0,0,0,0,0,0,0,0,0];
+let totalDuration = 0;
+let loadedCount = 0;
+const audio = document.getElementById('audioPlayer');
+const playBtn = document.getElementById('playBtn');
+const totalProgressBar = document.getElementById('totalProgressBar');
+const currentTimeEl = document.getElementById('currentTime');
+const totalTimeEl = document.getElementById('totalTime');
+const currentSegEl = document.getElementById('currentSeg');
+const segBtns = document.querySelectorAll('.seg-btn');
+const tabBtns = document.querySelectorAll('.tab-btn');
+const tabContents = document.querySelectorAll('.tab-content');
+segments.forEach((seg, index) => {
+    const tempAudio = new Audio(seg.src);
+    tempAudio.addEventListener('loadedmetadata', () => {
+        segmentDurations[index] = tempAudio.duration;
+        loadedCount++;
+        if (loadedCount === segments.length) {
+            totalDuration = segmentDurations.reduce((a, b) => a + b, 0);
+            totalTimeEl.textContent = formatTime(totalDuration);
+        }
+    });
+});
+function switchTab(index) {
+    tabBtns.forEach((btn, i) => btn.classList.toggle('active', i === index));
+    tabContents.forEach((content, i) => content.classList.toggle('active', i === index));
+}
+function clearHighlight() {
+    document.getElementById('questionText').classList.remove('sync-highlight');
+    document.getElementById('answerBracket').classList.remove('show');
+    document.getElementById('answerBracket').innerHTML = '（&nbsp;&nbsp;）';
+    ['optionA','optionB','optionC','optionD'].forEach(id => {
+        document.getElementById(id).classList.remove('sync-correct', 'sync-wrong');
+    });
+}
+function applyHighlight(type) {
+    if (!type) return;
+    if (type === 'question') {
+        document.getElementById('questionText').classList.add('sync-highlight');
+    } else if (type === 'optionA') {
+        document.getElementById('optionA').classList.add('sync-wrong');
+    } else if (type === 'optionB') {
+        document.getElementById('optionB').classList.add('sync-correct');
+        document.getElementById('answerBracket').classList.add('show');
+        document.getElementById('answerBracket').innerHTML = '（B）';
+    } else if (type === 'optionC') {
+        document.getElementById('optionC').classList.add('sync-wrong');
+    } else if (type === 'optionD') {
+        document.getElementById('optionD').classList.add('sync-wrong');
+    }
+}
+function loadSegment(index) {
+    clearHighlight();
+    currentSegment = index;
+    audio.src = segments[index].src;
+    currentSegEl.textContent = segments[index].name;
+    updateSegButtons();
+    const tabIndex = segments[index].tab;
+    if (tabIndex >= 0) switchTab(tabIndex);
+    const highlightType = segments[index].highlight;
+    if (highlightType) {
+        setTimeout(() => applyHighlight(highlightType), 200);
+    }
+}
+function checkAnswer(el, isCorrect) {
+    if (isCorrect) { el.classList.add('correct'); el.classList.add('show-analysis'); }
+    else { el.classList.add('wrong'); el.classList.add('show-analysis'); }
+}
+function togglePlay() {
+    if (isPlaying) { audio.pause(); playBtn.textContent = '▶'; isPlaying = false; }
+    else { audio.play(); playBtn.textContent = '⏸'; isPlaying = true; }
+}
+function prevSegment() { if (currentSegment > 0) { loadSegment(currentSegment - 1); if (isPlaying) audio.play(); } }
+function nextSegment() {
+    if (currentSegment < segments.length - 1) { loadSegment(currentSegment + 1); if (isPlaying) audio.play(); }
+    else { audio.pause(); playBtn.textContent = '▶'; isPlaying = false; }
+}
+function jumpToSegment(index) { loadSegment(index); if (isPlaying) audio.play(); }
+function updateSegButtons() {
+    segBtns.forEach((btn, index) => {
+        btn.classList.remove('active');
+        if (index < currentSegment) btn.classList.add('played');
+        else btn.classList.remove('played');
+    });
+    segBtns[currentSegment].classList.add('active');
+}
+audio.addEventListener('ended', () => {
+    if (currentSegment < segments.length - 1) nextSegment();
+    else { playBtn.textContent = '▶'; isPlaying = false; }
+});
+audio.addEventListener('timeupdate', () => {
+    if (totalDuration > 0) {
+        const elapsedBefore = segmentDurations.slice(0, currentSegment).reduce((a, b) => a + b, 0);
+        const totalElapsed = elapsedBefore + audio.currentTime;
+        totalProgressBar.style.width = (totalElapsed / totalDuration * 100) + '%';
+        currentTimeEl.textContent = formatTime(totalElapsed);
+    }
+});
+function seekTotal(event) {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const percent = (event.clientX - rect.left) / rect.width;
+    const targetTime = percent * totalDuration;
+    let accumulated = 0;
+    for (let i = 0; i < segments.length; i++) {
+        if (targetTime < accumulated + segmentDurations[i]) {
+            loadSegment(i);
+            audio.currentTime = targetTime - accumulated;
+            if (isPlaying) audio.play();
+            break;
+        }
+        accumulated += segmentDurations[i];
+    }
+}
+function formatTime(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+function showImage(src) {
+    document.getElementById('modalImage').src = src;
+    document.getElementById('imageModal').classList.add('active');
+}
+function closeModal() {
+    document.getElementById('imageModal').classList.remove('active');
+}
+loadSegment(0);
+</script>
+</body>
+</html>

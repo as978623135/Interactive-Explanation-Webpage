@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第22题 人类起源与火的使用 - 互动讲解</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; background: #f5f7fa; color: #333; line-height: 1.8; padding: 20px; max-width: 960px; margin: 0 auto; padding-bottom: 40px; }
+.page-title { background: linear-gradient(135deg, #722ed1 0%, #9254de 100%); color: white; padding: 18px 30px; border-radius: 12px; text-align: center; margin-bottom: 16px; box-shadow: 0 4px 15px rgba(114,46,209,0.3); }
+.page-title h1 { font-size: 20px; margin-bottom: 4px; }
+.page-title .subtitle { font-size: 13px; opacity: 0.9; }
+.card { background: white; border-radius: 12px; padding: 18px 22px; margin-bottom: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+.modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; cursor: pointer; }
+.modal.active { display: flex; }
+.modal img { max-width: 92%; max-height: 92%; border-radius: 8px; }
+.original-question { border-left: 4px solid #722ed1; padding-left: 15px; }
+.original-question h3 { color: #722ed1; font-size: 15px; margin-bottom: 10px; }
+.question-text { font-size: 14px; line-height: 2; }
+.question-text .q-main { font-weight: bold; color: #333; margin-bottom: 8px; }
+.question-text .q-main.sync-highlight { background: #E3F2FD; padding: 2px 4px; border-radius: 4px; }
+.illustration-row { display: flex; flex-wrap: wrap; gap: 15px; margin: 12px 0; justify-content: center; }
+.illustration-item { text-align: center; cursor: pointer; }
+.illustration-item img { width: 140px; height: 100px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd; transition: transform 0.2s; }
+.illustration-item img:hover { transform: scale(1.05); border-color: #722ed1; }
+.illustration-item .illu-label { font-size: 12px; color: #666; margin-top: 4px; font-weight: 500; }
+.material-block { background: #f9f9f9; border-radius: 8px; padding: 12px 15px; margin: 10px 0; border-left: 3px solid #722ed1; }
+.material-block .material-title { font-weight: bold; color: #722ed1; font-size: 13px; margin-bottom: 4px; }
+.material-block .material-content { font-size: 13px; color: #555; line-height: 1.8; }
+.material-block .material-source { font-size: 11px; color: #999; margin-top: 4px; text-align: right; }
+.sub-question { margin-bottom: 16px; padding: 12px 15px; border-radius: 8px; background: #fafafa; transition: all 0.3s; border-left: 3px solid transparent; }
+.sub-question.active { background: #f6ffed; border-left-color: #52c41a; box-shadow: 0 2px 8px rgba(82,196,26,0.15); }
+.sub-question .q-title { font-weight: bold; color: #333; margin-bottom: 6px; font-size: 14px; }
+.sub-question .q-question { color: #555; font-size: 13px; margin-bottom: 6px; }
+.sub-question .q-answer { color: #2D8A1F; font-size: 13px; font-weight: 500; background: rgba(82,196,26,0.08); padding: 8px 12px; border-radius: 6px; margin-top: 6px; }
+.sub-question .q-detail { color: #666; font-size: 12px; margin-top: 6px; line-height: 1.7; }
+.tabs-container { margin-top: 0; }
+.tab-buttons { display: flex; gap: 6px; margin-bottom: 0; flex-wrap: wrap; }
+.tab-btn { padding: 8px 18px; border: 1px solid #ddd; background: #fafafa; border-radius: 8px 8px 0 0; cursor: pointer; font-size: 13px; transition: all 0.3s; font-weight: 500; }
+.tab-btn:hover { background: #f9f0ff; border-color: #722ed1; }
+.tab-btn.active { background: white; border-color: #e8e8e8; border-bottom-color: white; color: #722ed1; font-weight: bold; position: relative; top: 1px; }
+.tab-content { display: none; background: white; border: 1px solid #e8e8e8; border-radius: 0 8px 8px 8px; padding: 20px; min-height: 300px; }
+.tab-content.active { display: block; animation: fadeIn 0.3s; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+.summary-content { line-height: 2; font-size: 14px; }
+.summary-content .tip-box { background: #fffbe6; border-left: 4px solid #faad14; padding: 12px 15px; border-radius: 0 8px 8px 0; margin: 12px 0; }
+.summary-content .rule-box { background: #f9f0ff; border-left: 4px solid #722ed1; padding: 12px 15px; border-radius: 0 8px 8px 0; margin: 12px 0; }
+.summary-content ul { margin-left: 20px; margin-top: 6px; }
+.summary-content li { margin-bottom: 4px; }
+.error-content { line-height: 2; font-size: 14px; }
+.error-item { background: #fff2f0; border-left: 4px solid #f5222d; padding: 12px 15px; border-radius: 0 8px 8px 0; margin-bottom: 12px; }
+.error-item .error-title { color: #f5222d; font-weight: bold; margin-bottom: 4px; }
+.kg-content { line-height: 2; font-size: 14px; }
+.kg-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.kg-tag { padding: 5px 14px; background: #f9f0ff; color: #722ed1; border-radius: 14px; font-size: 12px; font-weight: 500; }
+.kg-group { margin-bottom: 14px; padding: 12px 15px; background: #f9f9f9; border-radius: 8px; }
+.kg-group .group-title { font-weight: bold; color: #722ed1; margin-bottom: 6px; font-size: 14px; }
+.kg-group .group-detail { font-size: 13px; color: #555; line-height: 1.8; }
+.audio-player { position: sticky; bottom: 0; background: white; border-top: 1px solid #e8e8e8; border-radius: 12px 12px 0 0; padding: 12px 20px; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index: 1000; margin-top: 16px; }
+.player-title { font-size: 13px; color: #666; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+.current-segment { color: #722ed1; font-weight: bold; font-size: 13px; }
+.total-progress { width: 100%; height: 6px; background: #e8e8e8; border-radius: 3px; cursor: pointer; margin-bottom: 6px; overflow: hidden; }
+.total-progress-bar { height: 100%; background: linear-gradient(90deg, #722ed1, #9254de); border-radius: 3px; width: 0%; transition: width 0.1s linear; }
+.time-display { font-size: 11px; color: #999; display: flex; justify-content: space-between; margin-bottom: 8px; }
+.controls { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.play-btn { width: 38px; height: 38px; border-radius: 50%; background: #722ed1; color: white; border: none; cursor: pointer; font-size: 15px; display: flex; align-items: center; justify-content: center; transition: all 0.3s; flex-shrink: 0; }
+.play-btn:hover { background: #531dab; transform: scale(1.05); }
+.nav-btn { padding: 5px 12px; border: 1px solid #ddd; background: white; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.3s; }
+.nav-btn:hover { border-color: #722ed1; color: #722ed1; }
+.nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.segment-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg-btn { padding: 4px 12px; border: 1px solid #ddd; background: white; border-radius: 14px; cursor: pointer; font-size: 12px; transition: all 0.3s; }
+.seg-btn:hover { border-color: #722ed1; }
+.seg-btn.active { background: #722ed1; color: white; border-color: #722ed1; }
+.seg-btn.played { background: #f6ffed; border-color: #52c41a; color: #52c41a; }
+</style>
+</head>
+<body>
+<div class="page-title">
+    <h1>第22题 人类起源与火的使用</h1>
+    <div class="subtitle">周末小卷7上历史 · 材料分析题 · 14分</div>
+</div>
+<div class="card original-question">
+    <h3>📋 题目原文</h3>
+    <div class="question-text">
+        <div class="q-main" id="questionText">
+            22.（14分）阅读下列材料，回答问题。
+        </div>
+        <div class="material-block">
+            <div class="material-title">材料一</div>
+            <div class="illustration-row">
+                <div class="illustration-item" onclick="showImage('images/p002_q22_图1.png')">
+                    <img src="images/p002_q22_图1.png" alt="图1 女娲造人">
+                    <div class="illu-label">图1 女娲造人</div>
+                </div>
+                <div class="illustration-item" onclick="showImage('images/p002_q22_图2.png')">
+                    <img src="images/p002_q22_图2.png" alt="图2 人类进化图">
+                    <div class="illu-label">图2 人类进化图</div>
+                </div>
+            </div>
+        </div>
+        <div class="material-block">
+            <div class="material-title">材料二</div>
+            <div class="material-content">上古之世，人民少而禽兽众，人民不胜禽兽虫蛇。</div>
+            <div class="material-source">——《韩非子》</div>
+        </div>
+        <div class="material-block">
+            <div class="material-title">材料三</div>
+            <div class="material-content">1929年，考古学家先发现了被火烧过的鹿角，然后发现洞穴遗址有很厚的灰烬层，灰烬的底层多为黑色物质，据化验是草木炭灰。以上遗物遗迹说明：他们已经能使用并控制火，利用火取暖、烧烤食物、照明并驱赶野兽。</div>
+        </div>
+        <p style="font-size:13px; color:#555; margin-top:10px; margin-bottom:4px;">(1) 图1反映的是什么观点？你如何理解这一观点？（4分）</p>
+        <p style="font-size:13px; color:#555; margin-bottom:4px;">(2) 图2反映了什么观点？（1分）</p>
+        <p style="font-size:13px; color:#555; margin-bottom:4px;">(3) 根据材料二分析，远古人类过着怎样的生活？他们为什么要过这样的生活？（4分）</p>
+        <p style="font-size:13px; color:#555;">(4) 根据材料三，概括火对远古人类的用途。结合所学知识，回答远古人类学会用火的意义。（5分）</p>
+    </div>
+</div>
+<div class="tabs-container">
+    <div class="tab-buttons">
+        <button class="tab-btn active" onclick="switchTab(0)">题目讲解</button>
+        <button class="tab-btn" onclick="switchTab(1)">总结</button>
+        <button class="tab-btn" onclick="switchTab(2)">易错点</button>
+        <button class="tab-btn" onclick="switchTab(3)">知识图谱</button>
+        <button class="tab-btn" onclick="switchTab(4)">原题图片</button>
+    </div>
+    <div class="tab-content active" id="tab0">
+        <h3 style="color:#52c41a; margin-bottom:12px; font-size:15px;">✅ 题目讲解</h3>
+        <div class="sub-question" id="sq1">
+            <div class="q-title">(1) 图1：神创论观点</div>
+            <div class="q-question">图1反映的是什么观点？你如何理解这一观点？</div>
+            <div class="q-answer">答案：神创论观点（女娲造人的神话传说）。理解：这是古代人类对自身起源的探索和想象，不是科学的解释；现代科学证明人类是由古猿进化而来的。</div>
+            <div class="q-detail">
+                ① 女娲造人是中国古代神话传说，反映了远古人类对自身起源的探索和想象。<br>
+                ② 在科学不发达的古代，人们无法解释人类起源，于是创造了神创论神话。<br>
+                ③ 这一观点不是科学解释，现代科学证明人类是由古猿经过漫长进化过程演变而来的。<br>
+                ④ 虽然不是科学解释，但作为神话传说，反映了古代人类对自身起源的思考，具有文化价值。
+            </div>
+        </div>
+        <div class="sub-question" id="sq2">
+            <div class="q-title">(2) 图2：进化论观点</div>
+            <div class="q-question">图2反映了什么观点？</div>
+            <div class="q-answer">答案：进化论观点，人类是由古猿经过漫长的进化过程逐渐演变而来的。</div>
+            <div class="q-detail">
+                图2展示了从古猿→南方古猿→直立人→早期智人→晚期智人→现代人的进化过程。<br>
+                进化论由英国生物学家达尔文提出，著有《物种起源》。<br>
+                现代考古学和人类学的发现（古人类化石、石器工具等）都证明了人类进化理论的科学性。
+            </div>
+        </div>
+        <div class="sub-question" id="sq3">
+            <div class="q-title">(3) 远古人类的群居生活</div>
+            <div class="q-question">根据材料二分析，远古人类过着怎样的生活？他们为什么要过这样的生活？</div>
+            <div class="q-answer">答案：远古人类过着群居生活。原因：上古之世人民少而禽兽众，生产力水平低，工具简陋，单靠个人力量无法生存，必须群居共同对抗猛兽和自然灾害。</div>
+            <div class="q-detail">
+                材料二"上古之世，人民少而禽兽众，人民不胜禽兽虫蛇"说明：<br>
+                ① 远古时代人类数量少，禽兽数量多，人类在与自然斗争中处于弱势。<br>
+                ② 生产力水平极低，使用简单打制石器，单靠个人力量无法战胜猛兽。<br>
+                ③ 只有群居，大家团结起来，共同劳动，共同防御野兽，才能生存下去。
+            </div>
+        </div>
+        <div class="sub-question" id="sq4">
+            <div class="q-title">(4) 火的用途与意义</div>
+            <div class="q-question">根据材料三，概括火对远古人类的用途。结合所学知识，回答远古人类学会用火的意义。</div>
+            <div class="q-answer">答案：用途——取暖、烧烤食物、照明、驱赶野兽。意义——改善了生存条件，增强了适应自然的能力，是人类进化过程中的一大进步；学会用火是人类进化史上的里程碑。</div>
+            <div class="q-detail">
+                <strong>火的用途（4个方面）：</strong><br>
+                ① 取暖：抵御寒冷，尤其是冬季<br>
+                ② 烧烤食物：使食物更容易消化、更有营养、更卫生<br>
+                ③ 照明：在黑暗中提供光亮，延长活动时间<br>
+                ④ 驱赶野兽：吓退凶猛野兽，保护安全<br><br>
+                <strong>学会用火的意义：</strong><br>
+                ① 改善了生存条件，增强了适应自然的能力<br>
+                ② 是人类进化过程中的一大进步<br>
+                ③ 学会用火是人类进化史上的里程碑<br>
+                ④ 吃熟食促进了体质发展和大脑进化<br>
+                ⑤ 扩大了人类活动范围，能在更寒冷地区生存
+            </div>
+        </div>
+    </div>
+    <div class="tab-content" id="tab1">
+        <div class="summary-content">
+            <h3 style="color:#fa8c16; margin-bottom:10px; font-size:15px;">💡 总结</h3>
+            <div class="rule-box">
+                <strong>本题核心：</strong>以三则材料为背景，考查人类起源、远古人类生活及火的使用。
+            </div>
+            <p><strong>四个小问答案要点：</strong></p>
+            <ul>
+                <li><strong>(1) 神创论：</strong>图1女娲造人反映神创论观点，是古代人类对自身起源的探索和想象，不是科学解释，人类实际由古猿进化而来。</li>
+                <li><strong>(2) 进化论：</strong>图2人类进化图反映进化论观点，人类由古猿经过漫长进化过程演变而来。</li>
+                <li><strong>(3) 群居生活：</strong>远古人类过群居生活，原因是人民少而禽兽众，生产力低，单靠个人无法生存，必须群居共同对抗猛兽。</li>
+                <li><strong>(4) 火的使用：</strong>用途是取暖、烧烤食物、照明、驱赶野兽；意义是改善生存条件，增强适应自然能力，是人类进化过程中的一大进步，学会用火是人类进化史上的里程碑。</li>
+            </ul>
+            <div class="tip-box">
+                <strong>对比记忆：</strong>神创论（神话传说，非科学）vs 进化论（科学理论，有考古证据）；北京人（使用天然火）vs 山顶洞人（人工取火）。
+            </div>
+        </div>
+    </div>
+    <div class="tab-content" id="tab2">
+        <div class="error-content">
+            <h3 style="color:#f5222d; margin-bottom:12px; font-size:15px;">⚠️ 易错点提醒</h3>
+            <div class="error-item">
+                <div class="error-title">易错点1：把神创论和进化论混淆</div>
+                <p>神创论认为人类是神创造的（如女娲造人），是神话传说，非科学解释；进化论认为人类由古猿进化而来，是科学理论，有考古证据支持。</p>
+            </div>
+            <div class="error-item">
+                <div class="error-title">易错点2：对女娲造人的理解不全面</div>
+                <p>女娲造人不仅是神话故事，更反映了古代人类对自身起源的探索和思考，要从文化和科学两个角度理解。</p>
+            </div>
+            <div class="error-item">
+                <div class="error-title">易错点3：对群居生活的原因分析不完整</div>
+                <p>群居生活的原因不仅是"人民少而禽兽众"，还包括生产力水平低、工具简陋、单靠个人无法生存等多个方面。</p>
+            </div>
+            <div class="error-item">
+                <div class="error-title">易错点4：对火的用途概括不全面</div>
+                <p>火的用途包括取暖、烧烤食物、照明、驱赶野兽四个方面，不能遗漏。</p>
+            </div>
+            <div class="error-item">
+                <div class="error-title">易错点5：对学会用火的意义理解不深刻</div>
+                <p>学会用火不仅是技术进步，更是人类进化史上的里程碑，促进了体质发展和大脑进化，扩大了人类活动范围。</p>
+            </div>
+            <div class="error-item">
+                <div class="error-title">易错点6：对材料三的考古发现不熟悉</div>
+                <p>材料三提到的是北京人遗址的用火遗迹，北京人已经会使用天然火，会长时间保存火种。</p>
+            </div>
+        </div>
+    </div>
+    <div class="tab-content" id="tab3">
+        <div class="kg-content">
+            <h3 style="color:#722ed1; margin-bottom:12px; font-size:15px;">📚 知识图谱</h3>
+            <div class="kg-tags">
+                <span class="kg-tag">学科：历史</span>
+                <span class="kg-tag">年级：七年级上册</span>
+                <span class="kg-tag">教材：人教版（RJ）</span>
+                <span class="kg-tag">单元：第一单元 史前时期</span>
+                <span class="kg-tag">跨学科：生物（进化论）</span>
+            </div>
+            <div class="kg-group">
+                <div class="group-title">人类起源与远古人类的生活</div>
+                <div class="group-detail">
+                    <strong>1. 神创论</strong>
+                    <ul>
+                        <li>代表神话：女娲造人</li>
+                        <li>观点：人类是神创造的</li>
+                        <li>性质：神话传说，不是科学解释</li>
+                        <li>文化价值：反映了古代人类对自身起源的探索和思考</li>
+                    </ul>
+                    <strong>2. 进化论</strong>
+                    <ul>
+                        <li>提出者：达尔文（英国生物学家）</li>
+                        <li>著作：《物种起源》</li>
+                        <li>观点：人类由古猿经过漫长进化过程逐渐演变而来</li>
+                        <li>证据：古人类化石、石器工具等考古发现</li>
+                        <li>性质：科学理论</li>
+                    </ul>
+                    <strong>3. 人类进化过程</strong>
+                    <ul>
+                        <li>古猿→南方古猿→直立人→早期智人→晚期智人→现代人</li>
+                        <li>北京人属于直立人，山顶洞人属于晚期智人</li>
+                    </ul>
+                    <strong>4. 远古人类的群居生活</strong>
+                    <ul>
+                        <li>生活方式：群居，许多人生活在一起，共同劳动，共同生活</li>
+                        <li>原因：生产力水平低，工具简陋，人民少而禽兽众，单靠个人力量无法生存</li>
+                        <li>意义：提高了生存能力，促进了人类社会的形成和发展</li>
+                    </ul>
+                    <strong>5. 火的使用</strong>
+                    <ul>
+                        <li>用途：取暖、烧烤食物、照明、驱赶野兽</li>
+                        <li>代表人类：北京人会使用天然火，长时间保存火种；山顶洞人会人工取火</li>
+                        <li>意义：改善了生存条件，增强了适应自然的能力，是人类进化过程中的一大进步；学会用火是人类进化史上的里程碑</li>
+                    </ul>
+                    <strong>6. 北京人</strong>
+                    <ul>
+                        <li>发现地点：北京周口店</li>
+                        <li>距今时间：约70万—20万年</li>
+                        <li>生产生活：使用打制石器，使用天然火，长时间保存火种，过群居生活，以采集和狩猎为生</li>
+                    </ul>
+                    <strong>7. 山顶洞人</strong>
+                    <ul>
+                        <li>发现地点：北京周口店龙骨山顶部的洞穴</li>
+                        <li>距今时间：约3万年</li>
+                        <li>生产生活：掌握磨光和钻孔技术，会人工取火，用骨针缝制衣服，懂得爱美，有安葬死者的习俗</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tab-content" id="tab4">
+        <h3 style="color:#faad14; margin-bottom:15px; font-size:15px;">📷 原题图片</h3>
+        <p style="color:#666; font-size:13px; margin-bottom:15px;">点击图片可放大查看</p>
+        <img src="images/p002_q22.png" alt="第22题原题" style="max-width:100%; border-radius:8px; cursor:pointer; border:1px solid #ddd;" onclick="showImage('images/p002_q22.png')">
+    </div>
+</div>
+<div class="modal" id="imageModal" onclick="closeModal()">
+    <img id="modalImage" src="" alt="放大图片">
+</div>
+<audio id="audioPlayer"></audio>
+<div class="audio-player">
+    <div class="player-title">
+        <span>🎧 音频讲解</span>
+        <span class="current-segment" id="currentSeg">引导语</span>
+    </div>
+    <div class="total-progress" id="totalProgress" onclick="seekTotal(event)">
+        <div class="total-progress-bar" id="totalProgressBar"></div>
+    </div>
+    <div class="time-display">
+        <span id="currentTime">00:00</span>
+        <span id="totalTime">00:00</span>
+    </div>
+    <div class="controls">
+        <button class="nav-btn" onclick="prevSegment()" id="prevBtn">⏮ 上一段</button>
+        <button class="play-btn" onclick="togglePlay()" id="playBtn">▶</button>
+        <button class="nav-btn" onclick="nextSegment()" id="nextBtn">下一段 ⏭</button>
+    </div>
+    <div class="segment-buttons" id="segmentButtons">
+        <button class="seg-btn active" onclick="jumpToSegment(0)">引导语</button>
+        <button class="seg-btn" onclick="jumpToSegment(1)">题目朗读</button>
+        <button class="seg-btn" onclick="jumpToSegment(2)">(1)神创论</button>
+        <button class="seg-btn" onclick="jumpToSegment(3)">(2)进化论</button>
+        <button class="seg-btn" onclick="jumpToSegment(4)">(3)群居生活</button>
+        <button class="seg-btn" onclick="jumpToSegment(5)">(4)火的使用</button>
+        <button class="seg-btn" onclick="jumpToSegment(6)">总结</button>
+        <button class="seg-btn" onclick="jumpToSegment(7)">易错点</button>
+        <button class="seg-btn" onclick="jumpToSegment(8)">知识图谱</button>
+    </div>
+</div>
+<script>
+const segments = [
+    {src: 'audio/segment1.mp3', name: '引导语', tab: 0, sq: null},
+    {src: 'audio/segment2.mp3', name: '题目朗读', tab: 0, sq: null},
+    {src: 'audio/segment3.mp3', name: '(1)神创论', tab: 0, sq: 'sq1'},
+    {src: 'audio/segment4.mp3', name: '(2)进化论', tab: 0, sq: 'sq2'},
+    {src: 'audio/segment5.mp3', name: '(3)群居生活', tab: 0, sq: 'sq3'},
+    {src: 'audio/segment6.mp3', name: '(4)火的使用', tab: 0, sq: 'sq4'},
+    {src: 'audio/segment7.mp3', name: '总结', tab: 1, sq: null},
+    {src: 'audio/segment8.mp3', name: '易错点', tab: 2, sq: null},
+    {src: 'audio/segment9.mp3', name: '知识图谱', tab: 3, sq: null}
+];
+let currentSegment = 0;
+let isPlaying = false;
+let segmentDurations = new Array(segments.length).fill(0);
+let totalDuration = 0;
+let loadedCount = 0;
+const audio = document.getElementById('audioPlayer');
+const playBtn = document.getElementById('playBtn');
+const totalProgressBar = document.getElementById('totalProgressBar');
+const currentTimeEl = document.getElementById('currentTime');
+const totalTimeEl = document.getElementById('totalTime');
+const currentSegEl = document.getElementById('currentSeg');
+const segBtns = document.querySelectorAll('.seg-btn');
+const tabBtns = document.querySelectorAll('.tab-btn');
+const tabContents = document.querySelectorAll('.tab-content');
+segments.forEach((seg, index) => {
+    const tempAudio = new Audio(seg.src);
+    tempAudio.addEventListener('loadedmetadata', () => {
+        segmentDurations[index] = tempAudio.duration;
+        loadedCount++;
+        if (loadedCount === segments.length) {
+            totalDuration = segmentDurations.reduce((a, b) => a + b, 0);
+            totalTimeEl.textContent = formatTime(totalDuration);
+        }
+    });
+});
+function switchTab(index) {
+    tabBtns.forEach((btn, i) => btn.classList.toggle('active', i === index));
+    tabContents.forEach((content, i) => content.classList.toggle('active', i === index));
+}
+function clearSqHighlight() {
+    document.querySelectorAll('.sub-question').forEach(sq => sq.classList.remove('active'));
+}
+function highlightSq(sqId) {
+    if (!sqId) return;
+    const el = document.getElementById(sqId);
+    if (el) {
+        el.classList.add('active');
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+}
+function loadSegment(index) {
+    clearSqHighlight();
+    currentSegment = index;
+    audio.src = segments[index].src;
+    currentSegEl.textContent = segments[index].name;
+    updateSegButtons();
+    const tabIndex = segments[index].tab;
+    if (tabIndex >= 0) switchTab(tabIndex);
+    const sqId = segments[index].sq;
+    if (sqId) {
+        setTimeout(() => highlightSq(sqId), 300);
+    }
+}
+function togglePlay() {
+    if (isPlaying) { audio.pause(); playBtn.textContent = '▶'; isPlaying = false; }
+    else { audio.play(); playBtn.textContent = '⏸'; isPlaying = true; }
+}
+function prevSegment() { if (currentSegment > 0) { loadSegment(currentSegment - 1); if (isPlaying) audio.play(); } }
+function nextSegment() {
+    if (currentSegment < segments.length - 1) { loadSegment(currentSegment + 1); if (isPlaying) audio.play(); }
+    else { audio.pause(); playBtn.textContent = '▶'; isPlaying = false; }
+}
+function jumpToSegment(index) { loadSegment(index); if (isPlaying) audio.play(); }
+function updateSegButtons() {
+    segBtns.forEach((btn, index) => {
+        btn.classList.remove('active');
+        if (index < currentSegment) btn.classList.add('played');
+        else btn.classList.remove('played');
+    });
+    segBtns[currentSegment].classList.add('active');
+}
+audio.addEventListener('ended', () => {
+    if (currentSegment < segments.length - 1) nextSegment();
+    else { playBtn.textContent = '▶'; isPlaying = false; }
+});
+audio.addEventListener('timeupdate', () => {
+    if (totalDuration > 0) {
+        const elapsedBefore = segmentDurations.slice(0, currentSegment).reduce((a, b) => a + b, 0);
+        const totalElapsed = elapsedBefore + audio.currentTime;
+        totalProgressBar.style.width = (totalElapsed / totalDuration * 100) + '%';
+        currentTimeEl.textContent = formatTime(totalElapsed);
+    }
+});
+function seekTotal(event) {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const percent = (event.clientX - rect.left) / rect.width;
+    const targetTime = percent * totalDuration;
+    let accumulated = 0;
+    for (let i = 0; i < segments.length; i++) {
+        if (targetTime < accumulated + segmentDurations[i]) {
+            loadSegment(i);
+            audio.currentTime = targetTime - accumulated;
+            if (isPlaying) audio.play();
+            break;
+        }
+        accumulated += segmentDurations[i];
+    }
+}
+function formatTime(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+function showImage(src) {
+    document.getElementById('modalImage').src = src;
+    document.getElementById('imageModal').classList.add('active');
+}
+function closeModal() {
+    document.getElementById('imageModal').classList.remove('active');
+}
+loadSegment(0);
+</script>
+</body>
+</html>
