@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第1页第1题 - 用有序数对确定位置 | 黄冈课课练 六上数学</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+            background: #f0f2f5;
+            color: #333;
+            padding-bottom: 120px;
+        }
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        /* 页面标题 */
+        .page-title {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 24px 30px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+            text-align: center;
+        }
+        .page-title h1 {
+            font-size: 26px;
+            margin-bottom: 8px;
+        }
+        .page-title .subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        /* 题目原文卡片 */
+        .question-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            position: relative;
+        }
+        .question-card .card-label {
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        .question-text {
+            font-size: 18px;
+            line-height: 2;
+            margin-top: 10px;
+        }
+        .question-text .highlight {
+            background: #E3F2FD;
+            padding: 2px 4px;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        .blank {
+            display: inline-block;
+            min-width: 60px;
+            border-bottom: 2px solid #999;
+            text-align: center;
+            margin: 0 4px;
+            padding: 0 8px;
+            font-weight: bold;
+            color: #667eea;
+            transition: all 0.3s;
+        }
+        .blank.active {
+            background: #FFF3E0;
+            border-bottom-color: #FF9800;
+            transform: scale(1.1);
+        }
+        .blank.filled {
+            border-bottom-color: #4CAF50;
+            color: #4CAF50;
+        }
+        /* 选项卡导航 */
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 12px 12px 0 0;
+            overflow: hidden;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
+        }
+        .tab {
+            flex: 1;
+            padding: 14px 10px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            background: #fafafa;
+        }
+        .tab:hover {
+            background: #f0f0f0;
+        }
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            background: white;
+            font-weight: bold;
+        }
+        /* 选项卡内容 */
+        .tab-content {
+            background: white;
+            border-radius: 0 0 12px 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            min-height: 300px;
+        }
+        .tab-pane {
+            display: none;
+        }
+        .tab-pane.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .tab-pane h3 {
+            color: #667eea;
+            margin-bottom: 16px;
+            font-size: 18px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e8ecf1;
+        }
+        .tab-pane p {
+            line-height: 1.8;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+        .tab-pane .step {
+            background: #f8f9fa;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+        .tab-pane .warning {
+            background: #FFF3E0;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #FF9800;
+        }
+        .knowledge-tree {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 8px;
+        }
+        .knowledge-tree .node {
+            padding: 6px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        .knowledge-tree .node::before {
+            content: "├─";
+            position: absolute;
+            left: 0;
+            color: #999;
+        }
+        .knowledge-tree .node.root {
+            font-weight: bold;
+            color: #667eea;
+            padding-left: 0;
+        }
+        .knowledge-tree .node.root::before {
+            content: "";
+        }
+        /* 原题图片 */
+        .original-image {
+            text-align: center;
+        }
+        .original-image img {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+        }
+        /* sticky播放器 */
+        .player {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 960px;
+            background: white;
+            border-radius: 16px 16px 0 0;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+            padding: 16px 24px;
+            z-index: 1000;
+        }
+        .player .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .player .current-segment {
+            font-size: 14px;
+            color: #667eea;
+            font-weight: bold;
+        }
+        .player .time-display {
+            font-size: 13px;
+            color: #999;
+        }
+        .player .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e8ecf1;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-bottom: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+        .player .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.1s;
+        }
+        .player .controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .player .play-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+        .player .play-btn:hover {
+            transform: scale(1.1);
+        }
+        .player .segment-buttons {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            flex: 1;
+        }
+        .player .seg-btn {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            color: #666;
+            transition: all 0.2s;
+        }
+        .player .seg-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+        .player .seg-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        .player .seg-btn.completed {
+            background: #E8F5E9;
+            color: #4CAF50;
+            border-color: #4CAF50;
+        }
+        /* 模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 8px;
+        }
+        .modal .close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 40px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 页面标题 -->
+        <div class="page-title">
+            <h1>📐 用有序数对确定位置</h1>
+            <div class="subtitle">黄冈课课练 · 六年级上册数学 · 第一单元 · 第1页第1题</div>
+        </div>
+
+        <!-- 题目原文卡片 -->
+        <div class="question-card">
+            <div class="card-label">题目原文</div>
+            <div class="question-text" id="questionText">
+                电影院里，荣荣坐在第4列第7行，可以表示为(4,7)，柳明坐在第5列第11行，可以表示为(<span class="blank" id="blank1">?</span>,<span class="blank" id="blank1b">?</span>)，晓东坐在第2列第5行，可以表示为(<span class="blank" id="blank2">?</span>,<span class="blank" id="blank2b">?</span>)。
+            </div>
+        </div>
+
+        <!-- 选项卡导航 -->
+        <div class="tabs">
+            <div class="tab active" data-tab="0">📝 题目讲解</div>
+            <div class="tab" data-tab="1">💡 总结</div>
+            <div class="tab" data-tab="2">⚠️ 易错点</div>
+            <div class="tab" data-tab="3">🌳 知识图谱</div>
+            <div class="tab" data-tab="4">🖼️ 原题图片</div>
+        </div>
+
+        <!-- 选项卡内容 -->
+        <div class="tab-content">
+            <!-- 题目讲解 -->
+            <div class="tab-pane active" id="tab0">
+                <h3>📝 题目讲解</h3>
+                <div class="step">
+                    <strong>第1空（柳明的位置）：</strong><br>
+                    柳明坐在第5列第11行。根据例子(4,7)，第一个数表示列数，第二个数表示行数。所以柳明的位置表示为 <strong style="color:#4CAF50">(5,11)</strong>。
+                </div>
+                <div class="step">
+                    <strong>第2空（晓东的位置）：</strong><br>
+                    晓东坐在第2列第5行。按照先列后行的规则，第一个数是2（列数），第二个数是5（行数）。所以晓东的位置表示为 <strong style="color:#4CAF50">(2,5)</strong>。
+                </div>
+            </div>
+
+            <!-- 总结 -->
+            <div class="tab-pane" id="tab1">
+                <h3>💡 解题总结</h3>
+                <p><strong>用有序数对确定位置的方法：</strong></p>
+                <div class="step">
+                    <strong>1. 先列后行：</strong>有序数对的第一个数表示列数，第二个数表示行数。
+                </div>
+                <div class="step">
+                    <strong>2. 书写格式：</strong>列数和行数之间用逗号隔开，外面加上小括号，如(5,11)。
+                </div>
+                <div class="step">
+                    <strong>3. 有序性：</strong>数对是有序的，(4,7)和(7,4)表示不同的位置，不能随意交换顺序。
+                </div>
+            </div>
+
+            <!-- 易错点 -->
+            <div class="tab-pane" id="tab2">
+                <h3>⚠️ 易错点提醒</h3>
+                <div class="warning">
+                    <strong>易错点1：行列顺序搞反</strong><br>
+                    有的同学会把行数写在前面，列数写在后面。一定要记住<strong>先列后行</strong>，第一个数是列，第二个数是行。
+                </div>
+                <div class="warning">
+                    <strong>易错点2：忘记加括号或逗号</strong><br>
+                    有序数对的标准格式是小括号括起来，中间用逗号隔开。如果只写"5 11"或者"5、11"都是不规范的。
+                </div>
+            </div>
+
+            <!-- 知识图谱 -->
+            <div class="tab-pane" id="tab3">
+                <h3>🌳 知识图谱</h3>
+                <div class="knowledge-tree">
+                    <div class="node root">📚 数学 · 六年级上册 · 人教版</div>
+                    <div class="node">📖 第一单元：确定位置</div>
+                    <div class="node">📝 知识点：用有序数对确定位置</div>
+                    <div class="node">✅ 要点1：有序数对的概念（两个数表示一个位置）</div>
+                    <div class="node">✅ 要点2：书写格式（先列后行，小括号加逗号）</div>
+                    <div class="node">✅ 要点3：实际应用（电影院、教室、地图等场景）</div>
+                    <div class="node">🔗 后续知识：平面直角坐标系（七年级）</div>
+                </div>
+            </div>
+
+            <!-- 原题图片 -->
+            <div class="tab-pane" id="tab4">
+                <h3>🖼️ 原题图片</h3>
+                <div class="original-image">
+                    <img src="images/p001_q01.png" alt="原题图片" onclick="showModal(this.src, '原题图片')">
+                    <p style="margin-top:10px;color:#999;font-size:14px;">点击图片可放大查看</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- sticky播放器 -->
+    <div class="player">
+        <div class="player-header">
+            <div class="current-segment" id="currentSegment">引导语</div>
+            <div class="time-display"><span id="currentTime">0:00</span> / <span id="totalTime">0:00</span></div>
+        </div>
+        <div class="progress-bar" id="progressBar" onclick="seekProgress(event)">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="controls">
+            <button class="play-btn" id="playBtn" onclick="togglePlay()">▶</button>
+            <div class="segment-buttons" id="segmentButtons"></div>
+        </div>
+    </div>
+
+    <!-- 模态框 -->
+    <div class="modal" id="imageModal" onclick="closeModal()">
+        <span class="close">&times;</span>
+        <img id="modalImage" src="" alt="">
+    </div>
+
+    <audio id="audioPlayer" preload="auto"></audio>
+
+    <script>
+        // 音频片段配置
+        const segments = [
+            { id: 1, name: '引导语', src: 'audio/segment1.mp3', tab: -1, highlight: null },
+            { id: 2, name: '题目朗读', src: 'audio/segment2.mp3', tab: 0, highlight: 'question' },
+            { id: 3, name: '第1空讲解', src: 'audio/segment3.mp3', tab: 0, highlight: 'blank1' },
+            { id: 4, name: '第2空讲解', src: 'audio/segment4.mp3', tab: 0, highlight: 'blank2' },
+            { id: 5, name: '总结', src: 'audio/segment5.mp3', tab: 1, highlight: null },
+            { id: 6, name: '易错点', src: 'audio/segment6.mp3', tab: 2, highlight: null },
+            { id: 7, name: '知识图谱', src: 'audio/segment7.mp3', tab: 3, highlight: null }
+        ];
+
+        let currentSegmentIndex = 0;
+        let isPlaying = false;
+        let totalDuration = 0;
+        let segmentDurations = new Array(segments.length).fill(0);
+        let completedSegments = new Set();
+
+        const audioPlayer = document.getElementById('audioPlayer');
+        const playBtn = document.getElementById('playBtn');
+        const progressFill = document.getElementById('progressFill');
+        const progressBar = document.getElementById('progressBar');
+        const currentTimeEl = document.getElementById('currentTime');
+        const totalTimeEl = document.getElementById('totalTime');
+        const currentSegmentEl = document.getElementById('currentSegment');
+        const segmentButtonsContainer = document.getElementById('segmentButtons');
+
+        // 初始化分段按钮
+        function initSegmentButtons() {
+            segmentButtonsContainer.innerHTML = '';
+            segments.forEach((seg, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'seg-btn';
+                btn.textContent = seg.name;
+                btn.onclick = () => jumpToSegment(index);
+                segmentButtonsContainer.appendChild(btn);
+            });
+        }
+
+        // 预加载所有音频获取时长
+        function preloadDurations() {
+            segments.forEach((seg, index) => {
+                const audio = new Audio(seg.src);
+                audio.addEventListener('loadedmetadata', () => {
+                    segmentDurations[index] = audio.duration;
+                    updateTotalDuration();
+                });
+            });
+        }
+
+        // 更新总时长
+        function updateTotalDuration() {
+            totalDuration = segmentDurations.reduce((a, b) => a + b, 0);
+            totalTimeEl.textContent = formatTime(totalDuration);
+        }
+
+        // 格式化时间
+        function formatTime(seconds) {
+            if (isNaN(seconds) || seconds === 0) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // 计算当前总进度时间
+        function getCurrentTotalTime() {
+            let time = 0;
+            for (let i = 0; i < currentSegmentIndex; i++) {
+                time += segmentDurations[i] || 0;
+            }
+            time += audioPlayer.currentTime || 0;
+            return time;
+        }
+
+        // 切换播放/暂停
+        function togglePlay() {
+            if (isPlaying) {
+                audioPlayer.pause();
+                playBtn.textContent = '▶';
+                isPlaying = false;
+            } else {
+                if (audioPlayer.src === '') {
+                    loadSegment(0);
+                }
+                audioPlayer.play();
+                playBtn.textContent = '⏸';
+                isPlaying = true;
+            }
+        }
+
+        // 加载指定片段
+        function loadSegment(index) {
+            if (index < 0 || index >= segments.length) return;
+            
+            currentSegmentIndex = index;
+            const seg = segments[index];
+            
+            audioPlayer.src = seg.src;
+            currentSegmentEl.textContent = seg.name;
+            
+            // 更新分段按钮状态
+            document.querySelectorAll('.seg-btn').forEach((btn, i) => {
+                btn.classList.remove('active');
+                if (completedSegments.has(i)) {
+                    btn.classList.add('completed');
+                }
+                if (i === index) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // 切换选项卡
+            if (seg.tab >= 0) {
+                switchTab(seg.tab);
+            }
+            
+            // 高亮
+            applyHighlight(seg.highlight);
+        }
+
+        // 跳转到指定片段
+        function jumpToSegment(index) {
+            loadSegment(index);
+            if (isPlaying) {
+                audioPlayer.play();
+            }
+        }
+
+        // 应用高亮
+        function applyHighlight(type) {
+            // 清除所有高亮
+            document.querySelectorAll('.blank').forEach(b => b.classList.remove('active'));
+            document.getElementById('questionText').classList.remove('highlight');
+            
+            if (type === 'question') {
+                document.getElementById('questionText').classList.add('highlight');
+            } else if (type === 'blank1') {
+                document.getElementById('blank1').classList.add('active');
+                document.getElementById('blank1b').classList.add('active');
+                // 显示答案
+                setTimeout(() => {
+                    document.getElementById('blank1').textContent = '5';
+                    document.getElementById('blank1b').textContent = '11';
+                    document.getElementById('blank1').classList.add('filled');
+                    document.getElementById('blank1b').classList.add('filled');
+                }, 2000);
+            } else if (type === 'blank2') {
+                document.getElementById('blank2').classList.add('active');
+                document.getElementById('blank2b').classList.add('active');
+                // 显示答案
+                setTimeout(() => {
+                    document.getElementById('blank2').textContent = '2';
+                    document.getElementById('blank2b').textContent = '5';
+                    document.getElementById('blank2').classList.add('filled');
+                    document.getElementById('blank2b').classList.add('filled');
+                }, 2000);
+            }
+        }
+
+        // 切换选项卡
+        function switchTab(index) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+            document.querySelector(`.tab[data-tab="${index}"]`).classList.add('active');
+            document.getElementById(`tab${index}`).classList.add('active');
+        }
+
+        // 选项卡点击
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const index = parseInt(tab.dataset.tab);
+                switchTab(index);
+            });
+        });
+
+        // 进度条点击
+        function seekProgress(event) {
+            const rect = progressBar.getBoundingClientRect();
+            const percent = (event.clientX - rect.left) / rect.width;
+            const targetTotalTime = percent * totalDuration;
+            
+            // 找到对应的片段
+            let accumulated = 0;
+            for (let i = 0; i < segments.length; i++) {
+                if (accumulated + (segmentDurations[i] || 0) >= targetTotalTime) {
+                    loadSegment(i);
+                    audioPlayer.currentTime = targetTotalTime - accumulated;
+                    if (isPlaying) audioPlayer.play();
+                    return;
+                }
+                accumulated += segmentDurations[i] || 0;
+            }
+        }
+
+        // 音频时间更新
+        audioPlayer.addEventListener('timeupdate', () => {
+            const currentTotal = getCurrentTotalTime();
+            const percent = (currentTotal / totalDuration) * 100;
+            progressFill.style.width = percent + '%';
+            currentTimeEl.textContent = formatTime(currentTotal);
+        });
+
+        // 音频结束
+        audioPlayer.addEventListener('ended', () => {
+            completedSegments.add(currentSegmentIndex);
+            
+            if (currentSegmentIndex < segments.length - 1) {
+                loadSegment(currentSegmentIndex + 1);
+                audioPlayer.play();
+            } else {
+                // 全部播放完成
+                isPlaying = false;
+                playBtn.textContent = '▶';
+                currentSegmentEl.textContent = '播放完成';
+            }
+        });
+
+        // 模态框
+        function showModal(src, caption) {
+            document.getElementById('modalImage').src = src;
+            document.getElementById('imageModal').classList.add('active');
+        }
+        function closeModal() {
+            document.getElementById('imageModal').classList.remove('active');
+        }
+
+        // 初始化
+        initSegmentButtons();
+        preloadDurations();
+        loadSegment(0);
+    </script>
+</body>
+</html>

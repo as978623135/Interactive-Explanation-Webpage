@@ -1,0 +1,574 @@
+{
+  "project_name": "黄冈课课练 六上数学 第1-7页",
+  "subject": "数学",
+  "grade": "六年级上册",
+  "version": "人教版",
+  "total_questions": 28,
+  "completed": 0,
+  "failed": 0,
+  "skipped": 0,
+  "voice_speaker_id": "zh_male_cixingjieshuonan_uranus_bigtts",
+  "voice_speaker_name": "磁性解说男声 2.0",
+  "questions": [
+    {
+      "id": "p001_q01",
+      "page": 1,
+      "q_num": 1,
+      "source_image": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p001_q01.png",
+      "source_filename": "p001_q01.png",
+      "output_dir": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\互动课程\\p001_q01",
+      "status": "pending",
+      "retry_count": 0,
+      "error": null,
+      "illustrations": []
+    },
+    {
+      "id": "p001_q02",
+      "page": 1,
+      "q_num": 2,
+      "source_image": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p001_q02.png",
+      "source_filename": "p001_q02.png",
+      "output_dir": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\互动课程\\p001_q02",
+      "status": "pending",
+      "retry_count": 0,
+      "error": null,
+      "illustrations": [
+        {
+          "filename": "p001_q02_图1.png",
+          "path": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p001_q02_图1.png",
+          "img_num": 1
+        }
+      ]
+    },
+    {
+      "id": "p001_q03",
+      "page": 1,
+      "q_num": 3,
+      "source_image": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p001_q03.png",
+      "source_filename": "p001_q03.png",
+      "output_dir": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\互动课程\\p001_q03",
+      "status": "pending",
+      "retry_count": 0,
+      "error": null,
+      "illustrations": [
+        {
+          "filename": "p001_q03_图1.png",
+          "path": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p001_q03_图1.png",
+          "img_num": 1
+        }
+      ]
+    },
+    {
+      "id": "p001_q04",
+      "page": 1,
+      "q_num": 4,
+      "source_image": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p001_q04.png",
+      "source_filename": "p001_q04.png",
+      "output_dir": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\互动课程\\p001_q04",
+      "status": "pending",
+      "retry_count": 0,
+      "error": null,
+      "illustrations": [
+        {
+          "filename": "p001_q04_图1.png",
+          "path": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p001_q04_图1.png",
+          "img_num": 1
+        }
+      ]
+    },
+    {
+      "id": "p002_q01",
+      "page": 2,
+      "q_num": 1,
+      "source_image": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p002_q01.png",
+      "source_filename": "p002_q01.png",
+      "output_dir": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\互动课程\\p002_q01",
+      "status": "pending",
+      "retry_count": 0,
+      "error": null,
+      "illustrations": [
+        {
+          "filename": "p002_q01_图1.png",
+          "path": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p002_q01_图1.png",
+          "img_num": 1
+        },
+        {
+          "filename": "p002_q01_图2.png",
+          "path": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p002_q01_图2.png",
+          "img_num": 2
+        }
+      ]
+    },
+    {
+      "id": "p002_q02",
+      "page": 2,
+      "q_num": 2,
+      "source_image": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p002_q02.png",
+      "source_filename": "p002_q02.png",
+      "output_dir": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\互动课程\\p002_q02",
+      "status": "pending",
+      "retry_count": 0,
+      "error": null,
+      "illustrations": []
+    },
+    {
+      "id": "p002_q03",
+      "page": 2,
+      "q_num": 3,
+      "source_image": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p002_q03.png",
+      "source_filename": "p002_q03.png",
+      "output_dir": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\互动课程\\p002_q03",
+      "status": "pending",
+      "retry_count": 0,
+      "error": null,
+      "illustrations": [
+        {
+          "filename": "p002_q03_图1.png",
+          "path": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p002_q03_图1.png",
+          "img_num": 1
+        },
+        {
+          "filename": "p002_q03_图2.png",
+          "path": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p002_q03_图2.png",
+          "img_num": 2
+        }
+      ]
+    },
+    {
+      "id": "p002_q04",
+      "page": 2,
+      "q_num": 4,
+      "source_image": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p002_q04.png",
+      "source_filename": "p002_q04.png",
+      "output_dir": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\互动课程\\p002_q04",
+      "status": "pending",
+      "retry_count": 0,
+      "error": null,
+      "illustrations": [
+        {
+          "filename": "p002_q04_图1.png",
+          "path": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p002_q04_图1.png",
+          "img_num": 1
+        }
+      ]
+    },
+    {
+      "id": "p003_q01",
+      "page": 3,
+      "q_num": 1,
+      "source_image": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p003_q01.png",
+      "source_filename": "p003_q01.png",
+      "output_dir": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\互动课程\\p003_q01",
+      "status": "pending",
+      "retry_count": 0,
+      "error": null,
+      "illustrations": []
+    },
+    {
+      "id": "p003_q02",
+      "page": 3,
+      "q_num": 2,
+      "source_image": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p003_q02.png",
+      "source_filename": "p003_q02.png",
+      "output_dir": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\互动课程\\p003_q02",
+      "status": "pending",
+      "retry_count": 0,
+      "error": null,
+      "illustrations": [
+        {
+          "filename": "p003_q02_图1.png",
+          "path": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p003_q02_图1.png",
+          "img_num": 1
+        }
+      ]
+    },
+    {
+      "id": "p003_q03",
+      "page": 3,
+      "q_num": 3,
+      "source_image": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p003_q03.png",
+      "source_filename": "p003_q03.png",
+      "output_dir": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\互动课程\\p003_q03",
+      "status": "pending",
+      "retry_count": 0,
+      "error": null,
+      "illustrations": [
+        {
+          "filename": "p003_q03_图1.png",
+          "path": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p003_q03_图1.png",
+          "img_num": 1
+        },
+        {
+          "filename": "p003_q03_图2.png",
+          "path": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p003_q03_图2.png",
+          "img_num": 2
+        }
+      ]
+    },
+    {
+      "id": "p003_q04",
+      "page": 3,
+      "q_num": 4,
+      "source_image": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p003_q04.png",
+      "source_filename": "p003_q04.png",
+      "output_dir": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\互动课程\\p003_q04",
+      "status": "pending",
+      "retry_count": 0,
+      "error": null,
+      "illustrations": []
+    },
+    {
+      "id": "p003_q05",
+      "page": 3,
+      "q_num": 5,
+      "source_image": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p003_q05.png",
+      "source_filename": "p003_q05.png",
+      "output_dir": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\互动课程\\p003_q05",
+      "status": "pending",
+      "retry_count": 0,
+      "error": null,
+      "illustrations": [
+        {
+          "filename": "p003_q05_图1.png",
+          "path": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p003_q05_图1.png",
+          "img_num": 1
+        }
+      ]
+    },
+    {
+      "id": "p004_q01",
+      "page": 4,
+      "q_num": 1,
+      "source_image": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p004_q01.png",
+      "source_filename": "p004_q01.png",
+      "output_dir": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\互动课程\\p004_q01",
+      "status": "pending",
+      "retry_count": 0,
+      "error": null,
+      "illustrations": [
+        {
+          "filename": "p004_q01_图1.png",
+          "path": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p004_q01_图1.png",
+          "img_num": 1
+        }
+      ]
+    },
+    {
+      "id": "p004_q02",
+      "page": 4,
+      "q_num": 2,
+      "source_image": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p004_q02.png",
+      "source_filename": "p004_q02.png",
+      "output_dir": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\互动课程\\p004_q02",
+      "status": "pending",
+      "retry_count": 0,
+      "error": null,
+      "illustrations": [
+        {
+          "filename": "p004_q02_图1.png",
+          "path": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p004_q02_图1.png",
+          "img_num": 1
+        },
+        {
+          "filename": "p004_q02_图2.png",
+          "path": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p004_q02_图2.png",
+          "img_num": 2
+        }
+      ]
+    },
+    {
+      "id": "p004_q03",
+      "page": 4,
+      "q_num": 3,
+      "source_image": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p004_q03.png",
+      "source_filename": "p004_q03.png",
+      "output_dir": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\互动课程\\p004_q03",
+      "status": "pending",
+      "retry_count": 0,
+      "error": null,
+      "illustrations": []
+    },
+    {
+      "id": "p004_q04",
+      "page": 4,
+      "q_num": 4,
+      "source_image": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p004_q04.png",
+      "source_filename": "p004_q04.png",
+      "output_dir": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\互动课程\\p004_q04",
+      "status": "pending",
+      "retry_count": 0,
+      "error": null,
+      "illustrations": [
+        {
+          "filename": "p004_q04_图1.png",
+          "path": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p004_q04_图1.png",
+          "img_num": 1
+        }
+      ]
+    },
+    {
+      "id": "p005_q01",
+      "page": 5,
+      "q_num": 1,
+      "source_image": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p005_q01.png",
+      "source_filename": "p005_q01.png",
+      "output_dir": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\互动课程\\p005_q01",
+      "status": "pending",
+      "retry_count": 0,
+      "error": null,
+      "illustrations": [
+        {
+          "filename": "p005_q01_图1.png",
+          "path": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p005_q01_图1.png",
+          "img_num": 1
+        },
+        {
+          "filename": "p005_q01_图2.png",
+          "path": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p005_q01_图2.png",
+          "img_num": 2
+        }
+      ]
+    },
+    {
+      "id": "p005_q02",
+      "page": 5,
+      "q_num": 2,
+      "source_image": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p005_q02.png",
+      "source_filename": "p005_q02.png",
+      "output_dir": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\互动课程\\p005_q02",
+      "status": "pending",
+      "retry_count": 0,
+      "error": null,
+      "illustrations": [
+        {
+          "filename": "p005_q02_图1.png",
+          "path": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p005_q02_图1.png",
+          "img_num": 1
+        }
+      ]
+    },
+    {
+      "id": "p005_q03",
+      "page": 5,
+      "q_num": 3,
+      "source_image": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p005_q03.png",
+      "source_filename": "p005_q03.png",
+      "output_dir": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\互动课程\\p005_q03",
+      "status": "pending",
+      "retry_count": 0,
+      "error": null,
+      "illustrations": [
+        {
+          "filename": "p005_q03_图1.png",
+          "path": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p005_q03_图1.png",
+          "img_num": 1
+        }
+      ]
+    },
+    {
+      "id": "p005_q04",
+      "page": 5,
+      "q_num": 4,
+      "source_image": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p005_q04.png",
+      "source_filename": "p005_q04.png",
+      "output_dir": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\互动课程\\p005_q04",
+      "status": "pending",
+      "retry_count": 0,
+      "error": null,
+      "illustrations": []
+    },
+    {
+      "id": "p006_q01",
+      "page": 6,
+      "q_num": 1,
+      "source_image": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p006_q01.png",
+      "source_filename": "p006_q01.png",
+      "output_dir": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\互动课程\\p006_q01",
+      "status": "pending",
+      "retry_count": 0,
+      "error": null,
+      "illustrations": [
+        {
+          "filename": "p006_q01_图1.png",
+          "path": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p006_q01_图1.png",
+          "img_num": 1
+        }
+      ]
+    },
+    {
+      "id": "p006_q02",
+      "page": 6,
+      "q_num": 2,
+      "source_image": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p006_q02.png",
+      "source_filename": "p006_q02.png",
+      "output_dir": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\互动课程\\p006_q02",
+      "status": "pending",
+      "retry_count": 0,
+      "error": null,
+      "illustrations": [
+        {
+          "filename": "p006_q02_图1.png",
+          "path": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p006_q02_图1.png",
+          "img_num": 1
+        },
+        {
+          "filename": "p006_q02_图2.png",
+          "path": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p006_q02_图2.png",
+          "img_num": 2
+        }
+      ]
+    },
+    {
+      "id": "p006_q03",
+      "page": 6,
+      "q_num": 3,
+      "source_image": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p006_q03.png",
+      "source_filename": "p006_q03.png",
+      "output_dir": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\互动课程\\p006_q03",
+      "status": "pending",
+      "retry_count": 0,
+      "error": null,
+      "illustrations": []
+    },
+    {
+      "id": "p006_q04",
+      "page": 6,
+      "q_num": 4,
+      "source_image": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p006_q04.png",
+      "source_filename": "p006_q04.png",
+      "output_dir": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\互动课程\\p006_q04",
+      "status": "pending",
+      "retry_count": 0,
+      "error": null,
+      "illustrations": [
+        {
+          "filename": "p006_q04_图1.png",
+          "path": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p006_q04_图1.png",
+          "img_num": 1
+        }
+      ]
+    },
+    {
+      "id": "p007_q01",
+      "page": 7,
+      "q_num": 1,
+      "source_image": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p007_q01.png",
+      "source_filename": "p007_q01.png",
+      "output_dir": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\互动课程\\p007_q01",
+      "status": "pending",
+      "retry_count": 0,
+      "error": null,
+      "illustrations": []
+    },
+    {
+      "id": "p007_q02",
+      "page": 7,
+      "q_num": 2,
+      "source_image": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p007_q02.png",
+      "source_filename": "p007_q02.png",
+      "output_dir": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\互动课程\\p007_q02",
+      "status": "pending",
+      "retry_count": 0,
+      "error": null,
+      "illustrations": [
+        {
+          "filename": "p007_q02_图1.png",
+          "path": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p007_q02_图1.png",
+          "img_num": 1
+        }
+      ]
+    },
+    {
+      "id": "p007_q03",
+      "page": 7,
+      "q_num": 3,
+      "source_image": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p007_q03.png",
+      "source_filename": "p007_q03.png",
+      "output_dir": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\互动课程\\p007_q03",
+      "status": "pending",
+      "retry_count": 0,
+      "error": null,
+      "illustrations": [
+        {
+          "filename": "p007_q03_图1.png",
+          "path": "D:\\Interactive course webpage\\黄冈课课练_六上数学_第1-7页_互动课程\\题目图片\\p007_q03_图1.png",
+          "img_num": 1
+        }
+      ]
+    }
+  ],
+  "catalog": {
+    "book_name": "黄冈课课练",
+    "book_type": "教辅",
+    "subject": "数学",
+    "grade": "六年级上册",
+    "version": "人教版",
+    "publisher": "荣恒教育",
+    "year": "2026",
+    "season": "秋",
+    "page_range": {
+      "start": 1,
+      "end": 7,
+      "note": "本次仅包含第1-7页内容（第一单元 确定位置）"
+    },
+    "structure": [
+      {
+        "level": "单元",
+        "name": "第一单元 确定位置",
+        "start_page": 1,
+        "end_page": 7,
+        "children": [
+          {
+            "level": "课时",
+            "name": "第1课时 用有序数对确定位置(1)",
+            "start_page": 1,
+            "end_page": 1,
+            "children": []
+          },
+          {
+            "level": "课时",
+            "name": "第2课时 用有序数对确定位置(2)",
+            "start_page": 2,
+            "end_page": 2,
+            "children": []
+          },
+          {
+            "level": "课时",
+            "name": "第3课时 用方向和距离确定位置(1)",
+            "start_page": 3,
+            "end_page": 3,
+            "children": []
+          },
+          {
+            "level": "课时",
+            "name": "第4课时 用方向和距离确定位置(2)",
+            "start_page": 4,
+            "end_page": 4,
+            "children": []
+          },
+          {
+            "level": "课时",
+            "name": "第5课时 描述简单的路线图",
+            "start_page": 5,
+            "end_page": 5,
+            "children": []
+          },
+          {
+            "level": "课时",
+            "name": "第6课时 整理和复习",
+            "start_page": 6,
+            "end_page": 6,
+            "children": []
+          },
+          {
+            "level": "课时",
+            "name": "单元总结",
+            "start_page": 7,
+            "end_page": 7,
+            "children": []
+          }
+        ]
+      }
+    ]
+  }
+}
