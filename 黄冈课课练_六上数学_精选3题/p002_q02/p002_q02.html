@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>有序数对的实际应用 - 黄冈课课练六年级上册数学</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: #f5f7fa; color: #333; line-height: 1.6; padding-bottom: 100px; }
+        .container { max-width: 900px; margin: 0 auto; padding: 10px; }
+        .page-title { text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); font-size: 1.1em; font-weight: 500; }
+        .section-header { display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: -5px; position: relative; z-index: 10; user-select: none; margin-left: 0; padding-left: 0; }
+        .section-title { display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 6px 16px; border-radius: 6px; font-size: 0.9em; font-weight: 600; margin-left: 0; transition: all 0.3s; }
+        .collapse-btn { background: #f44336; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.8em; cursor: pointer; transition: background 0.3s; }
+        .collapse-btn:hover { background: #d32f2f; }
+        .section-header.collapsed .section-title { opacity: 0.6; background: #ccc; }
+        .section-header.collapsed .collapse-btn { background: #ff9800; }
+        .card-collapsible { background: white; border-radius: 12px; padding: 10px; margin-bottom: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); overflow: hidden; transition: max-height 0.4s ease, padding 0.3s ease, opacity 0.3s ease, margin-bottom 0.3s ease; max-height: 5000px; opacity: 1; }
+        .card-collapsible.collapsed { max-height: 0; padding-top: 0; padding-bottom: 0; margin-bottom: 0; opacity: 0.5; }
+        .tab-buttons { display: flex; gap: 5px; margin-bottom: 10px; border-bottom: 2px solid #f0f0f0; padding-bottom: 0; flex-wrap: wrap; }
+        .tab-btn { padding: 8px 16px; border: none; background: transparent; cursor: pointer; font-size: 0.9em; color: #666; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
+        .tab-btn:hover { color: #667eea; }
+        .tab-btn.active { color: #667eea; border-bottom-color: #667eea; font-weight: bold; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .question-text { font-size: 1.05em; line-height: 1.9; margin-bottom: 10px; }
+        .question-text .stem-highlight { background: #bbdefb; padding: 2px 4px; border-radius: 3px; transition: background 0.3s; }
+        .answer-bracket { display: inline-block; min-width: 30px; text-align: center; font-weight: bold; color: #4caf50; }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .option-item { padding: 10px 15px; border: 2px solid #e0e0e0; border-radius: 10px; background: white; transition: all 0.3s; font-size: 0.95em; }
+        .option-item.correct { background: #e8f5e9; border-color: #4caf50; color: #2e7d32; }
+        .option-item.wrong { background: #ffebee; border-color: #f44336; color: #c62828; }
+        .option-item:hover { border-color: #667eea; cursor: pointer; }
+        .question-images { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 10px; }
+        .question-thumb { width: 120px; height: 120px; object-fit: contain; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: transform 0.2s; }
+        .question-thumb:hover { transform: scale(1.05); border-color: #667eea; }
+        .image-label { text-align: center; font-size: 0.85em; color: #666; margin-top: 5px; }
+        .svg-container { display: flex; justify-content: center; margin: 10px 0; overflow-x: auto; }
+        .animation-controls { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
+        .ctrl-btn { padding: 8px 20px; border: none; background: #f0f2ff; color: #667eea; border-radius: 20px; cursor: pointer; font-size: 0.9em; transition: all 0.2s; }
+        .ctrl-btn:hover { background: #667eea; color: white; }
+        .scene-description { text-align: center; margin-top: 10px; padding: 10px; background: #f8f9ff; border-radius: 8px; font-size: 0.95em; color: #555; min-height: 40px; }
+        .grid-cell { transition: all 0.3s; }
+        .grid-cell.available { fill: white; stroke: #999; stroke-width: 1; }
+        .grid-cell.highlight-blue { fill: #bbdefb; stroke: #2196f3; stroke-width: 2; }
+        .grid-cell.highlight-green { fill: #c8e6c9; stroke: #4caf50; stroke-width: 2; }
+        .grid-cell.highlight-orange { fill: #ffe0b2; stroke: #ff9800; stroke-width: 2; }
+        .grid-cell.highlight-red { fill: #ffcdd2; stroke: #f44336; stroke-width: 2; }
+        .grid-label { font-size: 10px; fill: #666; text-anchor: middle; }
+        .annotation-text { font-size: 11px; fill: #ff5722; font-weight: bold; }
+        .answer-group { margin-bottom: 10px; padding: 12px; background: #f8f9ff; border-radius: 10px; border-left: 4px solid #667eea; transition: all 0.3s; }
+        .answer-group.highlight { background: #e8f5e9; border-left-color: #4caf50; transform: scale(1.01); }
+        .answer-group h4 { color: #667eea; margin-bottom: 6px; font-size: 1.05em; }
+        .content-section h3 { color: #667eea; margin-bottom: 10px; font-size: 1.15em; }
+        .content-section ul { margin-left: 25px; margin-bottom: 10px; }
+        .content-section li { margin-bottom: 6px; line-height: 1.7; }
+        .knowledge-item { display: flex; margin-bottom: 8px; padding: 8px; background: #f8f9ff; border-radius: 8px; }
+        .knowledge-label { font-weight: bold; color: #667eea; min-width: 100px; }
+        .original-images { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+        .original-image-item { text-align: center; }
+        .original-image-item img { max-width: 100%; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; }
+        .script-segment { margin-bottom: 10px; padding: 10px; background: #f8f9ff; border-radius: 8px; border-left: 3px solid #667eea; }
+        .script-segment h5 { color: #667eea; margin-bottom: 5px; font-size: 0.95em; }
+        .script-segment p { font-size: 0.95em; color: #444; line-height: 1.7; }
+        .sticky-player { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 860px; background: white; border-top: 3px solid #667eea; border-radius: 12px 12px 0 0; padding: 8px 15px 12px 15px; box-shadow: 0 -4px 20px rgba(0,0,0,0.15); z-index: 1000; }
+        .player-title { display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4px 12px; border-radius: 6px; font-size: 0.85em; font-weight: 600; margin-bottom: 6px; }
+        .player-row1 { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+        .play-btn { width: 34px; height: 34px; border-radius: 50%; border: none; background: linear-gradient(135deg, #667eea, #764ba2); color: white; font-size: 1em; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .play-btn:hover { opacity: 0.9; }
+        .volume-control { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+        .volume-control input { width: 60px; }
+        .total-progress { flex: 1; height: 7px; background: #e0e0e0; border-radius: 4px; cursor: pointer; overflow: hidden; }
+        .total-progress-bar { height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 4px; width: 0%; transition: width 0.1s; }
+        .player-time { font-size: 0.82em; color: #999; flex-shrink: 0; min-width: 85px; text-align: right; }
+        .player-row2 { display: flex; gap: 4px; flex-wrap: wrap; }
+        .seg-btn { padding: 3px 9px; border: 1px solid #e0e0e0; background: white; border-radius: 12px; cursor: pointer; font-size: 0.76em; transition: all 0.2s; }
+        .seg-btn:hover { border-color: #667eea; color: #667eea; }
+        .seg-btn.active { background: #667eea; color: white; border-color: #667eea; }
+        .seg-btn.played { background: #e8f5e9; border-color: #4caf50; color: #4caf50; }
+        .image-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; }
+        .image-modal.active { display: flex; }
+        .image-modal img { max-width: 90%; max-height: 90%; border-radius: 8px; }
+        .image-modal-close { position: absolute; top: 20px; right: 30px; color: white; font-size: 2em; cursor: pointer; }
+        /* 手机端适配 */
+        @media (max-width: 600px) {
+            body { padding-bottom: 130px; }
+            .container { padding: 8px; }
+            .page-title { padding: 8px; font-size: 0.95em; margin-bottom: 8px; }
+            .section-title { padding: 5px 12px; font-size: 0.85em; }
+            .collapse-btn { padding: 5px 10px; font-size: 0.75em; min-height: 32px; }
+            .card-collapsible { padding: 8px; margin-bottom: 8px; }
+            .tab-btn { padding: 6px 10px; font-size: 0.82em; min-height: 36px; }
+            .question-text { font-size: 0.95em; line-height: 1.7; }
+            .options-grid { grid-template-columns: 1fr; gap: 8px; }
+            .option-item { padding: 12px 15px; font-size: 0.92em; min-height: 44px; }
+            .question-thumb { width: 90px; height: 90px; }
+            .svg-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            .ctrl-btn { padding: 8px 14px; font-size: 0.82em; min-height: 40px; }
+            .scene-description { font-size: 0.88em; padding: 8px; }
+            .answer-group { padding: 10px; }
+            .answer-group h4 { font-size: 0.98em; }
+            .content-section h3 { font-size: 1.05em; }
+            .content-section li { font-size: 0.92em; }
+            .knowledge-item { padding: 6px; font-size: 0.9em; }
+            .knowledge-label { min-width: 80px; }
+            .script-segment { padding: 8px; }
+            .script-segment p { font-size: 0.9em; }
+            .sticky-player { padding: 6px 10px 10px 10px; max-width: 100%; }
+            .player-title { padding: 3px 10px; font-size: 0.78em; }
+            .player-row1 { gap: 6px; }
+            .play-btn { width: 32px; height: 32px; font-size: 0.9em; }
+            .volume-control input { width: 45px; }
+            .total-progress { height: 6px; }
+            .player-time { font-size: 0.75em; min-width: 70px; }
+            .seg-btn { padding: 4px 8px; font-size: 0.7em; min-height: 32px; }
+        }
+        @media (max-width: 400px) {
+            .question-thumb { width: 70px; height: 70px; }
+            .page-title { font-size: 0.88em; }
+            .tab-btn { padding: 5px 8px; font-size: 0.78em; }
+            .option-item { font-size: 0.88em; padding: 10px 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="page-title">2026秋 · 黄冈课课练 · 六年级上册数学 · 人教版</div>
+
+        <div class="section-header" onclick="toggleCard(this)">
+            <div class="section-title">题目原文</div>
+            <button class="collapse-btn">折叠</button>
+        </div>
+        <div class="card-collapsible">
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="switchTab(0,0)">题目</button>
+            </div>
+            <div class="tab-content active">
+                <div class="question-text" id="questionStem">
+                    课间操时，同学们站成整齐的方队。从前面数，小明站在第3列第5行，用有序数对表示为(3,5)。从后面数，小明站在第4列第2行。下列说法正确的是<span class="answer-bracket" id="answerBracket">?</span>
+                </div>
+                <div class="options-grid">
+                    <div class="option-item" id="optA" onclick="checkOption('A')">A. 这个方队一共有8列7行</div>
+                    <div class="option-item" id="optB" onclick="checkOption('B')">B. 这个方队一共有7列6行</div>
+                    <div class="option-item" id="optC" onclick="checkOption('C')">C. 这个方队一共有6列7行</div>
+                    <div class="option-item" id="optD" onclick="checkOption('D')">D. 这个方队一共有7列7行</div>
+                </div>
+                <div class="question-images"><div><img src="images/p002_q02.png" class="question-thumb" onclick="showImageModal('images/p002_q02.png')" alt="题目原图"><div class="image-label">题目原图</div></div></div>
+            </div>
+        </div>
+
+        <div class="section-header" onclick="toggleCard(this)">
+            <div class="section-title">动画演示</div>
+            <button class="collapse-btn">折叠</button>
+        </div>
+        <div class="card-collapsible">
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="switchTab(1,0)">动画演示</button>
+            </div>
+            <div class="tab-content active">
+                <div class="svg-container"><svg id="animSvg" width="400" height="350" viewBox="0 0 400 350"><g id="svgContent"></g><g id="annotationLayer"></g></svg></div>
+                <div class="animation-controls"><button class="ctrl-btn" onclick="prevStep()">⏮ 上一步</button><button class="ctrl-btn" onclick="togglePlayAnimation()" id="playAnimBtn">▶ 播放</button><button class="ctrl-btn" onclick="nextStep()">下一步 ⏭</button><button class="ctrl-btn" onclick="resetAnimation()">🔄 重置</button></div>
+                <div class="scene-description" id="sceneDescription">点击"播放"按钮，开始动画演示。小明从前面数在(3,5)，从后面数在(4,2)。</div>
+            </div>
+        </div>
+
+        <div class="section-header" onclick="toggleCard(this)">
+            <div class="section-title">讲解内容</div>
+            <button class="collapse-btn">折叠</button>
+        </div>
+        <div class="card-collapsible">
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="switchTab(2,0)">📖 题目讲解</button>
+                <button class="tab-btn" onclick="switchTab(2,1)">📝 总结</button>
+                <button class="tab-btn" onclick="switchTab(2,2)">⚠️ 易错点</button>
+                <button class="tab-btn" onclick="switchTab(2,3)">🧠 知识图谱</button>
+                <button class="tab-btn" onclick="switchTab(2,4)">🖼️ 原题图片</button>
+                <button class="tab-btn" onclick="switchTab(2,5)">📄 讲解原文</button>
+            </div>
+            <div class="tab-content active" id="c0">
+                <div class="answer-group" id="ag1"><h4>第1步：求总列数</h4><p>从前面数小明在第3列，从后面数在第4列。</p><p>总列数 = 3 + 4 - 1 = <span style="color:#4caf50;font-weight:bold;">6列</span>（减1是因为小明被数了两次）</p></div>
+                <div class="answer-group" id="ag2"><h4>第2步：求总行数</h4><p>从前面数小明在第5行，从后面数在第2行。</p><p>总行数 = 5 + 2 - 1 = <span style="color:#4caf50;font-weight:bold;">6行</span>（减1是因为小明被数了两次）</p></div>
+                <div class="answer-group" id="ag3"><h4>第3步：判断选项</h4><p>方队有6列6行。</p><p>A. 8列7行 ❌ &nbsp;&nbsp; B. 7列6行 ❌ &nbsp;&nbsp; C. 6列7行 ❌ &nbsp;&nbsp; D. 7列7行 ❌</p><p style="color:#f44336;font-weight:bold;margin-top:8px;">注意：四个选项都不正确！正确答案应该是6列6行。这道题可能存在印刷错误。</p></div>
+            </div>
+            <div class="tab-content content-section" id="c1"><h3>📝 方法总结</h3><ul><li><strong>求总列数：</strong>从前面数的列数 + 从后面数的列数 - 1（因为小明被数了两次）。</li><li><strong>求总行数：</strong>从前面数的行数 + 从后面数的行数 - 1（因为小明被数了两次）。</li><li><strong>关键：</strong>一定要减1，因为小明在两个方向都被数到了。</li></ul></div>
+            <div class="tab-content content-section" id="c2"><h3>⚠️ 易错点提醒</h3><ul><li><strong>忘记减1：</strong>有的同学直接把两个数相加，忘记小明被数了两次，需要减1。</li><li><strong>行列搞反：</strong>第一个数是列数，第二个数是行数，不要搞反。</li></ul></div>
+            <div class="tab-content content-section" id="c3"><h3>🧠 知识图谱</h3><div class="knowledge-item"><span class="knowledge-label">学科：</span><span>数学</span></div><div class="knowledge-item"><span class="knowledge-label">年级：</span><span>六年级上册</span></div><div class="knowledge-item"><span class="knowledge-label">教材版本：</span><span>人教版（RJ）</span></div><div class="knowledge-item"><span class="knowledge-label">单元：</span><span>第一单元 确定位置</span></div><div class="knowledge-item"><span class="knowledge-label">知识点：</span><span>用有序数对确定位置及方队问题</span></div><p style="margin-top:12px;color:#666;line-height:1.8;">这道题属于数学六年级上册人教版第一单元确定位置，核心知识点是用有序数对确定位置及解决方队行列计算问题。</p></div>
+            <div class="tab-content" id="c4"><div class="original-images"><div class="original-image-item"><img src="images/p002_q02.png" onclick="showImageModal('images/p002_q02.png')" alt="题目原图" style="max-height:500px;"><p style="margin-top:8px;color:#666;">题目原图</p></div></div></div>
+            <div class="tab-content" id="c5">
+                <div class="script-segment"><h5>1. 引导语</h5><p>同学们，大家好，跟着老师来做这道题。</p></div>
+                <div class="script-segment"><h5>2. 题目朗读</h5><p>课间操时，同学们站成整齐的方队。从前面数，小明站在第3列第5行，用有序数对表示为3逗号5。从后面数，小明站在第4列第2行。下列说法正确的是。A. 这个方队一共有8列7行。B. 这个方队一共有7列6行。C. 这个方队一共有6列7行。D. 这个方队一共有7列7行。</p></div>
+                <div class="script-segment"><h5>3. 选项A分析</h5><p>我们先来看A选项，这个方队一共有8列7行。我们来计算一下总列数。从前面数小明在第3列，从后面数在第4列。总列数等于3加4减1，等于6列。所以A选项说8列是错误的。</p></div>
+                <div class="script-segment"><h5>4. 选项B分析</h5><p>再来看B选项，这个方队一共有7列6行。我们刚才算出总列数是6列，不是7列。所以B选项说7列是错误的。</p></div>
+                <div class="script-segment"><h5>5. 选项C分析</h5><p>接下来看C选项，这个方队一共有6列7行。总列数确实是6列，我们再算总行数。从前面数小明在第5行，从后面数在第2行。总行数等于5加2减1，等于6行，不是7行。所以C选项说7行是错误的。</p></div>
+                <div class="script-segment"><h5>6. 选项D分析</h5><p>最后看D选项，这个方队一共有7列7行。总列数是6列，总行数是6行，所以D选项也是错误的。</p></div>
+                <div class="script-segment"><h5>7. 正确答案</h5><p>同学们，我们计算出这个方队一共有6列6行。但是四个选项中没有6列6行这个选项。A是8列7行，B是7列6行，C是6列7行，D是7列7行，都不正确。这道题可能存在印刷错误，正确答案应该是6列6行。希望同学们注意，做题时要仔细计算，不要盲目选择选项。</p></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sticky-player">
+        <div class="player-title">讲解播放器</div>
+        <div class="player-row1">
+            <button class="play-btn" onclick="togglePlay()" id="playBtn">▶</button>
+            <div class="volume-control"><span>🔊</span><input type="range" min="0" max="1" step="0.1" value="1" onchange="setVolume(this.value)"></div>
+            <div class="total-progress" onclick="seekTotal(event)"><div class="total-progress-bar" id="totalProgressBar"></div></div>
+            <span class="player-time" id="playerTime">00:00 / 00:00</span>
+        </div>
+        <div class="player-row2" id="segmentButtons"></div>
+    </div>
+
+    <div class="image-modal" id="imageModal" onclick="closeImageModal()"><span class="image-modal-close">&times;</span><img id="modalImage" src="" alt="放大图片"></div>
+    <audio id="audioPlayer"></audio>
+
+    <script>
+        function toggleCard(headerEl) {
+            const card = headerEl.nextElementSibling;
+            const btn = headerEl.querySelector('.collapse-btn');
+            const isCollapsed = card.classList.contains('collapsed');
+            if (isCollapsed) { card.classList.remove('collapsed'); headerEl.classList.remove('collapsed'); btn.textContent = '折叠'; }
+            else { card.classList.add('collapsed'); headerEl.classList.add('collapsed'); btn.textContent = '展开'; }
+        }
+        function switchTab(ci, ti) {
+            const card = document.querySelectorAll('.card-collapsible')[ci];
+            const btns = card.querySelectorAll('.tab-btn');
+            const contents = card.querySelectorAll('.tab-content');
+            btns.forEach((b, i) => b.classList.toggle('active', i === ti));
+            contents.forEach((c, i) => c.classList.toggle('active', i === ti));
+        }
+        function showImageModal(src) { document.getElementById('modalImage').src = src; document.getElementById('imageModal').classList.add('active'); }
+        function closeImageModal() { document.getElementById('imageModal').classList.remove('active'); }
+        function checkOption(opt) {
+            document.querySelectorAll('.option-item').forEach(o => { o.classList.remove('correct','wrong'); });
+            document.getElementById('opt'+opt).classList.add(opt === 'C' ? 'correct' : 'wrong');
+            document.getElementById('answerBracket').textContent = opt;
+        }
+
+        const sceneDescriptions = [
+            '认识方队：从前面数小明在(3,5)，即第3列第5行。记住先列后行！',
+            '从后面数小明在(4,2)，即第4列第2行。注意从后面数时方向相反。',
+            '求总列数：3 + 4 - 1 = 6列。减1是因为小明被数了两次。',
+            '求总行数：5 + 2 - 1 = 6行。减1是因为小明被数了两次。方队是6列6行。'
+        ];
+        let currentStep = 0, isPlaying = false, playInterval = null;
+        function drawGrid(content, annotation) {
+            for (let c = 1; c <= 7; c++) {
+                const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                t.setAttribute('x', 50 + (c-1)*45); t.setAttribute('y', 20); t.setAttribute('class', 'grid-label'); t.textContent = c + '列';
+                content.appendChild(t);
+            }
+            for (let r = 1; r <= 7; r++) {
+                const rt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                rt.setAttribute('x', 10); rt.setAttribute('y', 37 + (r-1)*40); rt.setAttribute('class', 'grid-label'); rt.textContent = r + '行';
+                content.appendChild(rt);
+                for (let c = 1; c <= 7; c++) {
+                    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    rect.setAttribute('x', 35 + (c-1)*45); rect.setAttribute('y', 25 + (r-1)*40);
+                    rect.setAttribute('width', 38); rect.setAttribute('height', 34); rect.setAttribute('rx', 3); rect.setAttribute('class', 'grid-cell available');
+                    content.appendChild(rect);
+                }
+            }
+        }
+        function hlCell(content, col, row, className) {
+            const cells = content.querySelectorAll('.grid-cell');
+            const idx = (row-1)*7 + (col-1);
+            if (cells[idx]) cells[idx].classList.add(className);
+        }
+        function addAnnot(annotation, x, y, text) {
+            const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            t.setAttribute('x', x); t.setAttribute('y', y); t.setAttribute('class', 'annotation-text'); t.textContent = text;
+            annotation.appendChild(t);
+        }
+        function drawStep(step) {
+            const content = document.getElementById('svgContent');
+            const annotation = document.getElementById('annotationLayer');
+            content.innerHTML = ''; annotation.innerHTML = '';
+            drawGrid(content, annotation);
+            if (step >= 0) { hlCell(content, 3, 5, 'highlight-blue'); addAnnot(annotation, 350, 60, '小明(3,5)'); }
+            if (step >= 1) { hlCell(content, 4, 2, 'highlight-orange'); addAnnot(annotation, 350, 100, '从后数(4,2)'); }
+            if (step >= 2) { for (let c = 1; c <= 6; c++) hlCell(content, c, 5, 'highlight-green'); addAnnot(annotation, 350, 140, '总列数=3+4-1=6'); }
+            if (step >= 3) { for (let r = 1; r <= 6; r++) hlCell(content, 3, r, 'highlight-purple' in window ? 'highlight-purple' : 'highlight-red'); addAnnot(annotation, 350, 180, '总行数=5+2-1=6'); }
+            document.getElementById('sceneDescription').textContent = sceneDescriptions[Math.min(step, 3)];
+        }
+        function togglePlayAnimation() {
+            isPlaying = !isPlaying;
+            const btn = document.getElementById('playAnimBtn');
+            if (isPlaying) {
+                btn.textContent = '⏸ 暂停';
+                playInterval = setInterval(() => { if (currentStep < 3) { currentStep++; drawStep(currentStep); } else { isPlaying = false; btn.textContent = '▶ 播放'; clearInterval(playInterval); } }, 2000);
+            } else { btn.textContent = '▶ 播放'; clearInterval(playInterval); }
+        }
+        function nextStep() { if (currentStep < 3) { currentStep++; drawStep(currentStep); } }
+        function prevStep() { if (currentStep > 0) { currentStep--; drawStep(currentStep); } }
+        function resetAnimation() { isPlaying = false; document.getElementById('playAnimBtn').textContent = '▶ 播放'; clearInterval(playInterval); currentStep = 0; drawStep(0); }
+
+        const audioFiles = ['audio/segment1.mp3','audio/segment2.mp3','audio/segment3.mp3','audio/segment4.mp3','audio/segment5.mp3','audio/segment6.mp3','audio/segment7.mp3'];
+        const segmentNames = ['引导语','题目朗读','选项A','选项B','选项C','选项D','正确答案'];
+        const segmentTabs = [-1,0,0,0,0,0,0];
+        let curSeg = 0, totalDur = 0;
+        const segDurs = new Array(7).fill(0);
+        const played = new Set();
+        const ap = document.getElementById('audioPlayer');
+        function initSegBtns() {
+            const c = document.getElementById('segmentButtons'); c.innerHTML = '';
+            segmentNames.forEach((n, i) => { const b = document.createElement('button'); b.className = 'seg-btn'; b.textContent = `${i+1}.${n}`; b.onclick = () => playSeg(i); c.appendChild(b); });
+        }
+        function preloadDurs() {
+            let ld = 0;
+            audioFiles.forEach((src, i) => { const a = new Audio(src); a.addEventListener('loadedmetadata', () => { segDurs[i] = a.duration; totalDur += a.duration; ld++; if (ld === 7) updatePT(); }); });
+        }
+        function playSeg(idx) {
+            curSeg = idx; ap.src = audioFiles[idx]; ap.play();
+            played.add(idx); updateSegBtns();
+            if (segmentTabs[idx] >= 0) switchTab(2, segmentTabs[idx]);
+            hlAnswer(idx); highlightOption(idx);
+        }
+        function hlAnswer(si) {
+            document.querySelectorAll('.answer-group').forEach(g => g.classList.remove('highlight'));
+            if (si === 2) document.getElementById('ag1').classList.add('highlight');
+            else if (si === 3) document.getElementById('ag1').classList.add('highlight');
+            else if (si === 4) document.getElementById('ag2').classList.add('highlight');
+            else if (si === 5) document.getElementById('ag2').classList.add('highlight');
+            else if (si === 6) document.getElementById('ag3').classList.add('highlight');
+        }
+        function highlightOption(si) {
+            document.querySelectorAll('.option-item').forEach(o => o.classList.remove('correct','wrong'));
+            if (si === 2) document.getElementById('optA').classList.add('wrong');
+            else if (si === 3) document.getElementById('optB').classList.add('wrong');
+            else if (si === 4) document.getElementById('optC').classList.add('wrong');
+            else if (si === 5) document.getElementById('optD').classList.add('wrong');
+            else if (si === 6) { document.getElementById('answerBracket').textContent = '无正确选项'; }
+        }
+        function updateSegBtns() {
+            document.querySelectorAll('.seg-btn').forEach((b, i) => { b.classList.remove('active','played'); if (i === curSeg) b.classList.add('active'); else if (played.has(i)) b.classList.add('played'); });
+        }
+        function togglePlay() { if (ap.paused) { if (!ap.src) playSeg(0); else ap.play(); document.getElementById('playBtn').textContent = '⏸'; } else { ap.pause(); document.getElementById('playBtn').textContent = '▶'; } }
+        ap.addEventListener('ended', () => { if (curSeg < 6) playSeg(curSeg+1); else document.getElementById('playBtn').textContent = '▶'; });
+        ap.addEventListener('timeupdate', () => { updatePT(); updateTP(); });
+        function updatePT() { const ct = ap.currentTime || 0; const eb = segDurs.slice(0, curSeg).reduce((a,b) => a+b, 0); document.getElementById('playerTime').textContent = `${fmt(eb+ct)} / ${fmt(totalDur)}`; }
+        function updateTP() { const ct = ap.currentTime || 0; const eb = segDurs.slice(0, curSeg).reduce((a,b) => a+b, 0); const pct = totalDur > 0 ? ((eb+ct)/totalDur)*100 : 0; document.getElementById('totalProgressBar').style.width = pct + '%'; }
+        function seekTotal(e) { const rect = e.currentTarget.getBoundingClientRect(); const pct = (e.clientX - rect.left) / rect.width; const tt = pct * totalDur; let el = 0; for (let i = 0; i < 7; i++) { if (el + segDurs[i] >= tt) { playSeg(i); setTimeout(() => { ap.currentTime = tt - el; }, 100); break; } el += segDurs[i]; } }
+        function fmt(s) { const m = Math.floor(s/60), sec = Math.floor(s%60); return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`; }
+        function setVolume(v) { ap.volume = v; }
+        initSegBtns(); preloadDurs(); drawStep(0);
+    </script>
+</body>
+</html>

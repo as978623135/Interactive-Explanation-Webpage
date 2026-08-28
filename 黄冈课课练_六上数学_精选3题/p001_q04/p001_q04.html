@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>飞机选座问题 - 黄冈课课练六年级上册数学</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: #f5f7fa; color: #333; line-height: 1.6; padding-bottom: 100px; }
+        .container { max-width: 900px; margin: 0 auto; padding: 10px; }
+        .page-title { text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); font-size: 1.1em; font-weight: 500; }
+        .section-header { display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: -5px; position: relative; z-index: 10; user-select: none; margin-left: 0; padding-left: 0; }
+        .section-title { display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 6px 16px; border-radius: 6px; font-size: 0.9em; font-weight: 600; margin-left: 0; transition: all 0.3s; }
+        .collapse-btn { background: #f44336; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.8em; cursor: pointer; transition: background 0.3s; }
+        .collapse-btn:hover { background: #d32f2f; }
+        .section-header.collapsed .section-title { opacity: 0.6; background: #ccc; }
+        .section-header.collapsed .collapse-btn { background: #ff9800; }
+        .card-collapsible { background: white; border-radius: 12px; padding: 10px; margin-bottom: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); overflow: hidden; transition: max-height 0.4s ease, padding 0.3s ease, opacity 0.3s ease, margin-bottom 0.3s ease; max-height: 5000px; opacity: 1; }
+        .card-collapsible.collapsed { max-height: 0; padding-top: 0; padding-bottom: 0; margin-bottom: 0; opacity: 0.5; }
+        .tab-buttons { display: flex; gap: 5px; margin-bottom: 10px; border-bottom: 2px solid #f0f0f0; padding-bottom: 0; flex-wrap: wrap; }
+        .tab-btn { padding: 8px 16px; border: none; background: transparent; cursor: pointer; font-size: 0.9em; color: #666; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
+        .tab-btn:hover { color: #667eea; }
+        .tab-btn.active { color: #667eea; border-bottom-color: #667eea; font-weight: bold; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .question-text { font-size: 1.05em; line-height: 1.9; margin-bottom: 10px; }
+        .question-text .blank { display: inline-block; min-width: 60px; border-bottom: 2px solid #667eea; text-align: center; color: #667eea; font-weight: bold; padding: 0 5px; }
+        .sub-question { margin-bottom: 8px; padding: 8px; background: #f8f9ff; border-radius: 8px; }
+        .sub-question h5 { color: #667eea; margin-bottom: 4px; }
+        .question-images { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 10px; }
+        .question-thumb { width: 120px; height: 120px; object-fit: contain; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: transform 0.2s; }
+        .question-thumb:hover { transform: scale(1.05); border-color: #667eea; }
+        .image-label { text-align: center; font-size: 0.85em; color: #666; margin-top: 5px; }
+        .svg-container { display: flex; justify-content: center; margin: 10px 0; overflow-x: auto; }
+        .animation-controls { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
+        .ctrl-btn { padding: 8px 20px; border: none; background: #f0f2ff; color: #667eea; border-radius: 20px; cursor: pointer; font-size: 0.9em; transition: all 0.2s; }
+        .ctrl-btn:hover { background: #667eea; color: white; }
+        .scene-description { text-align: center; margin-top: 10px; padding: 10px; background: #f8f9ff; border-radius: 8px; font-size: 0.95em; color: #555; min-height: 40px; }
+        .seat { transition: all 0.3s; }
+        .seat.available { fill: white; stroke: #999; stroke-width: 1; }
+        .seat.highlight-blue { fill: #bbdefb; stroke: #2196f3; stroke-width: 2; }
+        .seat.highlight-green { fill: #c8e6c9; stroke: #4caf50; stroke-width: 2; }
+        .seat.highlight-orange { fill: #ffe0b2; stroke: #ff9800; stroke-width: 2; }
+        .seat.highlight-purple { fill: #e1bee7; stroke: #9c27b0; stroke-width: 2; }
+        .seat-label { font-size: 10px; fill: #666; text-anchor: middle; }
+        .aisle { fill: #f5f5f5; }
+        .annotation-text { font-size: 11px; fill: #ff5722; font-weight: bold; }
+        .answer-group { margin-bottom: 10px; padding: 12px; background: #f8f9ff; border-radius: 10px; border-left: 4px solid #667eea; transition: all 0.3s; }
+        .answer-group.highlight { background: #e8f5e9; border-left-color: #4caf50; transform: scale(1.01); }
+        .answer-group h4 { color: #667eea; margin-bottom: 6px; font-size: 1.05em; }
+        .content-section h3 { color: #667eea; margin-bottom: 10px; font-size: 1.15em; }
+        .content-section ul { margin-left: 25px; margin-bottom: 10px; }
+        .content-section li { margin-bottom: 6px; line-height: 1.7; }
+        .knowledge-item { display: flex; margin-bottom: 8px; padding: 8px; background: #f8f9ff; border-radius: 8px; }
+        .knowledge-label { font-weight: bold; color: #667eea; min-width: 100px; }
+        .original-images { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+        .original-image-item { text-align: center; }
+        .original-image-item img { max-width: 100%; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; }
+        .script-segment { margin-bottom: 10px; padding: 10px; background: #f8f9ff; border-radius: 8px; border-left: 3px solid #667eea; }
+        .script-segment h5 { color: #667eea; margin-bottom: 5px; font-size: 0.95em; }
+        .script-segment p { font-size: 0.95em; color: #444; line-height: 1.7; }
+        .sticky-player { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 860px; background: white; border-top: 3px solid #667eea; border-radius: 12px 12px 0 0; padding: 8px 15px 12px 15px; box-shadow: 0 -4px 20px rgba(0,0,0,0.15); z-index: 1000; }
+        .player-title { display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4px 12px; border-radius: 6px; font-size: 0.85em; font-weight: 600; margin-bottom: 6px; }
+        .player-row1 { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+        .play-btn { width: 34px; height: 34px; border-radius: 50%; border: none; background: linear-gradient(135deg, #667eea, #764ba2); color: white; font-size: 1em; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .play-btn:hover { opacity: 0.9; }
+        .volume-control { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+        .volume-control input { width: 60px; }
+        .total-progress { flex: 1; height: 7px; background: #e0e0e0; border-radius: 4px; cursor: pointer; overflow: hidden; }
+        .total-progress-bar { height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 4px; width: 0%; transition: width 0.1s; }
+        .player-time { font-size: 0.82em; color: #999; flex-shrink: 0; min-width: 85px; text-align: right; }
+        .player-row2 { display: flex; gap: 4px; flex-wrap: wrap; }
+        .seg-btn { padding: 3px 9px; border: 1px solid #e0e0e0; background: white; border-radius: 12px; cursor: pointer; font-size: 0.76em; transition: all 0.2s; }
+        .seg-btn:hover { border-color: #667eea; color: #667eea; }
+        .seg-btn.active { background: #667eea; color: white; border-color: #667eea; }
+        .seg-btn.played { background: #e8f5e9; border-color: #4caf50; color: #4caf50; }
+        .image-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; }
+        .image-modal.active { display: flex; }
+        .image-modal img { max-width: 90%; max-height: 90%; border-radius: 8px; }
+        .image-modal-close { position: absolute; top: 20px; right: 30px; color: white; font-size: 2em; cursor: pointer; }
+        /* 手机端适配 */
+        @media (max-width: 600px) {
+            body { padding-bottom: 130px; }
+            .container { padding: 8px; }
+            .page-title { padding: 8px; font-size: 0.95em; margin-bottom: 8px; }
+            .section-title { padding: 5px 12px; font-size: 0.85em; }
+            .collapse-btn { padding: 5px 10px; font-size: 0.75em; min-height: 32px; }
+            .card-collapsible { padding: 8px; margin-bottom: 8px; }
+            .tab-btn { padding: 6px 10px; font-size: 0.82em; min-height: 36px; }
+            .question-text { font-size: 0.95em; line-height: 1.7; }
+            .sub-question { padding: 6px; }
+            .question-thumb { width: 90px; height: 90px; }
+            .svg-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            .ctrl-btn { padding: 8px 14px; font-size: 0.82em; min-height: 40px; }
+            .scene-description { font-size: 0.88em; padding: 8px; }
+            .answer-group { padding: 10px; }
+            .answer-group h4 { font-size: 0.98em; }
+            .content-section h3 { font-size: 1.05em; }
+            .content-section li { font-size: 0.92em; }
+            .knowledge-item { padding: 6px; font-size: 0.9em; }
+            .knowledge-label { min-width: 80px; }
+            .script-segment { padding: 8px; }
+            .script-segment p { font-size: 0.9em; }
+            .sticky-player { padding: 6px 10px 10px 10px; max-width: 100%; }
+            .player-title { padding: 3px 10px; font-size: 0.78em; }
+            .player-row1 { gap: 6px; }
+            .play-btn { width: 32px; height: 32px; font-size: 0.9em; }
+            .volume-control input { width: 45px; }
+            .total-progress { height: 6px; }
+            .player-time { font-size: 0.75em; min-width: 70px; }
+            .seg-btn { padding: 4px 8px; font-size: 0.7em; min-height: 32px; }
+        }
+        @media (max-width: 400px) {
+            .question-thumb { width: 70px; height: 70px; }
+            .page-title { font-size: 0.88em; }
+            .tab-btn { padding: 5px 8px; font-size: 0.78em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="page-title">2026秋 · 黄冈课课练 · 六年级上册数学 · 人教版</div>
+
+        <div class="section-header" onclick="toggleCard(this)">
+            <div class="section-title">题目原文</div>
+            <button class="collapse-btn">折叠</button>
+        </div>
+        <div class="card-collapsible">
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="switchTab(0,0)">第1问</button>
+                <button class="tab-btn" onclick="switchTab(0,1)">第2问</button>
+                <button class="tab-btn" onclick="switchTab(0,2)">第3问</button>
+            </div>
+            <div class="tab-content active">
+                <div class="question-text">文文和爸爸乘飞机去广东旅游，爸爸选择在网上值机选座。如图是飞机部分座位的分布图，座位可以用有序数对表示，如第A列第8行的座位就用有序数对(A,8)表示。<br><br><strong>第1问：</strong>图中用圆圈标出的座位用有序数对表示是<span class="blank" id="blank1">?</span>，爸爸选择的座位已在图中用方框标出，用有序数对表示是<span class="blank" id="blank2">?</span>。</div>
+                <div class="question-images"><div><img src="images/p001_q04.png" class="question-thumb" onclick="showImageModal('images/p001_q04.png')" alt="题目原图"><div class="image-label">题目原图</div></div></div>
+            </div>
+            <div class="tab-content">
+                <div class="question-text"><strong>第2问：</strong>文文选择和爸爸左右挨着坐，她的座位用有序数对表示是<span class="blank" id="blank3">?</span>或<span class="blank" id="blank4">?</span>。</div>
+                <div class="question-images"><div><img src="images/p001_q04.png" class="question-thumb" onclick="showImageModal('images/p001_q04.png')" alt="题目原图"><div class="image-label">题目原图</div></div></div>
+            </div>
+            <div class="tab-content">
+                <div class="question-text"><strong>第3问：</strong>请你当一回值机客服，为乘客推荐理想座位。
+                    <div class="sub-question"><h5>第1小问：</h5>张老师喜欢靠过道的座位，你为她推荐的座位应该在第<span class="blank" id="blank5">?</span>列或第<span class="blank" id="blank6">?</span>列。</div>
+                    <div class="sub-question"><h5>第2小问：</h5>王爷爷老两口想要独立的两连座，有<span class="blank" id="blank7">?</span>种选择？请用有序数对表示出来：<span class="blank" id="blank8">?</span></div>
+                </div>
+                <div class="question-images"><div><img src="images/p001_q04.png" class="question-thumb" onclick="showImageModal('images/p001_q04.png')" alt="题目原图"><div class="image-label">题目原图</div></div></div>
+            </div>
+        </div>
+
+        <div class="section-header" onclick="toggleCard(this)">
+            <div class="section-title">动画演示</div>
+            <button class="collapse-btn">折叠</button>
+        </div>
+        <div class="card-collapsible">
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="switchTab(1,0)">第1问动画</button>
+                <button class="tab-btn" onclick="switchTab(1,1)">第2问动画</button>
+                <button class="tab-btn" onclick="switchTab(1,2)">第3问动画</button>
+            </div>
+            <div class="tab-content active">
+                <div class="svg-container"><svg id="svg0" width="400" height="300" viewBox="0 0 400 300"><g id="content0"></g><g id="annot0"></g></svg></div>
+                <div class="animation-controls"><button class="ctrl-btn" onclick="aPrev(0)">⏮ 上一步</button><button class="ctrl-btn" onclick="aToggle(0)" id="abtn0">▶ 播放</button><button class="ctrl-btn" onclick="aNext(0)">下一步 ⏭</button><button class="ctrl-btn" onclick="aReset(0)">🔄 重置</button></div>
+                <div class="scene-description" id="desc0">点击"播放"按钮，开始第1问动画演示。</div>
+            </div>
+            <div class="tab-content">
+                <div class="svg-container"><svg id="svg1" width="400" height="300" viewBox="0 0 400 300"><g id="content1"></g><g id="annot1"></g></svg></div>
+                <div class="animation-controls"><button class="ctrl-btn" onclick="aPrev(1)">⏮ 上一步</button><button class="ctrl-btn" onclick="aToggle(1)" id="abtn1">▶ 播放</button><button class="ctrl-btn" onclick="aNext(1)">下一步 ⏭</button><button class="ctrl-btn" onclick="aReset(1)">🔄 重置</button></div>
+                <div class="scene-description" id="desc1">点击"播放"按钮，开始第2问动画演示。</div>
+            </div>
+            <div class="tab-content">
+                <div class="svg-container"><svg id="svg2" width="400" height="300" viewBox="0 0 400 300"><g id="content2"></g><g id="annot2"></g></svg></div>
+                <div class="animation-controls"><button class="ctrl-btn" onclick="aPrev(2)">⏮ 上一步</button><button class="ctrl-btn" onclick="aToggle(2)" id="abtn2">▶ 播放</button><button class="ctrl-btn" onclick="aNext(2)">下一步 ⏭</button><button class="ctrl-btn" onclick="aReset(2)">🔄 重置</button></div>
+                <div class="scene-description" id="desc2">点击"播放"按钮，开始第3问动画演示。</div>
+            </div>
+        </div>
+
+        <div class="section-header" onclick="toggleCard(this)">
+            <div class="section-title">讲解内容</div>
+            <button class="collapse-btn">折叠</button>
+        </div>
+        <div class="card-collapsible">
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="switchTab(2,0)">📖 题目讲解</button>
+                <button class="tab-btn" onclick="switchTab(2,1)">📝 总结</button>
+                <button class="tab-btn" onclick="switchTab(2,2)">⚠️ 易错点</button>
+                <button class="tab-btn" onclick="switchTab(2,3)">🧠 知识图谱</button>
+                <button class="tab-btn" onclick="switchTab(2,4)">🖼️ 原题图片</button>
+                <button class="tab-btn" onclick="switchTab(2,5)">📄 讲解原文</button>
+            </div>
+            <div class="tab-content active" id="c0">
+                <div class="answer-group" id="ag1"><h4>第1问：圆圈座位和爸爸座位</h4><p><strong>圆圈座位：</strong>B列第2行 → <span style="color:#4caf50;font-weight:bold;">(B,2)</span></p><p><strong>爸爸座位：</strong>F列第5行 → <span style="color:#4caf50;font-weight:bold;">(F,5)</span></p><p>注意：第一个数是列数（字母A-G），第二个数是行数（数字）。</p></div>
+                <div class="answer-group" id="ag2"><h4>第2问：文文和爸爸左右挨着坐</h4><p>爸爸在F列第5行，即(F,5)。左右挨着=同一行，列数相邻。</p><p>F列左边是E列，右边是G列 → <span style="color:#4caf50;font-weight:bold;">(E,5)或(G,5)</span></p></div>
+                <div class="answer-group" id="ag3"><h4>第3问-靠过道：张老师的座位</h4><p>过道在B列和C列之间，靠过道的座位是B列（右边是过道）和D列（左边是过道）。</p><p><span style="color:#4caf50;font-weight:bold;">推荐：B列或D列</span></p></div>
+                <div class="answer-group" id="ag4"><h4>第3问-两连座：王爷爷老两口</h4><p>独立两连座是A和B列（C-G是四连座）。</p><p>可选行：第1行(A,B可选)、第3行(A,B可选) → <span style="color:#4caf50;font-weight:bold;">2种：(A,1)(B,1)、(A,3)(B,3)</span></p></div>
+            </div>
+            <div class="tab-content content-section" id="c1"><h3>📝 方法总结</h3><ul><li><strong>有序数对第一个数表示列，第二个数表示行</strong>，顺序不能搞反。</li><li><strong>找相邻座位：</strong>同一行的列数相邻就是左右相邻。</li><li><strong>靠过道座位：</strong>要看清过道的位置，过道两边的列就是靠过道的列。</li></ul></div>
+            <div class="tab-content content-section" id="c2"><h3>⚠️ 易错点提醒</h3><ul><li><strong>行列搞反：</strong>一定要记住先列后行，第一个数是列，第二个数是行。</li><li><strong>字母列和数字行混淆：</strong>列数用字母A到G表示，行数用数字1到8表示，不要混淆。</li></ul></div>
+            <div class="tab-content content-section" id="c3"><h3>🧠 知识图谱</h3><div class="knowledge-item"><span class="knowledge-label">学科：</span><span>数学</span></div><div class="knowledge-item"><span class="knowledge-label">年级：</span><span>六年级上册</span></div><div class="knowledge-item"><span class="knowledge-label">教材版本：</span><span>人教版（RJ）</span></div><div class="knowledge-item"><span class="knowledge-label">单元：</span><span>第一单元 确定位置</span></div><div class="knowledge-item"><span class="knowledge-label">知识点：</span><span>用有序数对表示位置并解决实际问题</span></div><p style="margin-top:12px;color:#666;line-height:1.8;">这道题属于数学六年级上册人教版第一单元确定位置，核心知识点是用有序数对表示位置并解决实际问题，体现了数学在生活中的应用。</p></div>
+            <div class="tab-content" id="c4"><div class="original-images"><div class="original-image-item"><img src="images/p001_q04.png" onclick="showImageModal('images/p001_q04.png')" alt="题目原图" style="max-height:500px;"><p style="margin-top:8px;color:#666;">题目原图</p></div></div></div>
+            <div class="tab-content" id="c5">
+                <div class="script-segment"><h5>1. 引导语</h5><p>同学们，大家好，跟着老师来做这道题。</p></div>
+                <div class="script-segment"><h5>2. 题目朗读</h5><p>文文和爸爸乘飞机去广东旅游，爸爸选择在网上值机选座。如图是飞机部分座位的分布图，座位可以用有序数对表示，如第A列第8行的座位就用有序数对A逗号8表示。第一问，图中用圆圈标出的座位用有序数对表示是多少，爸爸选择的座位已在图中用方框标出，用有序数对表示是多少。第二问，文文选择和爸爸左右挨着坐，她的座位用有序数对表示是多少或多少。第三问，请你当一回值机客服，为乘客推荐理想座位。第一小问，张老师喜欢靠过道的座位，你为她推荐的座位应该在第几列或第几列。第二小问，王爷爷老两口想要独立的两连座，有几种选择？请用有序数对表示出来。</p></div>
+                <div class="script-segment"><h5>3. 第1问</h5><p>我们先来看第一问。图中用圆圈标出的座位在B列第2行，所以表示为B逗号2。爸爸选择的座位用方框标出，在F列第5行，所以表示为F逗号5。这里要注意，第一个数是列数，用字母表示，第二个数是行数，用数字表示。</p></div>
+                <div class="script-segment"><h5>4. 第2问</h5><p>再来看第二问，文文选择和爸爸左右挨着坐。爸爸在F列第5行，也就是F逗号5。左右挨着的座位就是同一行，列数相邻的座位。F列左边是E列，右边是G列，所以文文的座位可以是E逗号5或者G逗号5。</p></div>
+                <div class="script-segment"><h5>5. 第3问-靠过道</h5><p>接下来看第三问的第一小问，张老师喜欢靠过道的座位。观察座位分布图，过道在B列和C列之间，所以靠过道的座位是B列和D列。B列的右边就是过道，D列的左边就是过道。所以推荐的座位应该在第B列或第D列。</p></div>
+                <div class="script-segment"><h5>6. 第3问-两连座</h5><p>再看第二小问，王爷爷老两口想要独立的两连座。观察座位分布，A列和B列是两连座，C到G列是四连座。独立的两连座就是A和B列。我们看看哪些行的A和B列都是可选座位。第1行A和B都可选，第3行A和B都可选，其他行要么A已选要么B已选。所以有两种选择：A逗号1和B逗号1，A逗号3和B逗号3。</p></div>
+                <div class="script-segment"><h5>7. 总结</h5><p>通过这道题，我们总结一下用有序数对解决实际问题的方法。第一，有序数对的第一个数表示列，第二个数表示行，顺序不能搞反。第二，找相邻座位时，同一行的列数相邻就是左右相邻。第三，靠过道的座位要看清过道的位置。希望同学们牢固掌握，灵活运用。</p></div>
+                <div class="script-segment"><h5>8. 易错点</h5><p>这道题的易错点主要有两个。第一个易错点是行列搞反，有的同学会把行数写在前面，列数写在后面，一定要记住先列后行。第二个易错点是字母列和数字行的区分，列数用字母A到G表示，行数用数字1到8表示，不要混淆。</p></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sticky-player">
+        <div class="player-title">讲解播放器</div>
+        <div class="player-row1">
+            <button class="play-btn" onclick="togglePlay()" id="playBtn">▶</button>
+            <div class="volume-control"><span>🔊</span><input type="range" min="0" max="1" step="0.1" value="1" onchange="setVolume(this.value)"></div>
+            <div class="total-progress" onclick="seekTotal(event)"><div class="total-progress-bar" id="totalProgressBar"></div></div>
+            <span class="player-time" id="playerTime">00:00 / 00:00</span>
+        </div>
+        <div class="player-row2" id="segmentButtons"></div>
+    </div>
+
+    <div class="image-modal" id="imageModal" onclick="closeImageModal()"><span class="image-modal-close">&times;</span><img id="modalImage" src="" alt="放大图片"></div>
+    <audio id="audioPlayer"></audio>
+
+    <script>
+        function toggleCard(headerEl) {
+            const card = headerEl.nextElementSibling;
+            const btn = headerEl.querySelector('.collapse-btn');
+            const isCollapsed = card.classList.contains('collapsed');
+            if (isCollapsed) { card.classList.remove('collapsed'); headerEl.classList.remove('collapsed'); btn.textContent = '折叠'; }
+            else { card.classList.add('collapsed'); headerEl.classList.add('collapsed'); btn.textContent = '展开'; }
+        }
+        function switchTab(ci, ti) {
+            const card = document.querySelectorAll('.card-collapsible')[ci];
+            const btns = card.querySelectorAll('.tab-btn');
+            const contents = card.querySelectorAll('.tab-content');
+            btns.forEach((b, i) => b.classList.toggle('active', i === ti));
+            contents.forEach((c, i) => c.classList.toggle('active', i === ti));
+        }
+        function showImageModal(src) { document.getElementById('modalImage').src = src; document.getElementById('imageModal').classList.add('active'); }
+        function closeImageModal() { document.getElementById('imageModal').classList.remove('active'); }
+
+        function drawPlaneSeats(cid, contentId, annotId) {
+            const c = document.getElementById(contentId); c.innerHTML = '';
+            const cols = ['A','B','过道','C','D','E','F','G'];
+            const colX = [35, 70, 105, 140, 175, 210, 245, 280];
+            for (let i = 0; i < cols.length; i++) {
+                const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                t.setAttribute('x', colX[i]+15); t.setAttribute('y', 20); t.setAttribute('class', 'seat-label'); t.textContent = cols[i];
+                c.appendChild(t);
+            }
+            for (let r = 1; r <= 8; r++) {
+                const rt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                rt.setAttribute('x', 10); rt.setAttribute('y', 37 + (r-1)*28); rt.setAttribute('class', 'seat-label'); rt.textContent = r + '行';
+                c.appendChild(rt);
+                for (let c2 = 0; c2 < 8; c2++) {
+                    if (c2 === 2) {
+                        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                        rect.setAttribute('x', colX[c2]); rect.setAttribute('y', 25 + (r-1)*28);
+                        rect.setAttribute('width', 30); rect.setAttribute('height', 22); rect.setAttribute('class', 'aisle'); c.appendChild(rect);
+                    } else {
+                        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                        rect.setAttribute('x', colX[c2]); rect.setAttribute('y', 25 + (r-1)*28);
+                        rect.setAttribute('width', 30); rect.setAttribute('height', 22); rect.setAttribute('rx', 3); rect.setAttribute('class', 'seat available');
+                        c.appendChild(rect);
+                    }
+                }
+            }
+        }
+        function hlSeat(contentId, cols, colIdx, row, cls) {
+            const c = document.getElementById(contentId);
+            const seats = c.querySelectorAll('.seat');
+            const actualCol = colIdx > 1 ? colIdx - 1 : colIdx;
+            const idx = (row-1)*7 + actualCol;
+            if (seats[idx]) seats[idx].classList.add(cls);
+        }
+        function addAnnot(aid, x, y, text) {
+            const a = document.getElementById(aid);
+            const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            t.setAttribute('x', x); t.setAttribute('y', y); t.setAttribute('class', 'annotation-text'); t.textContent = text;
+            a.appendChild(t);
+        }
+        const aStates = [
+            {step:0,playing:false,interval:null,maxStep:2,descs:['认识座位图：列用字母A-G表示，行用数字1-8表示，先列后行。','圆圈座位在B列第2行 → (B,2)。','爸爸座位在F列第5行 → (F,5)。']},
+            {step:0,playing:false,interval:null,maxStep:2,descs:['爸爸在F列第5行，即(F,5)。','左右挨着=同一行，列数相邻。F列左边是E列 → (E,5)。','F列右边是G列 → (G,5)。']},
+            {step:0,playing:false,interval:null,maxStep:3,descs:['过道在B列和C列之间。','靠过道座位：B列（右边是过道）和D列（左边是过道）。','独立两连座是A和B列。第1行A、B可选 → (A,1)(B,1)。','第3行A、B可选 → (A,3)(B,3)。共2种选择。']}
+        ];
+        function drawA(idx) {
+            const s = aStates[idx];
+            drawPlaneSeats('svg'+idx, 'content'+idx, 'annot'+idx);
+            const cid = 'content'+idx;
+            const aid = 'annot'+idx;
+            if (idx === 0) {
+                if (s.step >= 1) { hlSeat(cid, 7, 1, 2, 'highlight-blue'); addAnnot(aid, 320, 50, '(B,2)'); }
+                if (s.step >= 2) { hlSeat(cid, 7, 6, 5, 'highlight-green'); addAnnot(aid, 320, 130, '(F,5)'); }
+            } else if (idx === 1) {
+                hlSeat(cid, 7, 6, 5, 'highlight-orange');
+                if (s.step >= 1) { hlSeat(cid, 7, 5, 5, 'highlight-blue'); addAnnot(aid, 320, 100, '(E,5)'); }
+                if (s.step >= 2) { hlSeat(cid, 7, 7, 5, 'highlight-green'); addAnnot(aid, 320, 130, '(G,5)'); }
+            } else if (idx === 2) {
+                if (s.step >= 1) { hlSeat(cid, 7, 1, 1, 'highlight-blue'); hlSeat(cid, 7, 1, 3, 'highlight-blue'); hlSeat(cid, 7, 3, 1, 'highlight-blue'); hlSeat(cid, 7, 3, 3, 'highlight-blue'); addAnnot(aid, 320, 60, 'B列、D列靠过道'); }
+                if (s.step >= 2) { hlSeat(cid, 7, 0, 1, 'highlight-green'); hlSeat(cid, 7, 1, 1, 'highlight-green'); addAnnot(aid, 320, 100, '(A,1)(B,1)'); }
+                if (s.step >= 3) { hlSeat(cid, 7, 0, 3, 'highlight-purple'); hlSeat(cid, 7, 1, 3, 'highlight-purple'); addAnnot(aid, 320, 140, '(A,3)(B,3)'); }
+            }
+            document.getElementById('desc'+idx).textContent = s.descs[Math.min(s.step, s.maxStep)];
+        }
+        function aToggle(idx) {
+            const s = aStates[idx]; s.playing = !s.playing;
+            const b = document.getElementById('abtn'+idx);
+            if (s.playing) {
+                b.textContent = '⏸ 暂停';
+                s.interval = setInterval(() => { if (s.step < s.maxStep) { s.step++; drawA(idx); } else { s.playing = false; b.textContent = '▶ 播放'; clearInterval(s.interval); } }, 2000);
+            } else { b.textContent = '▶ 播放'; clearInterval(s.interval); }
+        }
+        function aNext(idx) { const s = aStates[idx]; if (s.step < s.maxStep) { s.step++; drawA(idx); } }
+        function aPrev(idx) { const s = aStates[idx]; if (s.step > 0) { s.step--; drawA(idx); } }
+        function aReset(idx) { const s = aStates[idx]; s.playing = false; document.getElementById('abtn'+idx).textContent = '▶ 播放'; clearInterval(s.interval); s.step = 0; drawA(idx); }
+
+        const audioFiles = ['audio/segment1.mp3','audio/segment2.mp3','audio/segment3.mp3','audio/segment4.mp3','audio/segment5.mp3','audio/segment6.mp3','audio/segment7.mp3','audio/segment8.mp3'];
+        const segmentNames = ['引导语','题目朗读','第1问','第2问','第3问-过道','第3问-两连座','总结','易错点'];
+        const segmentTabs = [-1,0,0,0,0,0,1,2];
+        let curSeg = 0, totalDur = 0;
+        const segDurs = new Array(8).fill(0);
+        const played = new Set();
+        const ap = document.getElementById('audioPlayer');
+        function initSegBtns() {
+            const c = document.getElementById('segmentButtons'); c.innerHTML = '';
+            segmentNames.forEach((n, i) => { const b = document.createElement('button'); b.className = 'seg-btn'; b.textContent = `${i+1}.${n}`; b.onclick = () => playSeg(i); c.appendChild(b); });
+        }
+        function preloadDurs() {
+            let ld = 0;
+            audioFiles.forEach((src, i) => { const a = new Audio(src); a.addEventListener('loadedmetadata', () => { segDurs[i] = a.duration; totalDur += a.duration; ld++; if (ld === 8) updatePT(); }); });
+        }
+        function playSeg(idx) {
+            curSeg = idx; ap.src = audioFiles[idx]; ap.play();
+            played.add(idx); updateSegBtns();
+            if (segmentTabs[idx] >= 0) switchTab(2, segmentTabs[idx]);
+            hlAnswer(idx); showBlankAnswers(idx);
+            if (idx >= 2 && idx <= 5) { switchTab(1, idx-2); aReset(idx-2); }
+        }
+        function hlAnswer(si) {
+            document.querySelectorAll('.answer-group').forEach(g => g.classList.remove('highlight'));
+            if (si === 2) document.getElementById('ag1').classList.add('highlight');
+            else if (si === 3) document.getElementById('ag2').classList.add('highlight');
+            else if (si === 4) document.getElementById('ag3').classList.add('highlight');
+            else if (si === 5) document.getElementById('ag4').classList.add('highlight');
+        }
+        function showBlankAnswers(si) {
+            if (si === 2) { document.getElementById('blank1').textContent='(B,2)'; document.getElementById('blank2').textContent='(F,5)'; }
+            else if (si === 3) { document.getElementById('blank3').textContent='(E,5)'; document.getElementById('blank4').textContent='(G,5)'; }
+            else if (si === 4) { document.getElementById('blank5').textContent='B'; document.getElementById('blank6').textContent='D'; }
+            else if (si === 5) { document.getElementById('blank7').textContent='2'; document.getElementById('blank8').textContent='(A,1)(B,1),(A,3)(B,3)'; }
+        }
+        function updateSegBtns() {
+            document.querySelectorAll('.seg-btn').forEach((b, i) => { b.classList.remove('active','played'); if (i === curSeg) b.classList.add('active'); else if (played.has(i)) b.classList.add('played'); });
+        }
+        function togglePlay() { if (ap.paused) { if (!ap.src) playSeg(0); else ap.play(); document.getElementById('playBtn').textContent = '⏸'; } else { ap.pause(); document.getElementById('playBtn').textContent = '▶'; } }
+        ap.addEventListener('ended', () => { if (curSeg < 7) playSeg(curSeg+1); else document.getElementById('playBtn').textContent = '▶'; });
+        ap.addEventListener('timeupdate', () => { updatePT(); updateTP(); });
+        function updatePT() { const ct = ap.currentTime || 0; const eb = segDurs.slice(0, curSeg).reduce((a,b) => a+b, 0); document.getElementById('playerTime').textContent = `${fmt(eb+ct)} / ${fmt(totalDur)}`; }
+        function updateTP() { const ct = ap.currentTime || 0; const eb = segDurs.slice(0, curSeg).reduce((a,b) => a+b, 0); const pct = totalDur > 0 ? ((eb+ct)/totalDur)*100 : 0; document.getElementById('totalProgressBar').style.width = pct + '%'; }
+        function seekTotal(e) { const rect = e.currentTarget.getBoundingClientRect(); const pct = (e.clientX - rect.left) / rect.width; const tt = pct * totalDur; let el = 0; for (let i = 0; i < 8; i++) { if (el + segDurs[i] >= tt) { playSeg(i); setTimeout(() => { ap.currentTime = tt - el; }, 100); break; } el += segDurs[i]; } }
+        function fmt(s) { const m = Math.floor(s/60), sec = Math.floor(s%60); return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`; }
+        function setVolume(v) { ap.volume = v; }
+        initSegBtns(); preloadDurs();
+        for (let i = 0; i < 3; i++) drawA(i);
+    </script>
+</body>
+</html>
