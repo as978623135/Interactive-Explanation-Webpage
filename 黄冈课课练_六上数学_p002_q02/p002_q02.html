@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>有序数对的实际应用 - 黄冈课课练六年级上册数学</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding-bottom: 130px;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        /* 页面标题 */
+        .page-title {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        .page-title h1 { font-size: 1.6em; margin-bottom: 5px; }
+        .page-title p { font-size: 0.95em; opacity: 0.9; }
+        /* 题目原文卡片 */
+        .question-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        .question-card h2 {
+            font-size: 1.2em;
+            color: #667eea;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f2ff;
+        }
+        .question-text { font-size: 1.05em; line-height: 1.8; margin-bottom: 15px; }
+        .question-text .highlight { background: #e3f2fd; padding: 2px 6px; border-radius: 4px; }
+        .sub-question { margin-bottom: 20px; padding: 15px; background: #f8f9ff; border-radius: 10px; border-left: 4px solid #667eea; }
+        .sub-question h4 { color: #667eea; margin-bottom: 10px; font-size: 1.05em; }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .option-item {
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+            transition: all 0.3s;
+            font-size: 0.95em;
+        }
+        .option-item.correct { background: #e8f5e9; border-color: #4caf50; color: #2e7d32; }
+        .option-item.wrong { background: #ffebee; border-color: #f44336; color: #c62828; }
+        .option-item .option-label { font-weight: bold; margin-right: 8px; }
+        .answer-bracket { display: inline-block; min-width: 30px; text-align: center; font-weight: bold; color: #4caf50; }
+        .question-images { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 15px; }
+        .question-thumb {
+            width: 120px; height: 120px; object-fit: contain;
+            border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .question-thumb:hover { transform: scale(1.05); border-color: #667eea; }
+        .image-label { text-align: center; font-size: 0.85em; color: #666; margin-top: 5px; }
+        /* 动画演示区 */
+        .animation-section {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        .animation-section h2 {
+            font-size: 1.2em; color: #764ba2;
+            margin-bottom: 15px; padding-bottom: 10px;
+            border-bottom: 2px solid #f5f0ff;
+        }
+        .scene-buttons {
+            display: flex; gap: 8px; flex-wrap: wrap;
+            margin-bottom: 15px; justify-content: center;
+        }
+        .scene-btn {
+            padding: 8px 16px; border: 2px solid #e0e0e0;
+            background: white; border-radius: 20px; cursor: pointer;
+            font-size: 0.9em; transition: all 0.2s;
+        }
+        .scene-btn:hover { border-color: #764ba2; color: #764ba2; }
+        .scene-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; border-color: transparent;
+        }
+        .svg-container { display: flex; justify-content: center; margin: 20px 0; overflow-x: auto; }
+        .animation-controls { display: flex; gap: 10px; justify-content: center; margin-top: 15px; }
+        .ctrl-btn {
+            padding: 8px 20px; border: none; background: #f0f2ff;
+            color: #667eea; border-radius: 20px; cursor: pointer;
+            font-size: 0.9em; transition: all 0.2s;
+        }
+        .ctrl-btn:hover { background: #667eea; color: white; }
+        .scene-description {
+            text-align: center; margin-top: 15px; padding: 12px;
+            background: #f8f9ff; border-radius: 8px;
+            font-size: 0.95em; color: #555; min-height: 50px;
+        }
+        /* SVG座位样式 */
+        .seat { transition: all 0.3s; cursor: pointer; }
+        .seat.available { fill: white; stroke: #999; stroke-width: 1; }
+        .seat.selected { fill: #f8bbd0; stroke: #e91e63; stroke-width: 1; }
+        .seat.highlight-blue { fill: #bbdefb; stroke: #2196f3; stroke-width: 2; }
+        .seat.highlight-green { fill: #c8e6c9; stroke: #4caf50; stroke-width: 2; }
+        .seat.highlight-orange { fill: #ffe0b2; stroke: #ff9800; stroke-width: 2; }
+        .seat.highlight-purple { fill: #e1bee7; stroke: #9c27b0; stroke-width: 2; }
+        .seat.highlight-yellow { fill: #fff9c4; stroke: #fbc02d; stroke-width: 2; }
+        .seat-label { font-size: 11px; fill: #666; text-anchor: middle; }
+        .arrow-line { stroke: #ff5722; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+        .annotation-text { font-size: 12px; fill: #ff5722; font-weight: bold; }
+        .row-highlight { fill: rgba(33, 150, 243, 0.15); }
+        .col-highlight { fill: rgba(76, 175, 80, 0.15); }
+        .square-highlight { fill: rgba(156, 39, 176, 0.15); stroke: #9c27b0; stroke-width: 2; stroke-dasharray: 5,5; }
+        /* 选项卡 */
+        .tabs-container {
+            background: white; border-radius: 16px; padding: 25px;
+            margin-bottom: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        .tab-buttons {
+            display: flex; gap: 5px; margin-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0; padding-bottom: 0;
+        }
+        .tab-btn {
+            padding: 10px 20px; border: none; background: transparent;
+            cursor: pointer; font-size: 0.95em; color: #666;
+            border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s;
+        }
+        .tab-btn:hover { color: #667eea; }
+        .tab-btn.active { color: #667eea; border-bottom-color: #667eea; font-weight: bold; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .answer-group {
+            margin-bottom: 20px; padding: 15px;
+            background: #f8f9ff; border-radius: 10px;
+            border-left: 4px solid #667eea; transition: all 0.3s;
+        }
+        .answer-group.highlight {
+            background: #e8f5e9; border-left-color: #4caf50; transform: scale(1.02);
+        }
+        .answer-group h4 { color: #667eea; margin-bottom: 8px; font-size: 1.05em; }
+        .content-section h3 { color: #667eea; margin-bottom: 12px; font-size: 1.15em; }
+        .content-section ul { margin-left: 25px; margin-bottom: 15px; }
+        .content-section li { margin-bottom: 8px; line-height: 1.7; }
+        .knowledge-item {
+            display: flex; margin-bottom: 10px; padding: 10px;
+            background: #f8f9ff; border-radius: 8px;
+        }
+        .knowledge-label { font-weight: bold; color: #667eea; min-width: 100px; }
+        .original-images { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+        .original-image-item { text-align: center; }
+        .original-image-item img { max-width: 100%; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; }
+        /* sticky播放器 */
+        .sticky-player {
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 900px; background: white;
+            border-top: 3px solid #667eea; border-radius: 16px 16px 0 0;
+            padding: 15px 20px; box-shadow: 0 -4px 20px rgba(0,0,0,0.15); z-index: 1000;
+        }
+        .player-header {
+            display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 10px;
+        }
+        .player-title { font-weight: bold; color: #667eea; font-size: 0.95em; }
+        .player-time { font-size: 0.85em; color: #999; }
+        .total-progress {
+            width: 100%; height: 8px; background: #e0e0e0;
+            border-radius: 4px; cursor: pointer; margin-bottom: 10px; overflow: hidden;
+        }
+        .total-progress-bar {
+            height: 100%; background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px; width: 0%; transition: width 0.1s;
+        }
+        .segment-buttons { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
+        .seg-btn {
+            padding: 5px 12px; border: 1px solid #e0e0e0; background: white;
+            border-radius: 15px; cursor: pointer; font-size: 0.8em; transition: all 0.2s;
+        }
+        .seg-btn:hover { border-color: #667eea; color: #667eea; }
+        .seg-btn.active { background: #667eea; color: white; border-color: #667eea; }
+        .seg-btn.played { background: #e8f5e9; border-color: #4caf50; color: #4caf50; }
+        .player-controls { display: flex; gap: 15px; align-items: center; justify-content: center; }
+        .play-btn {
+            width: 40px; height: 40px; border-radius: 50%; border: none;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white; font-size: 1.1em; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .play-btn:hover { opacity: 0.9; }
+        .volume-control { display: flex; align-items: center; gap: 5px; }
+        .volume-control input { width: 80px; }
+        /* 图片放大浮层 */
+        .image-modal {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; background: rgba(0,0,0,0.8);
+            z-index: 2000; justify-content: center; align-items: center;
+        }
+        .image-modal.active { display: flex; }
+        .image-modal img { max-width: 90%; max-height: 90%; border-radius: 8px; }
+        .image-modal-close { position: absolute; top: 20px; right: 30px; color: white; font-size: 2em; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 页面标题 -->
+        <div class="page-title">
+            <h1>📝 有序数对的实际应用</h1>
+            <p>黄冈课课练 · 六年级上册数学 · 选择题</p>
+        </div>
+
+        <!-- 题目原文卡片 -->
+        <div class="question-card">
+            <h2>📖 题目原文</h2>
+            <div class="question-text" id="questionText">
+                <div class="sub-question">
+                    <h4>第1问：同一行连号的童话剧票</h4>
+                    <p>恒恒一家三口预购了3张同一行连号的童话剧票。其中一张票的位置用有序数对(3,5)表示，那么另外2张票的位置用有序数对表示可能是<span class="answer-bracket" id="answer1"></span>。</p>
+                    <div class="options-grid" id="options1">
+                        <div class="option-item" data-option="A"><span class="option-label">A.</span>(4,5)、(5,5)</div>
+                        <div class="option-item" data-option="B"><span class="option-label">B.</span>(5,6)、(4,5)</div>
+                        <div class="option-item" data-option="C"><span class="option-label">C.</span>(3,6)、(3,7)</div>
+                        <div class="option-item" data-option="D"><span class="option-label">D.</span>(5,6)、(5,4)</div>
+                    </div>
+                </div>
+                <div class="sub-question">
+                    <h4>第2问：同一列的座位</h4>
+                    <p>六(2)班要召开家长会，荣荣爸爸的位置是(2,3)，恒恒爸爸与荣荣爸爸坐在同一列，恒恒爸爸的位置可能是<span class="answer-bracket" id="answer2"></span>。</p>
+                    <div class="options-grid" id="options2">
+                        <div class="option-item" data-option="A"><span class="option-label">A.</span>(2,4)</div>
+                        <div class="option-item" data-option="B"><span class="option-label">B.</span>(3,2)</div>
+                        <div class="option-item" data-option="C"><span class="option-label">C.</span>(4,2)</div>
+                        <div class="option-item" data-option="D"><span class="option-label">D.</span>(5,3)</div>
+                    </div>
+                </div>
+                <div class="sub-question">
+                    <h4>第3问：正方形队列人数</h4>
+                    <p>广播体操比赛中，荣荣班级的队列是一个正方形。如果荣荣在队列中的位置是(4,6)，那么荣荣班级的人数至少是<span class="answer-bracket" id="answer3"></span>人。</p>
+                    <div class="options-grid" id="options3">
+                        <div class="option-item" data-option="A"><span class="option-label">A.</span>16</div>
+                        <div class="option-item" data-option="B"><span class="option-label">B.</span>24</div>
+                        <div class="option-item" data-option="C"><span class="option-label">C.</span>36</div>
+                        <div class="option-item" data-option="D"><span class="option-label">D.</span>无法确定</div>
+                    </div>
+                </div>
+            </div>
+            <div class="question-images">
+                <div>
+                    <img src="images/p002_q02.png" class="question-thumb" onclick="showImageModal('images/p002_q02.png')" alt="题目原图">
+                    <div class="image-label">题目原图</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 动画演示区 -->
+        <div class="animation-section">
+            <h2>🎬 动画演示 · 有序数对的实际应用</h2>
+            <div class="scene-buttons" id="sceneButtons">
+                <button class="scene-btn active" onclick="switchScene(0)">认识有序数对</button>
+                <button class="scene-btn" onclick="switchScene(1)">第1问·同行连号</button>
+                <button class="scene-btn" onclick="switchScene(2)">第2问·同列座位</button>
+                <button class="scene-btn" onclick="switchScene(3)">第3问·正方形队列</button>
+                <button class="scene-btn" onclick="switchScene(4)">方法总结</button>
+            </div>
+            <div class="svg-container">
+                <svg id="animSvg" width="500" height="380" viewBox="0 0 500 380">
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#ff5722"/>
+                        </marker>
+                    </defs>
+                    <g id="svgContent"></g>
+                    <g id="annotationLayer"></g>
+                </svg>
+            </div>
+            <div class="animation-controls">
+                <button class="ctrl-btn" onclick="prevStep()">⏮ 上一步</button>
+                <button class="ctrl-btn" onclick="togglePlayAnimation()" id="playAnimBtn">▶ 播放</button>
+                <button class="ctrl-btn" onclick="nextStep()">下一步 ⏭</button>
+                <button class="ctrl-btn" onclick="resetAnimation()">🔄 重置</button>
+            </div>
+            <div class="scene-description" id="sceneDescription">
+                点击"播放"按钮，或选择上方场景按钮，开始动画演示。有序数对(列,行)表示一个位置：第一个数是列数，第二个数是行数。
+            </div>
+        </div>
+
+        <!-- 选项卡区域 -->
+        <div class="tabs-container">
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="switchTab(0)">📖 题目讲解</button>
+                <button class="tab-btn" onclick="switchTab(1)">📝 总结</button>
+                <button class="tab-btn" onclick="switchTab(2)">⚠️ 易错点</button>
+                <button class="tab-btn" onclick="switchTab(3)">🧠 知识图谱</button>
+                <button class="tab-btn" onclick="switchTab(4)">🖼️ 原题图片</button>
+            </div>
+
+            <!-- 题目讲解 -->
+            <div class="tab-content active" id="tab0">
+                <div class="answer-group" id="answerGroup1">
+                    <h4>第1问：同一行连号的童话剧票</h4>
+                    <p><strong>已知：</strong>3张票同一行连号，其中一张是(3,5)</p>
+                    <p><strong>分析：</strong>同一行→行数都是5；连号→列数连续</p>
+                    <p><strong>答案：</strong><span style="color:#4caf50;font-weight:bold;">A. (4,5)、(5,5)</span></p>
+                </div>
+                <div class="answer-group" id="answerGroup2">
+                    <h4>第2问：同一列的座位</h4>
+                    <p><strong>已知：</strong>荣荣爸爸(2,3)，恒恒爸爸同一列</p>
+                    <p><strong>分析：</strong>同一列→列数都是2，行数可以不同</p>
+                    <p><strong>答案：</strong><span style="color:#4caf50;font-weight:bold;">A. (2,4)</span></p>
+                </div>
+                <div class="answer-group" id="answerGroup3">
+                    <h4>第3问：正方形队列人数</h4>
+                    <p><strong>已知：</strong>正方形队列，荣荣位置(4,6)</p>
+                    <p><strong>分析：</strong>正方形→行数=列数；荣荣在第6行→至少6行6列</p>
+                    <p><strong>答案：</strong><span style="color:#4caf50;font-weight:bold;">C. 36人（6×6）</span></p>
+                </div>
+            </div>
+
+            <!-- 总结 -->
+            <div class="tab-content content-section" id="tab1">
+                <h3>📝 方法总结</h3>
+                <ul>
+                    <li><strong>同一行的点：</strong>第二个数（行数）相同，列数可以不同。</li>
+                    <li><strong>同一列的点：</strong>第一个数（列数）相同，行数可以不同。</li>
+                    <li><strong>正方形队列：</strong>人数=行数×列数，且行数=列数。</li>
+                    <li><strong>连号判断：</strong>同一行连号=行数相同，列数连续；同一列连号=列数相同，行数连续。</li>
+                </ul>
+            </div>
+
+            <!-- 易错点 -->
+            <div class="tab-content content-section" id="tab2">
+                <h3>⚠️ 易错点提醒</h3>
+                <ul>
+                    <li><strong>行列搞反：</strong>有的同学会把行数写在前面，列数写在后面，一定要记住<strong>先列后行</strong>。</li>
+                    <li><strong>正方形队列人数计算：</strong>要注意正方形队列行数等于列数，荣荣在第6行说明至少有6行6列，总人数至少36人，不要算错。</li>
+                    <li><strong>同一行/同一列判断：</strong>同一行看第二个数是否相同，同一列看第一个数是否相同，不要搞反。</li>
+                </ul>
+            </div>
+
+            <!-- 知识图谱 -->
+            <div class="tab-content content-section" id="tab3">
+                <h3>🧠 知识图谱</h3>
+                <div class="knowledge-item"><span class="knowledge-label">学科：</span><span>数学</span></div>
+                <div class="knowledge-item"><span class="knowledge-label">年级：</span><span>六年级上册</span></div>
+                <div class="knowledge-item"><span class="knowledge-label">教材版本：</span><span>人教版（RJ）</span></div>
+                <div class="knowledge-item"><span class="knowledge-label">单元：</span><span>第一单元 确定位置</span></div>
+                <div class="knowledge-item"><span class="knowledge-label">知识点：</span><span>用有序数对解决实际问题</span></div>
+                <div class="knowledge-item"><span class="knowledge-label">核心能力：</span><span>数学建模、逻辑推理、实际应用</span></div>
+                <p style="margin-top:15px;color:#666;line-height:1.8;">这道题属于数学六年级上册人教版第一单元确定位置，核心知识点是用有序数对解决实际问题，包括找同行同列的位置、计算正方形队列人数等。这个知识点在生活中有很多应用，比如电影院选座、教室座位、运动会队列等。</p>
+            </div>
+
+            <!-- 原题图片 -->
+            <div class="tab-content" id="tab4">
+                <div class="original-images">
+                    <div class="original-image-item">
+                        <img src="images/p002_q02.png" onclick="showImageModal('images/p002_q02.png')" alt="题目原图" style="max-height:500px;">
+                        <p style="margin-top:10px;color:#666;">题目原图</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- sticky播放器 -->
+    <div class="sticky-player">
+        <div class="player-header">
+            <span class="player-title" id="currentSegmentName">🎧 音频讲解</span>
+            <span class="player-time" id="playerTime">00:00 / 00:00</span>
+        </div>
+        <div class="total-progress" onclick="seekTotal(event)">
+            <div class="total-progress-bar" id="totalProgressBar"></div>
+        </div>
+        <div class="segment-buttons" id="segmentButtons"></div>
+        <div class="player-controls">
+            <button class="play-btn" onclick="togglePlay()" id="playBtn">▶</button>
+            <div class="volume-control">
+                <span>🔊</span>
+                <input type="range" min="0" max="1" step="0.1" value="1" onchange="setVolume(this.value)">
+            </div>
+        </div>
+    </div>
+
+    <!-- 图片放大浮层 -->
+    <div class="image-modal" id="imageModal" onclick="closeImageModal()">
+        <span class="image-modal-close">&times;</span>
+        <img id="modalImage" src="" alt="放大图片">
+    </div>
+
+    <audio id="audioPlayer"></audio>
+
+    <script>
+        // ===== 动画场景数据 =====
+        const sceneDescriptions = [
+            '认识有序数对：第一个数是列数，第二个数是行数。例如(3,5)表示第3列第5行。记住先列后行！',
+            '第1问·同一行连号：已知(3,5)，同一行→行数都是5，连号→列数连续。另外两张是(4,5)和(5,5)，选A。B/C/D选项行数不统一或不是同一行。',
+            '第2问·同一列座位：荣荣爸爸(2,3)，同一列→列数都是2。恒恒爸爸位置是(2,4)，选A。B/C/D选项列数都不是2。',
+            '第3问·正方形队列：荣荣(4,6)在第6行，正方形队列行数=列数，至少6行6列，总人数6×6=36人，选C。',
+            '方法总结：①同一行→第二个数相同；②同一列→第一个数相同；③正方形队列→行数=列数，人数=行数×列数。记住先列后行！'
+        ];
+
+        let currentScene = 0;
+        let currentStep = 0;
+        let isPlaying = false;
+        let playInterval = null;
+
+        // 绘制场景
+        function drawScene(sceneIdx, step) {
+            const content = document.getElementById('svgContent');
+            const annotation = document.getElementById('annotationLayer');
+            content.innerHTML = '';
+            annotation.innerHTML = '';
+
+            if (sceneIdx === 0) {
+                // 场景1：认识有序数对 - 剧场座位图
+                drawTheaterSeats(content, annotation);
+                highlightSeat(content, 3, 5, 'highlight-blue');
+                addAnnotation(annotation, 160, 175, '(3,5)示例');
+                addAnnotation(annotation, 50, 30, '列号→');
+                addAnnotation(annotation, 10, 180, '↑行号');
+            } else if (sceneIdx === 1) {
+                // 场景2：第1问 - 同一行连号
+                drawTheaterSeats(content, annotation);
+                // 第5行整行高亮
+                const rowRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rowRect.setAttribute('x', 35); rowRect.setAttribute('y', 145);
+                rowRect.setAttribute('width', 280); rowRect.setAttribute('height', 30);
+                rowRect.setAttribute('class', 'row-highlight'); rowRect.setAttribute('rx', 4);
+                content.appendChild(rowRect);
+                highlightSeat(content, 3, 5, 'highlight-orange');
+                if (step >= 0) { highlightSeat(content, 4, 5, 'highlight-green'); }
+                if (step >= 1) { highlightSeat(content, 5, 5, 'highlight-green'); }
+                addAnnotation(annotation, 160, 130, '同一行=行数都是5');
+                addAnnotation(annotation, 160, 200, '连号=列数连续(3,4,5)');
+                addAnnotation(annotation, 320, 175, '答案:A');
+            } else if (sceneIdx === 2) {
+                // 场景3：第2问 - 同一列
+                drawClassroomSeats(content, annotation);
+                // 第2列整列高亮
+                const colRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                colRect.setAttribute('x', 85); colRect.setAttribute('y', 45);
+                colRect.setAttribute('width', 30); colRect.setAttribute('height', 180);
+                colRect.setAttribute('class', 'col-highlight'); colRect.setAttribute('rx', 4);
+                content.appendChild(colRect);
+                highlightSeat2(content, 2, 3, 'highlight-orange');
+                if (step >= 0) { highlightSeat2(content, 2, 4, 'highlight-green'); }
+                addAnnotation(annotation, 75, 30, '同一列=列数都是2');
+                addAnnotation(annotation, 75, 250, '答案:A (2,4)');
+            } else if (sceneIdx === 3) {
+                // 场景4：第3问 - 正方形队列
+                drawSquareQueue(content, annotation);
+                if (step >= 0) {
+                    // 6x6正方形高亮
+                    const sqRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    sqRect.setAttribute('x', 85); sqRect.setAttribute('y', 45);
+                    sqRect.setAttribute('width', 180); sqRect.setAttribute('height', 180);
+                    sqRect.setAttribute('class', 'square-highlight'); sqRect.setAttribute('rx', 4);
+                    content.appendChild(sqRect);
+                }
+                highlightSeat3(content, 4, 6, 'highlight-orange');
+                addAnnotation(annotation, 150, 250, '6×6=36人');
+                addAnnotation(annotation, 300, 150, '答案:C');
+            } else if (sceneIdx === 4) {
+                // 场景5：方法总结
+                addAnnotation(annotation, 250, 80, '① 同一行 → 第二个数相同');
+                addAnnotation(annotation, 250, 130, '② 同一列 → 第一个数相同');
+                addAnnotation(annotation, 250, 180, '③ 正方形队列 → 行数=列数');
+                addAnnotation(annotation, 250, 230, '   人数 = 行数 × 列数');
+                addAnnotation(annotation, 250, 280, '⭐ 记住：先列后行！');
+            }
+        }
+
+        // 绘制剧场座位
+        function drawTheaterSeats(content, annotation) {
+            // 列号
+            for (let c = 1; c <= 8; c++) {
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', 50 + (c-1)*35); text.setAttribute('y', 30);
+                text.setAttribute('class', 'seat-label'); text.textContent = c;
+                content.appendChild(text);
+            }
+            // 行号和座位
+            for (let r = 1; r <= 8; r++) {
+                const rowText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                rowText.setAttribute('x', 20); rowText.setAttribute('y', 50 + (r-1)*25);
+                rowText.setAttribute('class', 'seat-label'); rowText.textContent = r;
+                content.appendChild(rowText);
+                for (let c = 1; c <= 8; c++) {
+                    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    rect.setAttribute('x', 35 + (c-1)*35); rect.setAttribute('y', 35 + (r-1)*25);
+                    rect.setAttribute('width', 28); rect.setAttribute('height', 20);
+                    rect.setAttribute('rx', 3); rect.setAttribute('class', 'seat available');
+                    content.appendChild(rect);
+                }
+            }
+        }
+
+        // 绘制教室座位
+        function drawClassroomSeats(content, annotation) {
+            for (let c = 1; c <= 6; c++) {
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', 100 + (c-1)*35); text.setAttribute('y', 30);
+                text.setAttribute('class', 'seat-label'); text.textContent = c;
+                content.appendChild(text);
+            }
+            for (let r = 1; r <= 7; r++) {
+                const rowText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                rowText.setAttribute('x', 70); rowText.setAttribute('y', 50 + (r-1)*25);
+                rowText.setAttribute('class', 'seat-label'); rowText.textContent = r;
+                content.appendChild(rowText);
+                for (let c = 1; c <= 6; c++) {
+                    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    rect.setAttribute('x', 85 + (c-1)*35); rect.setAttribute('y', 35 + (r-1)*25);
+                    rect.setAttribute('width', 28); rect.setAttribute('height', 20);
+                    rect.setAttribute('rx', 3); rect.setAttribute('class', 'seat available');
+                    content.appendChild(rect);
+                }
+            }
+        }
+
+        // 绘制正方形队列
+        function drawSquareQueue(content, annotation) {
+            for (let c = 1; c <= 8; c++) {
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', 100 + (c-1)*30); text.setAttribute('y', 30);
+                text.setAttribute('class', 'seat-label'); text.textContent = c;
+                content.appendChild(text);
+            }
+            for (let r = 1; r <= 8; r++) {
+                const rowText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                rowText.setAttribute('x', 70); rowText.setAttribute('y', 50 + (r-1)*22);
+                rowText.setAttribute('class', 'seat-label'); rowText.textContent = r;
+                content.appendChild(rowText);
+                for (let c = 1; c <= 8; c++) {
+                    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    rect.setAttribute('x', 85 + (c-1)*30); rect.setAttribute('y', 35 + (r-1)*22);
+                    rect.setAttribute('width', 24); rect.setAttribute('height', 18);
+                    rect.setAttribute('rx', 2); rect.setAttribute('class', 'seat available');
+                    content.appendChild(rect);
+                }
+            }
+        }
+
+        // 高亮座位（剧场）
+        function highlightSeat(content, col, row, className) {
+            const seats = content.querySelectorAll('.seat');
+            const idx = (row-1)*8 + (col-1);
+            if (seats[idx]) seats[idx].classList.add(className);
+        }
+
+        // 高亮座位（教室）
+        function highlightSeat2(content, col, row, className) {
+            const seats = content.querySelectorAll('.seat');
+            const idx = (row-1)*6 + (col-1);
+            if (seats[idx]) seats[idx].classList.add(className);
+        }
+
+        // 高亮座位（队列）
+        function highlightSeat3(content, col, row, className) {
+            const seats = content.querySelectorAll('.seat');
+            const idx = (row-1)*8 + (col-1);
+            if (seats[idx]) seats[idx].classList.add(className);
+        }
+
+        // 添加标注
+        function addAnnotation(annotation, x, y, text) {
+            const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            txt.setAttribute('x', x); txt.setAttribute('y', y);
+            txt.setAttribute('class', 'annotation-text'); txt.textContent = text;
+            annotation.appendChild(txt);
+        }
+
+        // 切换场景
+        function switchScene(sceneIdx) {
+            currentScene = sceneIdx;
+            currentStep = 0;
+            document.querySelectorAll('.scene-btn').forEach((btn, idx) => {
+                btn.classList.toggle('active', idx === sceneIdx);
+            });
+            document.getElementById('sceneDescription').textContent = sceneDescriptions[sceneIdx];
+            drawScene(sceneIdx, 0);
+        }
+
+        // 动画播放控制
+        function togglePlayAnimation() {
+            isPlaying = !isPlaying;
+            const btn = document.getElementById('playAnimBtn');
+            if (isPlaying) {
+                btn.textContent = '⏸ 暂停';
+                playInterval = setInterval(() => { nextStep(); }, 2000);
+            } else {
+                btn.textContent = '▶ 播放';
+                clearInterval(playInterval);
+            }
+        }
+
+        function nextStep() {
+            const maxSteps = [0, 1, 0, 0, 0];
+            if (currentStep < maxSteps[currentScene]) {
+                currentStep++;
+                drawScene(currentScene, currentStep);
+            } else if (currentScene < 4) {
+                switchScene(currentScene + 1);
+            } else {
+                isPlaying = false;
+                document.getElementById('playAnimBtn').textContent = '▶ 播放';
+                clearInterval(playInterval);
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                drawScene(currentScene, currentStep);
+            } else if (currentScene > 0) {
+                switchScene(currentScene - 1);
+            }
+        }
+
+        function resetAnimation() {
+            isPlaying = false;
+            document.getElementById('playAnimBtn').textContent = '▶ 播放';
+            clearInterval(playInterval);
+            switchScene(0);
+        }
+
+        // 选项卡切换
+        function switchTab(idx) {
+            document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+                btn.classList.toggle('active', i === idx);
+            });
+            document.querySelectorAll('.tab-content').forEach((content, i) => {
+                content.classList.toggle('active', i === idx);
+            });
+        }
+
+        // 图片放大
+        function showImageModal(src) {
+            document.getElementById('modalImage').src = src;
+            document.getElementById('imageModal').classList.add('active');
+        }
+        function closeImageModal() {
+            document.getElementById('imageModal').classList.remove('active');
+        }
+
+        // ===== 音频播放器 =====
+        const audioFiles = [
+            'audio/segment1.mp3', 'audio/segment2.mp3', 'audio/segment3.mp3',
+            'audio/segment4.mp3', 'audio/segment5.mp3', 'audio/segment6.mp3',
+            'audio/segment7.mp3'
+        ];
+        const segmentNames = ['引导语', '题目朗读', '第1问', '第2问', '第3问', '总结', '易错点'];
+        const segmentTabs = [-1, 0, 0, 0, 0, 1, 2];
+        const segmentScenes = [0, 0, 1, 2, 3, 4, 4];
+
+        let currentSegment = 0;
+        let totalDuration = 0;
+        let segmentDurations = new Array(7).fill(0);
+        let playedSegments = new Set();
+
+        const audioPlayer = document.getElementById('audioPlayer');
+
+        // 初始化分段按钮
+        function initSegmentButtons() {
+            const container = document.getElementById('segmentButtons');
+            container.innerHTML = '';
+            segmentNames.forEach((name, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'seg-btn';
+                btn.textContent = `${idx + 1}.${name}`;
+                btn.onclick = () => playSegment(idx);
+                container.appendChild(btn);
+            });
+        }
+
+        // 预加载音频时长
+        function preloadDurations() {
+            let loaded = 0;
+            audioFiles.forEach((src, idx) => {
+                const audio = new Audio(src);
+                audio.addEventListener('loadedmetadata', () => {
+                    segmentDurations[idx] = audio.duration;
+                    totalDuration += audio.duration;
+                    loaded++;
+                    if (loaded === 7) updatePlayerTime();
+                });
+            });
+        }
+
+        // 播放指定分段
+        function playSegment(idx) {
+            currentSegment = idx;
+            audioPlayer.src = audioFiles[idx];
+            audioPlayer.play();
+            playedSegments.add(idx);
+            updateSegmentButtons();
+            updateCurrentSegmentName();
+            if (segmentTabs[idx] >= 0) switchTab(segmentTabs[idx]);
+            switchScene(segmentScenes[idx]);
+            highlightAnswer(idx);
+            highlightOptions(idx);
+            showAnswerBracket(idx);
+        }
+
+        // 高亮答案区
+        function highlightAnswer(segIdx) {
+            document.querySelectorAll('.answer-group').forEach(g => g.classList.remove('highlight'));
+            if (segIdx === 2) document.getElementById('answerGroup1').classList.add('highlight');
+            else if (segIdx === 3) document.getElementById('answerGroup2').classList.add('highlight');
+            else if (segIdx === 4) document.getElementById('answerGroup3').classList.add('highlight');
+        }
+
+        // 选择题选项变色
+        function highlightOptions(segIdx) {
+            // 先重置所有选项
+            document.querySelectorAll('.option-item').forEach(opt => {
+                opt.classList.remove('correct', 'wrong');
+            });
+            if (segIdx === 2) {
+                // 第1问：A正确，B/C/D错误
+                document.querySelector('#options1 [data-option="A"]').classList.add('correct');
+                document.querySelector('#options1 [data-option="B"]').classList.add('wrong');
+                document.querySelector('#options1 [data-option="C"]').classList.add('wrong');
+                document.querySelector('#options1 [data-option="D"]').classList.add('wrong');
+            } else if (segIdx === 3) {
+                // 第2问：A正确，B/C/D错误
+                document.querySelector('#options2 [data-option="A"]').classList.add('correct');
+                document.querySelector('#options2 [data-option="B"]').classList.add('wrong');
+                document.querySelector('#options2 [data-option="C"]').classList.add('wrong');
+                document.querySelector('#options2 [data-option="D"]').classList.add('wrong');
+            } else if (segIdx === 4) {
+                // 第3问：C正确，A/B/D错误
+                document.querySelector('#options3 [data-option="A"]').classList.add('wrong');
+                document.querySelector('#options3 [data-option="B"]').classList.add('wrong');
+                document.querySelector('#options3 [data-option="C"]').classList.add('correct');
+                document.querySelector('#options3 [data-option="D"]').classList.add('wrong');
+            }
+        }
+
+        // 显示答案括号
+        function showAnswerBracket(segIdx) {
+            if (segIdx === 2) document.getElementById('answer1').textContent = 'A';
+            else if (segIdx === 3) document.getElementById('answer2').textContent = 'A';
+            else if (segIdx === 4) document.getElementById('answer3').textContent = 'C';
+        }
+
+        // 更新分段按钮状态
+        function updateSegmentButtons() {
+            document.querySelectorAll('.seg-btn').forEach((btn, idx) => {
+                btn.classList.remove('active', 'played');
+                if (idx === currentSegment) btn.classList.add('active');
+                else if (playedSegments.has(idx)) btn.classList.add('played');
+            });
+        }
+
+        function updateCurrentSegmentName() {
+            document.getElementById('currentSegmentName').textContent = `🎧 ${segmentNames[currentSegment]}`;
+        }
+
+        // 播放/暂停
+        function togglePlay() {
+            if (audioPlayer.paused) {
+                if (!audioPlayer.src) playSegment(0);
+                else audioPlayer.play();
+                document.getElementById('playBtn').textContent = '⏸';
+            } else {
+                audioPlayer.pause();
+                document.getElementById('playBtn').textContent = '▶';
+            }
+        }
+
+        // 音频结束自动播放下一段
+        audioPlayer.addEventListener('ended', () => {
+            if (currentSegment < 6) playSegment(currentSegment + 1);
+            else document.getElementById('playBtn').textContent = '▶';
+        });
+
+        // 播放进度更新
+        audioPlayer.addEventListener('timeupdate', () => {
+            updatePlayerTime();
+            updateTotalProgress();
+        });
+
+        function updatePlayerTime() {
+            const currentTime = audioPlayer.currentTime || 0;
+            const elapsedBefore = segmentDurations.slice(0, currentSegment).reduce((a, b) => a + b, 0);
+            const totalCurrent = elapsedBefore + currentTime;
+            document.getElementById('playerTime').textContent = `${formatTime(totalCurrent)} / ${formatTime(totalDuration)}`;
+        }
+
+        function updateTotalProgress() {
+            const currentTime = audioPlayer.currentTime || 0;
+            const elapsedBefore = segmentDurations.slice(0, currentSegment).reduce((a, b) => a + b, 0);
+            const totalCurrent = elapsedBefore + currentTime;
+            const percent = totalDuration > 0 ? (totalCurrent / totalDuration) * 100 : 0;
+            document.getElementById('totalProgressBar').style.width = percent + '%';
+        }
+
+        function seekTotal(event) {
+            const rect = event.currentTarget.getBoundingClientRect();
+            const percent = (event.clientX - rect.left) / rect.width;
+            const targetTime = percent * totalDuration;
+            let elapsed = 0;
+            for (let i = 0; i < 7; i++) {
+                if (elapsed + segmentDurations[i] >= targetTime) {
+                    playSegment(i);
+                    setTimeout(() => { audioPlayer.currentTime = targetTime - elapsed; }, 100);
+                    break;
+                }
+                elapsed += segmentDurations[i];
+            }
+        }
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function setVolume(val) { audioPlayer.volume = val; }
+
+        // 初始化
+        initSegmentButtons();
+        preloadDurations();
+        switchScene(0);
+    </script>
+</body>
+</html>
