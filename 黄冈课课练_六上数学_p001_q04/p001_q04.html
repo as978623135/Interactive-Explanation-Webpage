@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>飞机选座问题 - 黄冈课课练六年级上册数学</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding-bottom: 120px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        /* 页面标题 */
+        .page-title {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        .page-title h1 { font-size: 1.6em; margin-bottom: 5px; }
+        .page-title p { font-size: 0.95em; opacity: 0.9; }
+        /* 题目原文卡片 */
+        .question-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        .question-card h2 {
+            font-size: 1.2em;
+            color: #667eea;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f2ff;
+        }
+        .question-text {
+            font-size: 1.05em;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+        .question-text .highlight {
+            background: #e3f2fd;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .question-images {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        .question-thumb {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .question-thumb:hover { transform: scale(1.05); border-color: #667eea; }
+        .image-label {
+            text-align: center;
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+        /* 动画演示区 */
+        .animation-section {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        .animation-section h2 {
+            font-size: 1.2em;
+            color: #764ba2;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f5f0ff;
+        }
+        .seat-map-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        .scene-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            justify-content: center;
+        }
+        .scene-btn {
+            padding: 8px 16px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s;
+        }
+        .scene-btn:hover { border-color: #764ba2; color: #764ba2; }
+        .scene-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+        .animation-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        .ctrl-btn {
+            padding: 8px 20px;
+            border: none;
+            background: #f0f2ff;
+            color: #667eea;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s;
+        }
+        .ctrl-btn:hover { background: #667eea; color: white; }
+        .scene-description {
+            text-align: center;
+            margin-top: 15px;
+            padding: 12px;
+            background: #f8f9ff;
+            border-radius: 8px;
+            font-size: 0.95em;
+            color: #555;
+            min-height: 50px;
+        }
+        /* 选项卡 */
+        .tabs-container {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        .tab-buttons {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 0;
+        }
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 0.95em;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover { color: #667eea; }
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            font-weight: bold;
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        /* 答案区 */
+        .answer-group {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s;
+        }
+        .answer-group.highlight {
+            background: #e8f5e9;
+            border-left-color: #4caf50;
+            transform: scale(1.02);
+        }
+        .answer-group h4 {
+            color: #667eea;
+            margin-bottom: 8px;
+            font-size: 1.05em;
+        }
+        .answer-group .answer-text {
+            font-size: 1.1em;
+            color: #333;
+        }
+        .answer-group .answer-text .correct {
+            color: #4caf50;
+            font-weight: bold;
+        }
+        /* 总结/易错点/知识图谱 */
+        .content-section h3 {
+            color: #667eea;
+            margin-bottom: 12px;
+            font-size: 1.15em;
+        }
+        .content-section ul {
+            margin-left: 25px;
+            margin-bottom: 15px;
+        }
+        .content-section li {
+            margin-bottom: 8px;
+            line-height: 1.7;
+        }
+        .knowledge-item {
+            display: flex;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #f8f9ff;
+            border-radius: 8px;
+        }
+        .knowledge-label {
+            font-weight: bold;
+            color: #667eea;
+            min-width: 100px;
+        }
+        /* 原题图片选项卡 */
+        .original-images {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .original-image-item {
+            text-align: center;
+        }
+        .original-image-item img {
+            max-width: 100%;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        /* sticky播放器 */
+        .sticky-player {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            border-top: 3px solid #667eea;
+            border-radius: 16px 16px 0 0;
+            padding: 15px 20px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+            z-index: 1000;
+        }
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .player-title {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 0.95em;
+        }
+        .player-time {
+            font-size: 0.85em;
+            color: #999;
+        }
+        .total-progress {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        .total-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.1s;
+        }
+        .segment-buttons {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        .seg-btn {
+            padding: 5px 12px;
+            border: 1px solid #e0e0e0;
+            background: white;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: all 0.2s;
+        }
+        .seg-btn:hover { border-color: #667eea; color: #667eea; }
+        .seg-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        .seg-btn.played {
+            background: #e8f5e9;
+            border-color: #4caf50;
+            color: #4caf50;
+        }
+        .player-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+        }
+        .play-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-size: 1.1em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .play-btn:hover { opacity: 0.9; }
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .volume-control input {
+            width: 80px;
+        }
+        /* 图片放大浮层 */
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .image-modal.active { display: flex; }
+        .image-modal img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 8px;
+        }
+        .image-modal-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 2em;
+            cursor: pointer;
+        }
+        /* SVG座位图样式 */
+        .seat { transition: all 0.3s; cursor: pointer; }
+        .seat.available { fill: white; stroke: #999; stroke-width: 1; }
+        .seat.selected { fill: #f8bbd0; stroke: #e91e63; stroke-width: 1; }
+        .seat.circle-mark { fill: white; stroke: #2196f3; stroke-width: 3; }
+        .seat.square-mark { fill: white; stroke: #ff9800; stroke-width: 3; }
+        .seat.highlight-blue { fill: #bbdefb; stroke: #2196f3; stroke-width: 2; }
+        .seat.highlight-green { fill: #c8e6c9; stroke: #4caf50; stroke-width: 2; }
+        .seat.highlight-orange { fill: #ffe0b2; stroke: #ff9800; stroke-width: 2; }
+        .seat.highlight-purple { fill: #e1bee7; stroke: #9c27b0; stroke-width: 2; }
+        .seat-label { font-size: 12px; fill: #666; text-anchor: middle; }
+        .aisle-label { font-size: 11px; fill: #999; text-anchor: middle; }
+        .arrow-line { stroke: #ff5722; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+        .annotation-text { font-size: 13px; fill: #ff5722; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 页面标题 -->
+        <div class="page-title">
+            <h1>✈️ 飞机选座问题</h1>
+            <p>黄冈课课练 · 六年级上册数学 · 综合应用题</p>
+        </div>
+
+        <!-- 题目原文卡片 -->
+        <div class="question-card">
+            <h2>📝 题目原文</h2>
+            <div class="question-text" id="questionText">
+                文文和爸爸乘飞机去广东旅游，爸爸选择在网上值机选座。如图是飞机部分座位的分布图，座位可以用有序数对表示，如第A列第8行的座位就用有序数对(A,8)表示。<br><br>
+                <strong>第一问：</strong>图中用圆圈标出的座位用有序数对表示是( &nbsp; , &nbsp; )，爸爸选择的座位已在图中用方框标出，用有序数对表示是( &nbsp; , &nbsp; )。<br><br>
+                <strong>第二问：</strong>文文选择和爸爸左右挨着坐，她的座位用有序数对表示是( &nbsp; , &nbsp; )或( &nbsp; , &nbsp; )。<br><br>
+                <strong>第三问：</strong>请你当一回值机客服，为乘客推荐理想座位。<br>
+                ① 张老师喜欢靠过道的座位，你为她推荐的座位应该在第( &nbsp; )列或第( &nbsp; )列。<br>
+                ② 王爷爷老两口想要独立的两连座，有几种选择？请用有序数对表示出来。
+            </div>
+            <div class="question-images">
+                <div>
+                    <img src="images/p001_q04.png" class="question-thumb" onclick="showImageModal('images/p001_q04.png')" alt="题目原图">
+                    <div class="image-label">题目原图</div>
+                </div>
+                <div>
+                    <img src="images/p001_q04_图1.png" class="question-thumb" onclick="showImageModal('images/p001_q04_图1.png')" alt="座位分布图">
+                    <div class="image-label">座位分布图</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 动画演示区 -->
+        <div class="animation-section">
+            <h2>🎬 动画演示 · 座位分布图</h2>
+            <div class="scene-buttons" id="sceneButtons">
+                <button class="scene-btn active" onclick="switchScene(0)">认识座位图</button>
+                <button class="scene-btn" onclick="switchScene(1)">第1问·圆圈座位</button>
+                <button class="scene-btn" onclick="switchScene(2)">第1问·爸爸座位</button>
+                <button class="scene-btn" onclick="switchScene(3)">第2问·相邻座位</button>
+                <button class="scene-btn" onclick="switchScene(4)">第3问·靠过道</button>
+                <button class="scene-btn" onclick="switchScene(5)">第3问·两连座</button>
+            </div>
+            <div class="seat-map-container">
+                <svg id="seatMap" width="500" height="420" viewBox="0 0 500 420">
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#ff5722"/>
+                        </marker>
+                    </defs>
+                    <!-- 列号标签 -->
+                    <text x="60" y="30" class="seat-label">A</text>
+                    <text x="100" y="30" class="seat-label">B</text>
+                    <text x="170" y="30" class="aisle-label">过道</text>
+                    <text x="230" y="30" class="seat-label">D</text>
+                    <text x="280" y="30" class="seat-label">E</text>
+                    <text x="330" y="30" class="seat-label">F</text>
+                    <text x="380" y="30" class="seat-label">G</text>
+                    <!-- 行号标签和座位 -->
+                    <g id="seatGroup"></g>
+                    <!-- 动态标注层 -->
+                    <g id="annotationLayer"></g>
+                </svg>
+            </div>
+            <div class="animation-controls">
+                <button class="ctrl-btn" onclick="prevStep()">⏮ 上一步</button>
+                <button class="ctrl-btn" onclick="togglePlayAnimation()" id="playAnimBtn">▶ 播放</button>
+                <button class="ctrl-btn" onclick="nextStep()">下一步 ⏭</button>
+                <button class="ctrl-btn" onclick="resetAnimation()">🔄 重置</button>
+            </div>
+            <div class="scene-description" id="sceneDescription">
+                点击"播放"按钮，或选择上方场景按钮，开始动画演示。座位用有序数对表示：第一个数是列号（字母A-G），第二个数是行号（数字1-8）。
+            </div>
+        </div>
+
+        <!-- 选项卡区域 -->
+        <div class="tabs-container">
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="switchTab(0)">📖 题目讲解</button>
+                <button class="tab-btn" onclick="switchTab(1)">📝 总结</button>
+                <button class="tab-btn" onclick="switchTab(2)">⚠️ 易错点</button>
+                <button class="tab-btn" onclick="switchTab(3)">🧠 知识图谱</button>
+                <button class="tab-btn" onclick="switchTab(4)">🖼️ 原题图片</button>
+            </div>
+
+            <!-- 题目讲解 -->
+            <div class="tab-content active" id="tab0">
+                <div class="answer-group" id="answer1">
+                    <h4>第一问：用有序数对表示座位</h4>
+                    <div class="answer-text">
+                        圆圈标出的座位：<span class="correct">(B, 2)</span><br>
+                        爸爸的座位（方框）：<span class="correct">(F, 5)</span><br>
+                        <small>💡 第一个数是列数（字母），第二个数是行数（数字）</small>
+                    </div>
+                </div>
+                <div class="answer-group" id="answer2">
+                    <h4>第二问：文文左右挨着的座位</h4>
+                    <div class="answer-text">
+                        爸爸在(F, 5)，左右相邻的座位：<br>
+                        左边：<span class="correct">(E, 5)</span>，右边：<span class="correct">(G, 5)</span><br>
+                        <small>💡 左右挨着 = 同一行，列数相邻</small>
+                    </div>
+                </div>
+                <div class="answer-group" id="answer3">
+                    <h4>第三问①：靠过道的座位</h4>
+                    <div class="answer-text">
+                        过道在B列和D列之间，靠过道的座位是：<br>
+                        <span class="correct">第B列</span>（右边是过道）或 <span class="correct">第D列</span>（左边是过道）
+                    </div>
+                </div>
+                <div class="answer-group" id="answer4">
+                    <h4>第三问②：独立两连座</h4>
+                    <div class="answer-text">
+                        A列和B列是独立两连座（C-G是四连座）。<br>
+                        可选的两连座有 <span class="correct">2种</span>：<br>
+                        ① <span class="correct">(A,1)和(B,1)</span><br>
+                        ② <span class="correct">(A,3)和(B,3)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 总结 -->
+            <div class="tab-content content-section" id="tab1">
+                <h3>📝 方法总结</h3>
+                <ul>
+                    <li><strong>有序数对表示位置：</strong>第一个数表示列，第二个数表示行，顺序不能搞反（先列后行）。</li>
+                    <li><strong>找相邻座位：</strong>同一行的列数相邻就是左右相邻，同一列的行数相邻就是前后相邻。</li>
+                    <li><strong>靠过道座位：</strong>要看清过道的位置，座位旁边就是过道的就是靠过道座位。</li>
+                    <li><strong>独立两连座：</strong>只有两个座位连在一起的才是独立两连座，需要逐行检查是否都可选。</li>
+                </ul>
+            </div>
+
+            <!-- 易错点 -->
+            <div class="tab-content content-section" id="tab2">
+                <h3>⚠️ 易错点提醒</h3>
+                <ul>
+                    <li><strong>行列搞反：</strong>有的同学会把行数写在前面，列数写在后面，一定要记住<strong>先列后行</strong>。</li>
+                    <li><strong>字母列和数字行混淆：</strong>列数用字母A到G表示，行数用数字1到8表示，不要混淆。</li>
+                    <li><strong>相邻座位判断错误：</strong>左右相邻是同一行不同列，前后相邻是同一列不同行，要看清题目要求。</li>
+                    <li><strong>两连座漏选或多选：</strong>要逐行检查A和B列是否都可选，已选的座位不能算。</li>
+                </ul>
+            </div>
+
+            <!-- 知识图谱 -->
+            <div class="tab-content content-section" id="tab3">
+                <h3>🧠 知识图谱</h3>
+                <div class="knowledge-item">
+                    <span class="knowledge-label">学科：</span>
+                    <span>数学</span>
+                </div>
+                <div class="knowledge-item">
+                    <span class="knowledge-label">年级：</span>
+                    <span>六年级上册</span>
+                </div>
+                <div class="knowledge-item">
+                    <span class="knowledge-label">教材版本：</span>
+                    <span>人教版（RJ）</span>
+                </div>
+                <div class="knowledge-item">
+                    <span class="knowledge-label">单元：</span>
+                    <span>第一单元 确定位置</span>
+                </div>
+                <div class="knowledge-item">
+                    <span class="knowledge-label">知识点：</span>
+                    <span>用有序数对表示位置并解决实际问题</span>
+                </div>
+                <div class="knowledge-item">
+                    <span class="knowledge-label">核心能力：</span>
+                    <span>数学建模、空间想象、实际应用</span>
+                </div>
+            </div>
+
+            <!-- 原题图片 -->
+            <div class="tab-content" id="tab4">
+                <div class="original-images">
+                    <div class="original-image-item">
+                        <img src="images/p001_q04.png" onclick="showImageModal('images/p001_q04.png')" alt="题目原图" style="max-height:400px;">
+                        <p style="margin-top:10px;color:#666;">题目原图</p>
+                    </div>
+                    <div class="original-image-item">
+                        <img src="images/p001_q04_图1.png" onclick="showImageModal('images/p001_q04_图1.png')" alt="座位分布图" style="max-height:400px;">
+                        <p style="margin-top:10px;color:#666;">座位分布图</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- sticky播放器 -->
+    <div class="sticky-player">
+        <div class="player-header">
+            <span class="player-title" id="currentSegmentName">🎧 音频讲解</span>
+            <span class="player-time" id="playerTime">00:00 / 00:00</span>
+        </div>
+        <div class="total-progress" onclick="seekTotal(event)">
+            <div class="total-progress-bar" id="totalProgressBar"></div>
+        </div>
+        <div class="segment-buttons" id="segmentButtons"></div>
+        <div class="player-controls">
+            <button class="play-btn" onclick="togglePlay()" id="playBtn">▶</button>
+            <div class="volume-control">
+                <span>🔊</span>
+                <input type="range" min="0" max="1" step="0.1" value="1" onchange="setVolume(this.value)">
+            </div>
+        </div>
+    </div>
+
+    <!-- 图片放大浮层 -->
+    <div class="image-modal" id="imageModal" onclick="closeImageModal()">
+        <span class="image-modal-close">&times;</span>
+        <img id="modalImage" src="" alt="放大图片">
+    </div>
+
+    <audio id="audioPlayer"></audio>
+
+    <script>
+        // 座位数据：A B (过道) D E F G列，1-8行
+        // 0=可选, 1=已选, 2=圆圈标记, 3=方框标记
+        const seatData = {
+            'A': [0, 0, 0, 1, 1, 1, 1, 1],  // 行1-8
+            'B': [0, 2, 0, 0, 0, 0, 0, 0],
+            'D': [0, 0, 0, 0, 0, 0, 0, 0],
+            'E': [0, 0, 0, 0, 0, 0, 0, 0],
+            'F': [0, 0, 0, 0, 3, 0, 0, 0],
+            'G': [0, 0, 0, 0, 0, 0, 0, 0]
+        };
+        const columns = ['A', 'B', 'D', 'E', 'F', 'G'];
+        const colX = {'A': 40, 'B': 80, 'D': 210, 'E': 260, 'F': 310, 'G': 360};
+        const rowY = [60, 100, 140, 180, 220, 260, 300, 340]; // 行1-8的y坐标
+
+        let currentScene = 0;
+        let currentStep = 0;
+        let isPlaying = false;
+        let playInterval = null;
+
+        // 场景描述
+        const sceneDescriptions = [
+            '认识座位分布图：列号用字母A、B、D、E、F、G表示（B和D之间是过道），行号用数字1-8表示。白色方框是可选座位，粉色方框是已选座位。有序数对(列,行)表示一个座位，如(A,8)表示第A列第8行。',
+            '第1问·圆圈座位：图中用圆圈标出的座位在第B列第2行。先找到B列，再找到第2行，交叉处就是圆圈座位。用有序数对表示为(B, 2)。注意：第一个数是列数（字母），第二个数是行数（数字）。',
+            '第1问·爸爸座位：爸爸选择的座位用方框标出，在第F列第5行。先找到F列，再找到第5行，交叉处就是爸爸的座位。用有序数对表示为(F, 5)。',
+            '第2问·相邻座位：爸爸在(F, 5)，文文要和爸爸左右挨着坐。左右挨着就是同一行（第5行），列数相邻。F列左边是E列，右边是G列，所以文文的座位可以是(E, 5)或(G, 5)。',
+            '第3问·靠过道：过道在B列和D列之间。靠过道的座位就是座位旁边就是过道的座位。B列的右边是过道，D列的左边是过道，所以推荐张老师第B列或第D列的座位。',
+            '第3问·两连座：A列和B列是独立两连座（C-G列是四连座，不是独立两连座）。逐行检查A和B列是否都可选：第1行A、B都可选✓；第2行B是圆圈标记✗；第3行A、B都可选✓；第4-8行A已选✗。所以共有2种选择：(A,1)(B,1)和(A,3)(B,3)。'
+        ];
+
+        // 初始化座位图
+        function initSeatMap() {
+            const group = document.getElementById('seatGroup');
+            group.innerHTML = '';
+            columns.forEach(col => {
+                seatData[col].forEach((status, rowIdx) => {
+                    const x = colX[col];
+                    const y = rowY[rowIdx];
+                    let seatClass = 'seat ';
+                    if (status === 0) seatClass += 'available';
+                    else if (status === 1) seatClass += 'selected';
+                    else if (status === 2) seatClass += 'circle-mark';
+                    else if (status === 3) seatClass += 'square-mark';
+                    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    rect.setAttribute('x', x);
+                    rect.setAttribute('y', y);
+                    rect.setAttribute('width', 35);
+                    rect.setAttribute('height', 30);
+                    rect.setAttribute('rx', 4);
+                    rect.setAttribute('class', seatClass);
+                    rect.setAttribute('data-col', col);
+                    rect.setAttribute('data-row', rowIdx + 1);
+                    group.appendChild(rect);
+                    // 行号标签
+                    if (col === 'A') {
+                        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                        text.setAttribute('x', 15);
+                        text.setAttribute('y', y + 20);
+                        text.setAttribute('class', 'seat-label');
+                        text.textContent = rowIdx + 1;
+                        group.appendChild(text);
+                    }
+                });
+            });
+        }
+
+        // 切换场景
+        function switchScene(sceneIdx) {
+            currentScene = sceneIdx;
+            currentStep = 0;
+            document.querySelectorAll('.scene-btn').forEach((btn, idx) => {
+                btn.classList.toggle('active', idx === sceneIdx);
+            });
+            document.getElementById('sceneDescription').textContent = sceneDescriptions[sceneIdx];
+            resetSeatHighlight();
+            applySceneHighlight(sceneIdx, 0);
+        }
+
+        // 重置座位高亮
+        function resetSeatHighlight() {
+            document.querySelectorAll('.seat').forEach(seat => {
+                const col = seat.getAttribute('data-col');
+                const row = parseInt(seat.getAttribute('data-row'));
+                const status = seatData[col][row - 1];
+                let seatClass = 'seat ';
+                if (status === 0) seatClass += 'available';
+                else if (status === 1) seatClass += 'selected';
+                else if (status === 2) seatClass += 'circle-mark';
+                else if (status === 3) seatClass += 'square-mark';
+                seat.setAttribute('class', seatClass);
+            });
+            document.getElementById('annotationLayer').innerHTML = '';
+        }
+
+        // 应用场景高亮
+        function applySceneHighlight(sceneIdx, step) {
+            const annotationLayer = document.getElementById('annotationLayer');
+            annotationLayer.innerHTML = '';
+            
+            if (sceneIdx === 0) {
+                // 认识座位图：高亮示例(A,8)
+                highlightSeat('A', 8, 'highlight-blue');
+                addAnnotation(40, 350, '(A,8)示例');
+            } else if (sceneIdx === 1) {
+                // 圆圈座位(B,2)
+                highlightSeat('B', 2, 'highlight-blue');
+                addArrow(100, 30, 100, 100);
+                addAnnotation(100, 50, 'B列');
+                addArrow(15, 100, 80, 100);
+                addAnnotation(15, 85, '第2行');
+                addAnnotation(100, 155, '(B,2)');
+            } else if (sceneIdx === 2) {
+                // 爸爸座位(F,5)
+                highlightSeat('F', 5, 'highlight-orange');
+                addArrow(310, 30, 310, 220);
+                addAnnotation(310, 50, 'F列');
+                addArrow(260, 220, 310, 220);
+                addAnnotation(250, 210, '第5行');
+                addAnnotation(310, 275, '(F,5)');
+            } else if (sceneIdx === 3) {
+                // 相邻座位(E,5)和(G,5)
+                highlightSeat('F', 5, 'highlight-orange');
+                if (step >= 0) {
+                    highlightSeat('E', 5, 'highlight-green');
+                    addAnnotation(260, 275, '(E,5)左边');
+                }
+                if (step >= 1) {
+                    highlightSeat('G', 5, 'highlight-green');
+                    addAnnotation(360, 275, '(G,5)右边');
+                }
+            } else if (sceneIdx === 4) {
+                // 靠过道：B列和D列
+                for (let row = 1; row <= 8; row++) {
+                    highlightSeat('B', row, 'highlight-purple');
+                    highlightSeat('D', row, 'highlight-purple');
+                }
+                addAnnotation(80, 385, 'B列(右靠过道)');
+                addAnnotation(210, 385, 'D列(左靠过道)');
+            } else if (sceneIdx === 5) {
+                // 两连座
+                if (step >= 0) {
+                    highlightSeat('A', 1, 'highlight-green');
+                    highlightSeat('B', 1, 'highlight-green');
+                    addAnnotation(60, 35, '第1行✓');
+                }
+                if (step >= 1) {
+                    highlightSeat('A', 3, 'highlight-green');
+                    highlightSeat('B', 3, 'highlight-green');
+                    addAnnotation(60, 115, '第3行✓');
+                }
+                if (step >= 2) {
+                    addAnnotation(60, 385, '共2种选择');
+                }
+            }
+        }
+
+        // 高亮单个座位
+        function highlightSeat(col, row, className) {
+            const seats = document.querySelectorAll(`.seat[data-col="${col}"][data-row="${row}"]`);
+            seats.forEach(seat => {
+                seat.classList.add(className);
+            });
+        }
+
+        // 添加箭头
+        function addArrow(x1, y1, x2, y2) {
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', x1);
+            line.setAttribute('y1', y1);
+            line.setAttribute('x2', x2);
+            line.setAttribute('y2', y2);
+            line.setAttribute('class', 'arrow-line');
+            document.getElementById('annotationLayer').appendChild(line);
+        }
+
+        // 添加标注文字
+        function addAnnotation(x, y, text) {
+            const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            txt.setAttribute('x', x);
+            txt.setAttribute('y', y);
+            txt.setAttribute('class', 'annotation-text');
+            txt.textContent = text;
+            document.getElementById('annotationLayer').appendChild(txt);
+        }
+
+        // 动画播放控制
+        function togglePlayAnimation() {
+            isPlaying = !isPlaying;
+            const btn = document.getElementById('playAnimBtn');
+            if (isPlaying) {
+                btn.textContent = '⏸ 暂停';
+                playInterval = setInterval(() => {
+                    nextStep();
+                }, 2000);
+            } else {
+                btn.textContent = '▶ 播放';
+                clearInterval(playInterval);
+            }
+        }
+
+        function nextStep() {
+            const maxSteps = [0, 0, 0, 1, 0, 2];
+            if (currentStep < maxSteps[currentScene]) {
+                currentStep++;
+                applySceneHighlight(currentScene, currentStep);
+            } else {
+                if (currentScene < 5) {
+                    switchScene(currentScene + 1);
+                } else {
+                    isPlaying = false;
+                    document.getElementById('playAnimBtn').textContent = '▶ 播放';
+                    clearInterval(playInterval);
+                }
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                resetSeatHighlight();
+                applySceneHighlight(currentScene, currentStep);
+            } else if (currentScene > 0) {
+                switchScene(currentScene - 1);
+            }
+        }
+
+        function resetAnimation() {
+            isPlaying = false;
+            document.getElementById('playAnimBtn').textContent = '▶ 播放';
+            clearInterval(playInterval);
+            switchScene(0);
+        }
+
+        // 选项卡切换
+        function switchTab(idx) {
+            document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+                btn.classList.toggle('active', i === idx);
+            });
+            document.querySelectorAll('.tab-content').forEach((content, i) => {
+                content.classList.toggle('active', i === idx);
+            });
+        }
+
+        // 图片放大
+        function showImageModal(src) {
+            document.getElementById('modalImage').src = src;
+            document.getElementById('imageModal').classList.add('active');
+        }
+        function closeImageModal() {
+            document.getElementById('imageModal').classList.remove('active');
+        }
+
+        // ===== 音频播放器 =====
+        const audioFiles = [
+            'audio/segment1.mp3',
+            'audio/segment2.mp3',
+            'audio/segment3.mp3',
+            'audio/segment4.mp3',
+            'audio/segment5.mp3',
+            'audio/segment6.mp3',
+            'audio/segment7.mp3',
+            'audio/segment8.mp3'
+        ];
+        const segmentNames = ['引导语', '题目朗读', '第1问', '第2问', '第3问·靠过道', '第3问·两连座', '总结', '易错点'];
+        const segmentTabs = [-1, 0, 0, 0, 0, 0, 1, 2]; // 对应选项卡
+        const segmentScenes = [0, 0, 1, 3, 4, 5, 0, 0]; // 对应动画场景
+
+        let currentSegment = 0;
+        let totalDuration = 0;
+        let segmentDurations = new Array(8).fill(0);
+        let playedSegments = new Set();
+
+        const audioPlayer = document.getElementById('audioPlayer');
+
+        // 初始化分段按钮
+        function initSegmentButtons() {
+            const container = document.getElementById('segmentButtons');
+            container.innerHTML = '';
+            segmentNames.forEach((name, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'seg-btn';
+                btn.textContent = `${idx + 1}.${name}`;
+                btn.onclick = () => playSegment(idx);
+                container.appendChild(btn);
+            });
+        }
+
+        // 预加载所有音频获取时长
+        function preloadDurations() {
+            let loaded = 0;
+            audioFiles.forEach((src, idx) => {
+                const audio = new Audio(src);
+                audio.addEventListener('loadedmetadata', () => {
+                    segmentDurations[idx] = audio.duration;
+                    totalDuration += audio.duration;
+                    loaded++;
+                    if (loaded === 8) {
+                        updatePlayerTime();
+                    }
+                });
+            });
+        }
+
+        // 播放指定分段
+        function playSegment(idx) {
+            currentSegment = idx;
+            audioPlayer.src = audioFiles[idx];
+            audioPlayer.play();
+            playedSegments.add(idx);
+            updateSegmentButtons();
+            updateCurrentSegmentName();
+            // 切换选项卡
+            if (segmentTabs[idx] >= 0) {
+                switchTab(segmentTabs[idx]);
+            }
+            // 切换动画场景
+            switchScene(segmentScenes[idx]);
+            // 高亮答案
+            highlightAnswer(idx);
+        }
+
+        // 高亮答案区
+        function highlightAnswer(segIdx) {
+            document.querySelectorAll('.answer-group').forEach(g => g.classList.remove('highlight'));
+            if (segIdx === 2) document.getElementById('answer1').classList.add('highlight');
+            else if (segIdx === 3) document.getElementById('answer2').classList.add('highlight');
+            else if (segIdx === 4) document.getElementById('answer3').classList.add('highlight');
+            else if (segIdx === 5) document.getElementById('answer4').classList.add('highlight');
+        }
+
+        // 更新分段按钮状态
+        function updateSegmentButtons() {
+            document.querySelectorAll('.seg-btn').forEach((btn, idx) => {
+                btn.classList.remove('active', 'played');
+                if (idx === currentSegment) btn.classList.add('active');
+                else if (playedSegments.has(idx)) btn.classList.add('played');
+            });
+        }
+
+        // 更新当前分段名称
+        function updateCurrentSegmentName() {
+            document.getElementById('currentSegmentName').textContent = `🎧 ${segmentNames[currentSegment]}`;
+        }
+
+        // 播放/暂停
+        function togglePlay() {
+            if (audioPlayer.paused) {
+                if (!audioPlayer.src) {
+                    playSegment(0);
+                } else {
+                    audioPlayer.play();
+                }
+                document.getElementById('playBtn').textContent = '⏸';
+            } else {
+                audioPlayer.pause();
+                document.getElementById('playBtn').textContent = '▶';
+            }
+        }
+
+        // 音频结束自动播放下一段
+        audioPlayer.addEventListener('ended', () => {
+            if (currentSegment < 7) {
+                playSegment(currentSegment + 1);
+            } else {
+                document.getElementById('playBtn').textContent = '▶';
+            }
+        });
+
+        // 播放进度更新
+        audioPlayer.addEventListener('timeupdate', () => {
+            updatePlayerTime();
+            updateTotalProgress();
+        });
+
+        // 更新播放时间显示
+        function updatePlayerTime() {
+            const currentTime = audioPlayer.currentTime || 0;
+            const segDuration = segmentDurations[currentSegment] || 0;
+            const elapsedBefore = segmentDurations.slice(0, currentSegment).reduce((a, b) => a + b, 0);
+            const totalCurrent = elapsedBefore + currentTime;
+            document.getElementById('playerTime').textContent = `${formatTime(totalCurrent)} / ${formatTime(totalDuration)}`;
+        }
+
+        // 更新总进度条
+        function updateTotalProgress() {
+            const currentTime = audioPlayer.currentTime || 0;
+            const elapsedBefore = segmentDurations.slice(0, currentSegment).reduce((a, b) => a + b, 0);
+            const totalCurrent = elapsedBefore + currentTime;
+            const percent = totalDuration > 0 ? (totalCurrent / totalDuration) * 100 : 0;
+            document.getElementById('totalProgressBar').style.width = percent + '%';
+        }
+
+        // 总进度条点击跳转
+        function seekTotal(event) {
+            const rect = event.currentTarget.getBoundingClientRect();
+            const percent = (event.clientX - rect.left) / rect.width;
+            const targetTime = percent * totalDuration;
+            // 找到对应的分段
+            let elapsed = 0;
+            for (let i = 0; i < 8; i++) {
+                if (elapsed + segmentDurations[i] >= targetTime) {
+                    playSegment(i);
+                    setTimeout(() => {
+                        audioPlayer.currentTime = targetTime - elapsed;
+                    }, 100);
+                    break;
+                }
+                elapsed += segmentDurations[i];
+            }
+        }
+
+        // 格式化时间
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        // 音量控制
+        function setVolume(val) {
+            audioPlayer.volume = val;
+        }
+
+        // 初始化
+        initSeatMap();
+        initSegmentButtons();
+        preloadDurations();
+        switchScene(0);
+    </script>
+</body>
+</html>
