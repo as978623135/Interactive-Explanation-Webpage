@@ -330,7 +330,6 @@ body {
   cursor: pointer;
 }
 
-/* ===== 竖屏自适应旋转（手机/平板自动横屏显示） ===== */
 @media (orientation: portrait) and (max-width: 900px) {
   body {
     overflow: hidden;
@@ -349,50 +348,59 @@ body {
     border-radius: 0 !important;
   }
   /* 旋转提示（可选，显示3秒后淡出） */
-  .rotate-hint {
-    display: flex !important;
   }
-}
 
 /* 旋转提示层 */
-.rotate-hint {
-  display: none;
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.85);
-  z-index: 99999;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  gap: 16px;
-  animation: fadeOutHint 3s ease-in-out 2s forwards;
+50% { transform: rotate(90deg); }
 }
-.rotate-hint .phone-icon {
-  font-size: 64px;
-  animation: rotatePhone 1.5s ease-in-out infinite;
 }
-.rotate-hint .hint-text {
-  color: #fff;
-  font-size: 18px;
-  font-weight: 600;
-  text-align: center;
+
+
+/* ===== v2 竖屏自适应（JS控制旋转+整体缩放） ===== */
+body.portrait-mode {
+  background: #000 !important;
+  overflow: hidden !important;
 }
-@keyframes rotatePhone {
-  0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(90deg); }
+body.portrait-mode .stage {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform-origin: center center !important;
+  border-radius: 0 !important;
 }
-@keyframes fadeOutHint {
-  to { opacity: 0; visibility: hidden; }
+
+/* 右侧边栏：滚动区+固定播放器 */
+.students-panel, .right-panel, .info-panel, .answer-panel, .quiz-panel {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  overflow: hidden !important;
 }
+.panel-scroll-area {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0;
+}
+.panel-scroll-area::-webkit-scrollbar { width: 4px; }
+.panel-scroll-area::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.2);
+  border-radius: 2px;
+}
+.panel-players {
+  flex: 0 0 auto;
+  padding-top: 10px;
+  margin-top: 6px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+.panel-players .explain-card:last-child { margin-bottom: 0; }
 
 </style>
 </head>
 <body>
-<!-- 竖屏旋转提示 -->
-<div class="rotate-hint">
-  <div class="phone-icon">📱</div>
-  <div class="hint-text">已自动旋转为横屏模式<br>建议横屏观看效果更佳</div>
+<div class="hint-text">已自动旋转为横屏模式<br>建议横屏观看效果更佳</div>
 </div>
 
 
@@ -789,5 +797,187 @@ function formatTime(seconds) {
 initGrid();
 initDualPlayers();
 </script>
+
+<!-- ===== v2 竖屏自适应：旋转+缩放+右侧滚动+触摸坐标转换+drag模拟 ===== -->
+<script>
+(function(){
+  var BASE_W = 1280, BASE_H = 720;
+  var scale = 1, isPortrait = false;
+  var panelDone = false;
+
+  function $(s, ctx){ return (ctx||document).querySelector(s); }
+  function $$(s, ctx){ return Array.prototype.slice.call((ctx||document).querySelectorAll(s)); }
+
+  /* ---- 1. 竖屏检测 + 旋转 + 整体缩放 ---- */
+  function applyLayout(){
+    var stage = document.getElementById('stage');
+    if(!stage) return;
+    var w = window.innerWidth, h = window.innerHeight;
+    isPortrait = (h > w) && (w <= 900);
+
+    if(isPortrait){
+      var availW = h, availH = w;
+      scale = Math.min(availW / BASE_W, availH / BASE_H);
+      stage.style.width = BASE_W + 'px';
+      stage.style.height = BASE_H + 'px';
+      stage.style.marginLeft = -(BASE_W/2) + 'px';
+      stage.style.marginTop = -(BASE_H/2) + 'px';
+      stage.style.transform = 'rotate(90deg) scale(' + scale + ')';
+      document.body.classList.add('portrait-mode');
+      rearrangePanel();
+    } else {
+      stage.style.width = '';
+      stage.style.height = '';
+      stage.style.marginLeft = '';
+      stage.style.marginTop = '';
+      stage.style.transform = '';
+      document.body.classList.remove('portrait-mode');
+    }
+  }
+
+  /* ---- 2. 右侧边栏重排：播放器固定底部，其余可滚动 ---- */
+  function rearrangePanel(){
+    if(panelDone) return;
+    var panels = $$('.students-panel, .right-panel, .info-panel, .answer-panel, .quiz-panel');
+    panels.forEach(function(panel){
+      var players = $$('.explain-card, .player-card, .audio-card', panel);
+      if(players.length === 0) return;
+      var scrollArea = document.createElement('div');
+      scrollArea.className = 'panel-scroll-area';
+      var playersArea = document.createElement('div');
+      playersArea.className = 'panel-players';
+      players.forEach(function(p){ playersArea.appendChild(p); });
+      while(panel.firstChild){ scrollArea.appendChild(panel.firstChild); }
+      panel.appendChild(scrollArea);
+      panel.appendChild(playersArea);
+    });
+    panelDone = true;
+  }
+
+  /* ---- 3. 触摸坐标转换（逆旋转+逆缩放） ---- */
+  function convertCoords(cx, cy){
+    if(!isPortrait) return {x:cx, y:cy};
+    var scx = window.innerWidth/2, scy = window.innerHeight/2;
+    var dx = (cx - scx) / scale;
+    var dy = (cy - scy) / scale;
+    // 逆旋转（逆时针90度）
+    return { x: scx - dy, y: scy + dx };
+  }
+
+  function fireMouse(type, target, x, y){
+    var evt = new MouseEvent(type, {bubbles:true, cancelable:true, clientX:x, clientY:y, button:0});
+    target.dispatchEvent(evt);
+  }
+
+  function isInRightPanel(el){
+    while(el && el !== document.body){
+      if(el.classList && (el.classList.contains('students-panel')||el.classList.contains('right-panel')||
+         el.classList.contains('info-panel')||el.classList.contains('answer-panel')||
+         el.classList.contains('quiz-panel')||el.classList.contains('panel-scroll-area')||
+         el.classList.contains('panel-players'))) return true;
+      el = el.parentNode;
+    }
+    return false;
+  }
+
+  /* ---- 4. drag模拟状态 ---- */
+  var dragSrc = null, lastDropTarget = null;
+
+  function findDropTarget(x, y){
+    var el = document.elementFromPoint(x, y);
+    while(el && el !== document.body){
+      if(el.classList && (el.classList.contains('seat')||el.classList.contains('drop-zone')||
+         el.classList.contains('target')||el.classList.contains('cell')||
+         el.getAttribute && el.getAttribute('data-drop') === '1')) return el;
+      el = el.parentNode;
+    }
+    return null;
+  }
+
+  /* ---- 5. 全局touch拦截（仅左侧交互区域） ---- */
+  document.addEventListener('touchstart', function(e){
+    if(!isPortrait) return;
+    var t = e.touches[0];
+    var visualTarget = document.elementFromPoint(t.clientX, t.clientY);
+    if(isInRightPanel(visualTarget)) return; // 右侧边栏原生处理
+    e.preventDefault();
+    var coords = convertCoords(t.clientX, t.clientY);
+    var target = document.elementFromPoint(coords.x, coords.y) || visualTarget;
+    if(!target) return;
+    fireMouse('mousedown', target, coords.x, coords.y);
+    // drag模拟
+    if(target.getAttribute && target.getAttribute('draggable') === 'true'){
+      dragSrc = target;
+      var dt = new DataTransfer();
+      try{
+        var de = new DragEvent('dragstart', {bubbles:true, cancelable:true, clientX:coords.x, clientY:coords.y, dataTransfer:dt});
+        target.dispatchEvent(de);
+      }catch(err){}
+    }
+    if(target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') target.focus();
+  }, {passive:false});
+
+  document.addEventListener('touchmove', function(e){
+    if(!isPortrait) return;
+    var t = e.touches[0];
+    var visualTarget = document.elementFromPoint(t.clientX, t.clientY);
+    if(isInRightPanel(visualTarget)) return;
+    e.preventDefault();
+    var coords = convertCoords(t.clientX, t.clientY);
+    var target = document.elementFromPoint(coords.x, coords.y);
+    if(target) fireMouse('mousemove', target, coords.x, coords.y);
+    // drag模拟：dragover / dragleave
+    if(dragSrc){
+      var dropTarget = findDropTarget(coords.x, coords.y);
+      if(dropTarget !== lastDropTarget){
+        if(lastDropTarget){
+          try{ lastDropTarget.dispatchEvent(new DragEvent('dragleave', {bubbles:true, cancelable:true, clientX:coords.x, clientY:coords.y})); }catch(err){}
+        }
+        if(dropTarget){
+          try{ dropTarget.dispatchEvent(new DragEvent('dragover', {bubbles:true, cancelable:true, clientX:coords.x, clientY:coords.y})); }catch(err){}
+        }
+        lastDropTarget = dropTarget;
+      }
+    }
+  }, {passive:false});
+
+  document.addEventListener('touchend', function(e){
+    if(!isPortrait) return;
+    var t = e.changedTouches[0];
+    var visualTarget = document.elementFromPoint(t.clientX, t.clientY);
+    if(isInRightPanel(visualTarget)) return;
+    e.preventDefault();
+    var coords = convertCoords(t.clientX, t.clientY);
+    var target = document.elementFromPoint(coords.x, coords.y) || visualTarget;
+    if(target){
+      fireMouse('mouseup', target, coords.x, coords.y);
+      fireMouse('click', target, coords.x, coords.y);
+    }
+    // drag模拟：drop / dragend
+    if(dragSrc){
+      var dropTarget = findDropTarget(coords.x, coords.y);
+      if(dropTarget){
+        try{
+          var dt = new DataTransfer();
+          dropTarget.dispatchEvent(new DragEvent('drop', {bubbles:true, cancelable:true, clientX:coords.x, clientY:coords.y, dataTransfer:dt}));
+        }catch(err){}
+      }
+      try{ dragSrc.dispatchEvent(new DragEvent('dragend', {bubbles:true, cancelable:true, clientX:coords.x, clientY:coords.y})); }catch(err){}
+      dragSrc = null;
+      lastDropTarget = null;
+    }
+  }, {passive:false});
+
+  window.addEventListener('resize', applyLayout);
+  window.addEventListener('orientationchange', function(){ setTimeout(applyLayout, 150); });
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', applyLayout);
+  } else {
+    applyLayout();
+  }
+})();
+</script>
+
 </body>
 </html>
