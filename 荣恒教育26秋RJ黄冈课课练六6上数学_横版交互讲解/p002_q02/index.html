@@ -663,7 +663,7 @@ initDualPlayers();
 
     if(isPortrait){
       var availW = h, availH = w;
-      scale = Math.min(availW / BASE_W, availH / BASE_H);
+      scale = Math.min(availW / BASE_H, availH / BASE_W);
       stage.style.width = BASE_W + 'px';
       stage.style.height = BASE_H + 'px';
       stage.style.marginLeft = -(BASE_W/2) + 'px';
