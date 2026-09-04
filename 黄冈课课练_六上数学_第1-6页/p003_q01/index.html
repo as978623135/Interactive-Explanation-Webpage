@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>p003_q01 位置与方向选择</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;background:#f5f7fa;color:#333;line-height:1.8;padding-bottom:100px}
+.container{max-width:900px;margin:0 auto;padding:10px}
+.card{position:relative;background:#fff;border-radius:12px;padding:10px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+.card-title{display:inline-block;background:#667eea;color:#fff;padding:6px 16px;border-radius:8px;font-size:.95em;font-weight:bold;position:relative;top:-5px;margin-left:0;cursor:pointer;user-select:none}
+.toggle-btn{display:inline-block;margin-left:10px;padding:2px 10px;background:#ff4d4f;border:none;border-radius:6px;color:#fff;font-size:12px;cursor:pointer;vertical-align:middle;user-select:none}
+.card-header{display:flex;justify-content:space-between;align-items:flex-start;position:relative}
+.nav-btns{display:flex;gap:5px;margin-top:-3px}
+.nav-btn{padding:4px 12px;border:none;border-radius:4px;color:#fff;font-size:13px;cursor:pointer;user-select:none}
+.prev-btn{background:#1890ff}.next-btn{background:#52c41a}
+.card-content{overflow:hidden;max-height:2000px;opacity:1;transition:max-height .3s ease,opacity .3s ease}
+.card.collapsed .card-content{max-height:0;opacity:0}
+.modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);z-index:2000;justify-content:center;align-items:center;cursor:pointer}
+.modal.active{display:flex}.modal img{max-width:92%;max-height:92%;border-radius:8px}
+.question-text{font-size:1.05em;line-height:1.8}
+.question-text .q-main{font-weight:bold;color:#333;margin-bottom:8px}
+.question-text .q{margin-top:10px;padding-left:4px}
+.question-text .q .opt{display:block;margin:4px 0;padding:4px 8px;border-radius:6px}
+.q-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.q-tab-btn{padding:6px 14px;border:1px solid #ddd;background:#fafafa;border-radius:8px;cursor:pointer;font-size:13px}
+.q-tab-btn.active{background:#667eea;color:#fff;border-color:#667eea}
+.q-tab-panel{display:none}.q-tab-panel.active{display:block}
+.anim-content{display:flex;flex-direction:column;align-items:center;width:100%}
+.anim-stage{display:flex;justify-content:center;width:100%}
+.anim-stage svg{width:100%;max-width:800px;height:auto;display:block}
+.anim-text{margin-top:12px;font-size:15px;color:#667eea;font-weight:bold;line-height:1.7;text-align:center;background:#f0f4ff;border-radius:8px;padding:8px 12px;width:100%}
+.anim-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;justify-content:center}
+.anim-tab-btn{padding:6px 14px;border:1px solid #ddd;background:#fafafa;border-radius:8px;cursor:pointer;font-size:13px}
+.anim-tab-btn.active{background:#667eea;color:#fff;border-color:#667eea}
+.anim-scene{display:none}.anim-scene.active{display:block}
+.tab-buttons{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.tab-btn{padding:8px 16px;border:none;background:#f0f0f0;color:#333;border-radius:8px;cursor:pointer;font-size:.9em;transition:all .3s}
+.tab-btn.active{background:#667eea;color:#fff}
+.tab-content{display:none}.tab-content.active{display:block;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.step-item{margin-bottom:10px;padding:10px 12px;border-radius:8px;background:#fafafa;transition:all .3s;border-left:3px solid transparent}
+.step-item.active{background:#f6ffed;border-left-color:#52c41a;box-shadow:0 2px 8px rgba(82,196,26,.15)}
+.step-item .step-title{font-weight:bold;color:#333;margin-bottom:4px;font-size:14px}
+.step-item .step-answer{color:#52c41a;font-weight:bold;font-size:14px}
+.step-item .step-detail{color:#666;font-size:13px;margin-top:4px;line-height:1.7}
+.option-item{padding:8px 12px;margin:4px 0;border-radius:6px;background:#fafafa;border:1px solid #eee;transition:all .3s}
+.option-item.correct{background:#f6ffed;border-color:#52c41a}
+.option-item.wrong{background:#fff2f0;border-color:#ff4d4f}
+.option-item .opt-label{font-weight:bold;margin-right:6px}
+.summary-content,.error-content,.kg-content{line-height:2;font-size:14px}
+.img-grid{display:flex;flex-wrap:wrap;gap:10px}
+.img-grid img{width:200px;height:auto;object-fit:contain;border:1px solid #ddd;border-radius:6px;cursor:pointer}
+.script-seg{margin-bottom:10px}
+.script-seg .seg-title{font-weight:bold;color:#667eea;font-size:14px;margin-bottom:4px}
+.script-seg .seg-text{color:#444;font-size:13px;line-height:1.8;white-space:pre-wrap}
+.audio-player{position:sticky;bottom:0;background:#fff;border-radius:12px 12px 0 0;padding:12px 15px;box-shadow:0 -2px 12px rgba(0,0,0,.15);z-index:100;margin-top:10px}
+.player-row1{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.play-btn{width:36px;height:36px;border-radius:50%;background:#667eea;color:#fff;border:none;cursor:pointer;font-size:1em;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.vol-btn{width:32px;height:32px;border-radius:50%;background:#f0f0f0;border:none;cursor:pointer;font-size:.9em;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.total-progress{flex:1;height:6px;background:#e0e0e0;border-radius:3px;cursor:pointer;overflow:hidden}
+.total-progress-bar{height:100%;width:0%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:3px;transition:width .1s linear}
+.time-display{font-size:.8em;color:#666;min-width:90px;text-align:right;white-space:nowrap}
+.player-row2{display:flex;flex-wrap:wrap;gap:5px}
+.seg-btn{padding:4px 10px;border:1px solid #ddd;background:#fff;border-radius:6px;cursor:pointer;font-size:.75em;transition:all .3s}
+.seg-btn.active{background:#667eea;color:#fff;border-color:#667eea}
+.seg-btn.played{background:#e8f5e9;border-color:#4caf50}
+@media(max-width:600px){.container{padding:6px}body{font-size:14px}.card{padding:8px}.card-title{font-size:.9em;padding:5px 12px}}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="card collapsed" id="qCard">
+<div class="card-header">
+<span class="card-title" onclick="toggleCard('qCard')">题目原文<span class="toggle-btn" onclick="event.stopPropagation();toggleCard('qCard')">展开</span></span>
+<div class="nav-btns"><button class="nav-btn prev-btn" id="prevBtn" onclick="goPrev()">上一题</button><button class="nav-btn next-btn" id="nextBtn" onclick="goNext()">下一题</button></div>
+</div>
+<div class="card-content"><div class="question-text">
+<div class="q-main">一、选择。（将正确答案的序号填在括号里）</div>
+<div class="q-tabs">
+<button class="q-tab-btn active" onclick="switchQTab(0)">第(1)问</button>
+<button class="q-tab-btn" onclick="switchQTab(1)">第(2)问</button>
+</div>
+<div class="q-tab-panel active" id="qtab0"><div class="q">(1)学校在超市北偏西40°方向上，那么超市在学校(&nbsp;&nbsp;)方向上。<br><span class="opt">A. 南偏东50°</span><span class="opt">B. 南偏东40°</span><span class="opt">C. 西偏北40°</span><span class="opt">D. 西偏北50°</span></div></div>
+<div class="q-tab-panel" id="qtab1"><div class="q">(2)李伯伯做晨练，他先面向正西方向站立，然后全身向右转了30°，这时他面向(&nbsp;&nbsp;)方向。<br><span class="opt">A. 西偏北30°</span><span class="opt">B. 西偏南30°</span><span class="opt">C. 北偏西30°</span><span class="opt">D. 南偏西30°</span></div></div>
+</div></div></div>
+
+<div class="card" id="animCard">
+<span class="card-title" onclick="toggleCard('animCard')">动画演示<span class="toggle-btn" onclick="event.stopPropagation();toggleCard('animCard')">折叠</span></span>
+<div class="card-content"><div class="anim-content">
+<div class="anim-tabs"><button class="anim-tab-btn active" onclick="switchAnimScene(0)">方向罗盘</button></div>
+<div class="anim-stage"><div class="anim-scene active">
+<svg viewBox="0 0 420 300">
+<text x="210" y="16" text-anchor="middle" font-size="13" font-weight="bold" fill="#333">方向示意图</text>
+<circle cx="210" cy="160" r="90" fill="none" stroke="#ddd" stroke-width="1"/>
+<line x1="210" y1="70" x2="210" y2="250" stroke="#ddd" stroke-width="1"/>
+<line x1="120" y1="160" x2="300" y2="160" stroke="#ddd" stroke-width="1"/>
+<text x="210" y="60" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">北</text>
+<text x="210" y="268" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">南</text>
+<text x="108" y="165" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">西</text>
+<text x="312" y="165" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">东</text>
+<circle cx="210" cy="160" r="4" fill="#333"/>
+<g id="anim1" style="display:none;">
+<line x1="210" y1="160" x2="155" y2="90" stroke="#ff4d4f" stroke-width="2.5" marker-end="url(#arr1)"/>
+<text x="140" y="82" font-size="11" fill="#ff4d4f" font-weight="bold">学校</text>
+<text x="145" y="98" font-size="9" fill="#ff4d4f">北偏西40°</text>
+<path d="M 210 120 A 40 40 0 0 0 184 130" fill="none" stroke="#ff4d4f" stroke-width="1"/>
+<text x="186" y="118" font-size="9" fill="#ff4d4f">40°</text>
+<line x1="210" y1="160" x2="265" y2="230" stroke="#52c41a" stroke-width="2.5" marker-end="url(#arr1)"/>
+<text x="275" y="238" font-size="11" fill="#52c41a" font-weight="bold">超市</text>
+<text x="260" y="252" font-size="9" fill="#52c41a">南偏东40°</text>
+<path d="M 210 200 A 40 40 0 0 1 236 190" fill="none" stroke="#52c41a" stroke-width="1"/>
+<text x="230" y="205" font-size="9" fill="#52c41a">40°</text>
+<text x="210" y="285" text-anchor="middle" font-size="11" fill="#666">相对位置：方向相反，角度相同</text>
+</g>
+<g id="anim2" style="display:none;">
+<line x1="210" y1="160" x2="120" y2="160" stroke="#999" stroke-width="2" stroke-dasharray="4,3"/>
+<text x="110" y="152" font-size="10" fill="#999">正西</text>
+<line x1="210" y1="160" x2="135" y2="200" stroke="#1890ff" stroke-width="2.5" marker-end="url(#arr1)"/>
+<text x="120" y="215" font-size="11" fill="#1890ff" font-weight="bold">西偏南30°</text>
+<path d="M 170 160 A 40 40 0 0 1 180 178" fill="none" stroke="#1890ff" stroke-width="1.5"/>
+<text x="160" y="180" font-size="10" fill="#1890ff">右转30°</text>
+<text x="210" y="285" text-anchor="middle" font-size="11" fill="#666">面向正西，向右转（顺时针）30°→西偏南30°</text>
+</g>
+<defs><marker id="arr1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="#666"/></marker></defs>
+<g id="hint0"><text x="210" y="285" text-anchor="middle" font-size="12" fill="#667eea" font-weight="bold">上北下南，左西右东</text></g>
+</svg>
+</div></div>
+<div class="anim-text" id="animText">上北下南，左西右东</div>
+</div></div></div>
+
+<div class="card" id="explainCard">
+<span class="card-title" onclick="toggleCard('explainCard')">讲解内容<span class="toggle-btn" onclick="event.stopPropagation();toggleCard('explainCard')">折叠</span></span>
+<div class="card-content">
+<div class="tab-buttons">
+<button class="tab-btn active" onclick="switchTab(0)">题目讲解</button>
+<button class="tab-btn" onclick="switchTab(1)">总结</button>
+<button class="tab-btn" onclick="switchTab(2)">易错点</button>
+<button class="tab-btn" onclick="switchTab(3)">知识图谱</button>
+<button class="tab-btn" onclick="switchTab(4)">原题图片</button>
+<button class="tab-btn" onclick="switchTab(5)">讲解原文</button>
+</div>
+<div class="tab-content active" id="tab0">
+<div class="step-item" id="sq1">
+<div class="step-title">第(1)问</div>
+<div class="step-answer">答案：B. 南偏东40°</div>
+<div class="step-detail">两个地点的相对位置，方向相反，角度相同。学校在超市北偏西40°，那么超市在学校的反方向——南偏东40°。</div>
+<div style="margin-top:6px;">
+<div class="option-item wrong"><span class="opt-label">A.</span>南偏东50° ✗ 角度错误</div>
+<div class="option-item correct"><span class="opt-label">B.</span>南偏东40° ✓ 方向相反角度相同</div>
+<div class="option-item wrong"><span class="opt-label">C.</span>西偏北40° ✗ 方向不相反</div>
+<div class="option-item wrong"><span class="opt-label">D.</span>西偏北50° ✗ 方向角度都错</div>
+</div>
+</div>
+<div class="step-item" id="sq2">
+<div class="step-title">第(2)问</div>
+<div class="step-answer">答案：B. 西偏南30°</div>
+<div class="step-detail">面向正西，向右转=顺时针转。顺时针从西转向南，转30°后就是西偏南30°。</div>
+<div style="margin-top:6px;">
+<div class="option-item wrong"><span class="opt-label">A.</span>西偏北30° ✗ 右转应转向南不是北</div>
+<div class="option-item correct"><span class="opt-label">B.</span>西偏南30° ✓ 顺时针转向南</div>
+<div class="option-item wrong"><span class="opt-label">C.</span>北偏西30° ✗ 方向错误</div>
+<div class="option-item wrong"><span class="opt-label">D.</span>南偏西30° ✗ 起始方向错误</div>
+</div>
+</div>
+</div>
+<div class="tab-content" id="tab1"><div class="summary-content">
+<p><strong>相对位置</strong>：方向相反，角度相同。北↔南，西↔东。</p>
+<p><strong>转动方向</strong>：向右转=顺时针转，向左转=逆时针转。</p>
+<p>面向正西时，右转（顺时针）转向南，左转（逆时针）转向北。</p>
+</div></div>
+<div class="tab-content" id="tab2"><div class="error-content">
+<p style="color:#ff4d4f;font-weight:bold;">易错点1：相对位置方向搞反</p>
+<p>北偏西的反方向是南偏东，不是南偏西。北对南，西对东。</p>
+<p style="color:#ff4d4f;font-weight:bold;margin-top:10px;">易错点2：转动方向搞反</p>
+<p>向右转是顺时针，面向正西时右转转向南，不是转向北。</p>
+</div></div>
+<div class="tab-content" id="tab3"><div class="kg-content">
+<p><strong>学科：</strong>数学</p>
+<p><strong>年级：</strong>六年级上册</p>
+<p><strong>教材：</strong>人教版（RJ）</p>
+<p><strong>单元：</strong>第二单元 位置与方向（二）</p>
+<p><strong>知识点：</strong>根据方向和距离确定位置、相对位置、方向转动</p>
+<p><strong>核心方法：</strong>上北下南左西右东，相对位置方向相反角度相同</p>
+</div></div>
+<div class="tab-content" id="tab4"><div class="img-grid">
+<img src="images/p003_q01.png" onclick="showImage(this.src)" alt="原题">
+</div></div>
+<div class="tab-content" id="tab5">
+<div class="script-seg"><div class="seg-title">引导语</div><div class="seg-text">同学们，大家好，跟着老师来做这道题。</div></div>
+<div class="script-seg"><div class="seg-title">题目朗读</div><div class="seg-text">一、选择。将正确答案的序号填在括号里。</div></div>
+<div class="script-seg"><div class="seg-title">第(1)问</div><div class="seg-text">学校在超市北偏西40°，相对位置方向相反角度相同，超市在学校南偏东40°，选B。</div></div>
+<div class="script-seg"><div class="seg-title">第(2)问</div><div class="seg-text">面向正西，向右转=顺时针转30°→西偏南30°，选B。</div></div>
+<div class="script-seg"><div class="seg-title">总结</div><div class="seg-text">相对位置方向相反角度相同。向右转顺时针，向左转逆时针。</div></div>
+<div class="script-seg"><div class="seg-title">易错点</div><div class="seg-text">易错点一是相对方向搞反。易错点二是转动方向搞反，右转顺时针。</div></div>
+</div>
+</div></div>
+
+<div class="card audio-player" id="playerCard">
+<div class="card-title" style="cursor:default;">讲解播放器</div>
+<div class="player-row1">
+<button class="play-btn" onclick="togglePlay()" id="playBtn">▶</button>
+<button class="vol-btn" onclick="toggleMute()" id="volBtn">🔊</button>
+<div class="total-progress" id="totalProgress" onclick="seekTotal(event)"><div class="total-progress-bar" id="totalProgressBar"></div></div>
+<div class="time-display"><span id="currentTime">00:00</span> / <span id="totalTime">00:00</span></div>
+</div>
+<div class="player-row2">
+<button class="seg-btn active" onclick="jumpToSegment(0)">引导语</button>
+<button class="seg-btn" onclick="jumpToSegment(1)">题目朗读</button>
+<button class="seg-btn" onclick="jumpToSegment(2)">第(1)问</button>
+<button class="seg-btn" onclick="jumpToSegment(3)">第(2)问</button>
+<button class="seg-btn" onclick="jumpToSegment(4)">总结</button>
+<button class="seg-btn" onclick="jumpToSegment(5)">易错点</button>
+</div>
+</div>
+</div>
+
+<div class="modal" id="imageModal" onclick="closeModal()"><img id="modalImage" src="" alt="放大图片"></div>
+<audio id="audioPlayer"></audio>
+
+<script>
+const segments=[
+{src:'audio/segment0.mp3',name:'引导语',tab:-1,highlight:null,anim_scene:-1,anim_step:0},
+{src:'audio/segment1.mp3',name:'题目朗读',tab:-1,highlight:null,anim_scene:-1,anim_step:0},
+{src:'audio/segment2.mp3',name:'第(1)问',tab:0,highlight:'sq1',anim_scene:0,anim_step:1},
+{src:'audio/segment3.mp3',name:'第(2)问',tab:0,highlight:'sq2',anim_scene:0,anim_step:2},
+{src:'audio/segment4.mp3',name:'总结',tab:1,highlight:null,anim_scene:-1,anim_step:0},
+{src:'audio/segment5.mp3',name:'易错点',tab:2,highlight:null,anim_scene:-1,anim_step:0}
+];
+let currentSegment=0,isPlaying=false,segmentDurations=[0,0,0,0,0,0],totalDuration=0,loadedCount=0;
+const audio=document.getElementById('audioPlayer'),playBtn=document.getElementById('playBtn'),volBtn=document.getElementById('volBtn');
+const totalProgressBar=document.getElementById('totalProgressBar'),currentTimeEl=document.getElementById('currentTime'),totalTimeEl=document.getElementById('totalTime');
+const segBtns=document.querySelectorAll('.seg-btn'),tabBtns=document.querySelectorAll('.tab-btn'),tabContents=document.querySelectorAll('.tab-content');
+segments.forEach((s,i)=>{const t=new Audio(s.src);t.addEventListener('loadedmetadata',()=>{segmentDurations[i]=t.duration;loadedCount++;if(loadedCount===segments.length){totalDuration=segmentDurations.reduce((a,b)=>a+b,0);totalTimeEl.textContent=formatTime(totalDuration);}});});
+function toggleCard(id){const c=document.getElementById(id);if(!c)return;c.classList.toggle('collapsed');const b=c.querySelector('.toggle-btn');if(b)b.textContent=c.classList.contains('collapsed')?'展开':'折叠';}
+const prevUrl='../p002_q04/index.html',nextUrl='../p003_q02/index.html';
+function goPrev(){if(prevUrl)window.location.href=prevUrl;}function goNext(){if(nextUrl)window.location.href=nextUrl;}
+document.addEventListener('DOMContentLoaded',()=>{if(!prevUrl)document.getElementById('prevBtn').style.display='none';if(!nextUrl)document.getElementById('nextBtn').style.display='none';});
+function switchTab(i){tabBtns.forEach((b,idx)=>b.classList.toggle('active',idx===i));tabContents.forEach((c,idx)=>c.classList.toggle('active',idx===i));}
+function switchQTab(i){document.querySelectorAll('.q-tab-btn').forEach((b,idx)=>b.classList.toggle('active',idx===i));document.querySelectorAll('.q-tab-panel').forEach((p,idx)=>p.classList.toggle('active',idx===i));}
+function switchAnimScene(i){document.querySelectorAll('.anim-tab-btn').forEach((b,idx)=>b.classList.toggle('active',idx===i));document.querySelectorAll('.anim-scene').forEach((s,idx)=>s.classList.toggle('active',idx===i));}
+function loadSegment(index){
+document.querySelectorAll('.step-item').forEach(el=>el.classList.remove('active'));
+currentSegment=index;audio.src=segments[index].src;updateSegButtons();
+if(segments[index].tab>=0)switchTab(segments[index].tab);
+if(segments[index].anim_scene>=0)switchAnimScene(segments[index].anim_scene);
+applyAnimStep(segments[index]);
+const h=segments[index].highlight;if(h){const el=document.getElementById(h);if(el)el.classList.add('active');}
+if(index===2)switchQTab(0);if(index===3)switchQTab(1);
+}
+function togglePlay(){if(isPlaying){audio.pause();playBtn.textContent='▶';isPlaying=false;}else{audio.play();playBtn.textContent='⏸';isPlaying=true;}}
+function toggleMute(){audio.muted=!audio.muted;volBtn.textContent=audio.muted?'🔇':'🔊';}
+function jumpToSegment(i){loadSegment(i);if(isPlaying)audio.play();}
+function updateSegButtons(){segBtns.forEach((b,i)=>{b.classList.remove('active');b.classList.toggle('played',i<currentSegment);});if(segBtns[currentSegment])segBtns[currentSegment].classList.add('active');}
+audio.addEventListener('ended',()=>{if(currentSegment<segments.length-1)jumpToSegment(currentSegment+1);else{playBtn.textContent='▶';isPlaying=false;}});
+audio.addEventListener('timeupdate',()=>{if(totalDuration>0){const before=segmentDurations.slice(0,currentSegment).reduce((a,b)=>a+b,0);const elapsed=before+audio.currentTime;totalProgressBar.style.width=(elapsed/totalDuration*100)+'%';currentTimeEl.textContent=formatTime(elapsed);}});
+function seekTotal(e){const r=e.currentTarget.getBoundingClientRect();const pct=(e.clientX-r.left)/r.width;const tt=pct*totalDuration;let acc=0;for(let i=0;i<segments.length;i++){if(tt<acc+segmentDurations[i]){loadSegment(i);audio.currentTime=tt-acc;if(isPlaying)audio.play();break;}acc+=segmentDurations[i];}}
+function formatTime(s){const m=Math.floor(s/60),sec=Math.floor(s%60);return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;}
+function showImage(src){document.getElementById('modalImage').src=src;document.getElementById('imageModal').classList.add('active');}
+function closeModal(){document.getElementById('imageModal').classList.remove('active');}
+function applyAnimStep(seg){
+const step=seg.anim_step;
+document.getElementById('anim1').style.display='none';
+document.getElementById('anim2').style.display='none';
+document.getElementById('hint0').style.display='block';
+const at=document.getElementById('animText');
+if(step===1){document.getElementById('anim1').style.display='block';document.getElementById('hint0').style.display='none';at.textContent='学校在超市北偏西40°→超市在学校南偏东40°（方向相反，角度相同）';}
+else if(step===2){document.getElementById('anim2').style.display='block';document.getElementById('hint0').style.display='none';at.textContent='面向正西→右转（顺时针）30°→西偏南30°';}
+else at.textContent='上北下南，左西右东';
+}
+document.querySelectorAll('.question-text img').forEach(img=>img.addEventListener('click',()=>showImage(img.src)));
+loadSegment(0);
+</script>
+</body>
+</html>
