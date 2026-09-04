@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>p002_q02 数对选择题</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;background:#f5f7fa;color:#333;line-height:1.8;padding-bottom:100px}
+.container{max-width:900px;margin:0 auto;padding:10px}
+.card{position:relative;background:#fff;border-radius:12px;padding:10px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+.card-title{display:inline-block;background:#667eea;color:#fff;padding:6px 16px;border-radius:8px;font-size:.95em;font-weight:bold;position:relative;top:-5px;margin-left:0;cursor:pointer;user-select:none}
+.toggle-btn{display:inline-block;margin-left:10px;padding:2px 10px;background:#ff4d4f;border:none;border-radius:6px;color:#fff;font-size:12px;cursor:pointer;vertical-align:middle;user-select:none}
+.card-header{display:flex;justify-content:space-between;align-items:flex-start;position:relative}
+.nav-btns{display:flex;gap:5px;margin-top:-3px}
+.nav-btn{padding:4px 12px;border:none;border-radius:4px;color:#fff;font-size:13px;cursor:pointer;user-select:none}
+.prev-btn{background:#1890ff}.next-btn{background:#52c41a}
+.card-content{overflow:hidden;max-height:2000px;opacity:1;transition:max-height .3s ease,opacity .3s ease}
+.card.collapsed .card-content{max-height:0;opacity:0}
+.modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);z-index:2000;justify-content:center;align-items:center;cursor:pointer}
+.modal.active{display:flex}.modal img{max-width:92%;max-height:92%;border-radius:8px}
+.question-text{font-size:1.05em;line-height:1.8}
+.question-text .q-main{font-weight:bold;color:#333;margin-bottom:8px}
+.question-text .q{margin-top:10px;padding-left:4px}
+.question-text .q .opt{display:block;margin:4px 0;padding:4px 8px;border-radius:6px}
+.q-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.q-tab-btn{padding:6px 14px;border:1px solid #ddd;background:#fafafa;border-radius:8px;cursor:pointer;font-size:13px}
+.q-tab-btn.active{background:#667eea;color:#fff;border-color:#667eea}
+.q-tab-panel{display:none}.q-tab-panel.active{display:block}
+.anim-content{display:flex;flex-direction:column;align-items:center;width:100%}
+.anim-stage{display:flex;justify-content:center;width:100%}
+.anim-text{margin-top:12px;font-size:15px;color:#667eea;font-weight:bold;line-height:1.7;text-align:center;background:#f0f4ff;border-radius:8px;padding:12px;width:100%}
+.anim-text .hl{background:#FFF9C4;padding:1px 4px;border-radius:3px}
+.anim-text .correct{color:#52c41a;font-weight:bold}
+.anim-text .wrong{color:#ff4d4f;text-decoration:line-through}
+.anim-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;justify-content:center}
+.anim-tab-btn{padding:6px 14px;border:1px solid #ddd;background:#fafafa;border-radius:8px;cursor:pointer;font-size:13px}
+.anim-tab-btn.active{background:#667eea;color:#fff;border-color:#667eea}
+.anim-scene{display:none}.anim-scene.active{display:block}
+.tab-buttons{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.tab-btn{padding:8px 16px;border:none;background:#f0f0f0;color:#333;border-radius:8px;cursor:pointer;font-size:.9em;transition:all .3s}
+.tab-btn.active{background:#667eea;color:#fff}
+.tab-content{display:none}.tab-content.active{display:block;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.step-item{margin-bottom:10px;padding:10px 12px;border-radius:8px;background:#fafafa;transition:all .3s;border-left:3px solid transparent}
+.step-item.active{background:#f6ffed;border-left-color:#52c41a;box-shadow:0 2px 8px rgba(82,196,26,.15)}
+.step-item .step-title{font-weight:bold;color:#333;margin-bottom:4px;font-size:14px}
+.step-item .step-answer{color:#52c41a;font-weight:bold;font-size:14px}
+.step-item .step-detail{color:#666;font-size:13px;margin-top:4px;line-height:1.7}
+.option-item{padding:8px 12px;margin:4px 0;border-radius:6px;background:#fafafa;border:1px solid #eee;transition:all .3s}
+.option-item.correct{background:#f6ffed;border-color:#52c41a}
+.option-item.wrong{background:#fff2f0;border-color:#ff4d4f}
+.option-item .opt-label{font-weight:bold;margin-right:6px}
+.summary-content,.error-content,.kg-content{line-height:2;font-size:14px}
+.img-grid{display:flex;flex-wrap:wrap;gap:10px}
+.img-grid img{width:200px;height:auto;object-fit:contain;border:1px solid #ddd;border-radius:6px;cursor:pointer}
+.script-seg{margin-bottom:10px}
+.script-seg .seg-title{font-weight:bold;color:#667eea;font-size:14px;margin-bottom:4px}
+.script-seg .seg-text{color:#444;font-size:13px;line-height:1.8;white-space:pre-wrap}
+.audio-player{position:sticky;bottom:0;background:#fff;border-radius:12px 12px 0 0;padding:12px 15px;box-shadow:0 -2px 12px rgba(0,0,0,.15);z-index:100;margin-top:10px}
+.player-row1{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.play-btn{width:36px;height:36px;border-radius:50%;background:#667eea;color:#fff;border:none;cursor:pointer;font-size:1em;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.vol-btn{width:32px;height:32px;border-radius:50%;background:#f0f0f0;border:none;cursor:pointer;font-size:.9em;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.total-progress{flex:1;height:6px;background:#e0e0e0;border-radius:3px;cursor:pointer;overflow:hidden}
+.total-progress-bar{height:100%;width:0%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:3px;transition:width .1s linear}
+.time-display{font-size:.8em;color:#666;min-width:90px;text-align:right;white-space:nowrap}
+.player-row2{display:flex;flex-wrap:wrap;gap:5px}
+.seg-btn{padding:4px 10px;border:1px solid #ddd;background:#fff;border-radius:6px;cursor:pointer;font-size:.75em;transition:all .3s}
+.seg-btn.active{background:#667eea;color:#fff;border-color:#667eea}
+.seg-btn.played{background:#e8f5e9;border-color:#4caf50}
+@media(max-width:600px){.container{padding:6px}body{font-size:14px}.card{padding:8px}.card-title{font-size:.9em;padding:5px 12px}}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="card collapsed" id="qCard">
+<div class="card-header">
+<span class="card-title" onclick="toggleCard('qCard')">题目原文<span class="toggle-btn" onclick="event.stopPropagation();toggleCard('qCard')">展开</span></span>
+<div class="nav-btns"><button class="nav-btn prev-btn" id="prevBtn" onclick="goPrev()">上一题</button><button class="nav-btn next-btn" id="nextBtn" onclick="goNext()">下一题</button></div>
+</div>
+<div class="card-content"><div class="question-text">
+<div class="q-main">二、选择。（将正确答案的序号填在括号里）</div>
+<div class="q-tabs">
+<button class="q-tab-btn active" onclick="switchQTab(0)">第(1)问</button>
+<button class="q-tab-btn" onclick="switchQTab(1)">第(2)问</button>
+<button class="q-tab-btn" onclick="switchQTab(2)">第(3)问</button>
+</div>
+<div class="q-tab-panel active" id="qtab0"><div class="q">(1)恒恒一家三口预购了3张同一行连号的童话剧票。其中一张票的位置用有序数对(3,5)表示，那么另外2张票的位置用有序数对表示可能是(&nbsp;&nbsp;)。<br><span class="opt">A. (4,5)、(5,5)</span><span class="opt">B. (5,6)、(4,5)</span><span class="opt">C. (3,6)、(3,7)</span><span class="opt">D. (5,6)、(5,4)</span></div></div>
+<div class="q-tab-panel" id="qtab1"><div class="q">(2)六(2)班要召开家长会，荣荣爸爸的位置是(2,3)，恒恒爸爸与荣荣爸爸坐在同一列，恒恒爸爸的位置可能是(&nbsp;&nbsp;)。<br><span class="opt">A. (2,4)</span><span class="opt">B. (3,2)</span><span class="opt">C. (4,2)</span><span class="opt">D. (5,3)</span></div></div>
+<div class="q-tab-panel" id="qtab2"><div class="q">(3)广播体操比赛中，荣荣班级的队列是一个正方形。如果荣荣在队列中的位置是(4,6)，那么荣荣班级的人数至少是(&nbsp;&nbsp;)人。<br><span class="opt">A. 16</span><span class="opt">B. 24</span><span class="opt">C. 36</span><span class="opt">D. 无法确定</span></div></div>
+</div></div></div>
+
+<div class="card" id="animCard">
+<span class="card-title" onclick="toggleCard('animCard')">动画演示<span class="toggle-btn" onclick="event.stopPropagation();toggleCard('animCard')">折叠</span></span>
+<div class="card-content"><div class="anim-content">
+<div class="anim-tabs"><button class="anim-tab-btn active" onclick="switchAnimScene(0)">解题要点</button></div>
+<div class="anim-stage"><div class="anim-scene active">
+<div class="anim-text" id="animText">数对 = (<span class="hl">列</span>, <span class="hl">行</span>)，先列后行<br>同一行→第2个数相同；同一列→第1个数相同</div>
+</div></div>
+</div></div></div>
+
+<div class="card" id="explainCard">
+<span class="card-title" onclick="toggleCard('explainCard')">讲解内容<span class="toggle-btn" onclick="event.stopPropagation();toggleCard('explainCard')">折叠</span></span>
+<div class="card-content">
+<div class="tab-buttons">
+<button class="tab-btn active" onclick="switchTab(0)">题目讲解</button>
+<button class="tab-btn" onclick="switchTab(1)">总结</button>
+<button class="tab-btn" onclick="switchTab(2)">易错点</button>
+<button class="tab-btn" onclick="switchTab(3)">知识图谱</button>
+<button class="tab-btn" onclick="switchTab(4)">原题图片</button>
+<button class="tab-btn" onclick="switchTab(5)">讲解原文</button>
+</div>
+<div class="tab-content active" id="tab0">
+<div class="step-item" id="sq1">
+<div class="step-title">第(1)问</div>
+<div class="step-answer">答案：A</div>
+<div class="step-detail">3张票同一行连号，已知(3,5)。同一行→行数都是5；连号→列号连续。A选项(4,5)(5,5)：行数都是5，列号3、4、5连续，正确。B、D行数不同，C是同一列，均错误。</div>
+<div style="margin-top:6px;">
+<div class="option-item correct"><span class="opt-label">A.</span>(4,5)、(5,5) ✓ 同一行连号</div>
+<div class="option-item wrong"><span class="opt-label">B.</span>(5,6)、(4,5) ✗ 行数不同</div>
+<div class="option-item wrong"><span class="opt-label">C.</span>(3,6)、(3,7) ✗ 同一列</div>
+<div class="option-item wrong"><span class="opt-label">D.</span>(5,6)、(5,4) ✗ 行数不同</div>
+</div>
+</div>
+<div class="step-item" id="sq2">
+<div class="step-title">第(2)问</div>
+<div class="step-answer">答案：A</div>
+<div class="step-detail">荣荣爸爸(2,3)，同一列→第1个数相同，都是2。A选项(2,4)第1个数是2，符合同一列。B、C、D第1个数都不是2。</div>
+<div style="margin-top:6px;">
+<div class="option-item correct"><span class="opt-label">A.</span>(2,4) ✓ 同列（第1个数都是2）</div>
+<div class="option-item wrong"><span class="opt-label">B.</span>(3,2) ✗ 列不同</div>
+<div class="option-item wrong"><span class="opt-label">C.</span>(4,2) ✗ 列不同</div>
+<div class="option-item wrong"><span class="opt-label">D.</span>(5,3) ✗ 列不同</div>
+</div>
+</div>
+<div class="step-item" id="sq3">
+<div class="step-title">第(3)问</div>
+<div class="step-answer">答案：C</div>
+<div class="step-detail">正方形队列→行数=列数。荣荣(4,6)在第6行，说明至少6行；正方形所以至少6列。6×6=36人。</div>
+<div style="margin-top:6px;">
+<div class="option-item wrong"><span class="opt-label">A.</span>16 ✗ 4×4，不够6行</div>
+<div class="option-item wrong"><span class="opt-label">B.</span>24 ✗ 不是正方形</div>
+<div class="option-item correct"><span class="opt-label">C.</span>36 ✓ 6×6正方形</div>
+<div class="option-item wrong"><span class="opt-label">D.</span>无法确定 ✗ 可以确定</div>
+</div>
+</div>
+</div>
+<div class="tab-content" id="tab1"><div class="summary-content">
+<p>数对第一个数表示<strong>列</strong>，第二个数表示<strong>行</strong>，先列后行。</p>
+<p><strong>同一行</strong>的数对，第二个数相同；<strong>同一列</strong>的数对，第一个数相同。</p>
+<p>正方形队列中，行数=列数，根据最大的列数或行数确定边长，人数=边长×边长。</p>
+</div></div>
+<div class="tab-content" id="tab2"><div class="error-content">
+<p style="color:#ff4d4f;font-weight:bold;">易错点1：同一行和同一列搞混</p>
+<p>同一行看第二个数，同一列看第一个数，不要搞反。</p>
+<p style="color:#ff4d4f;font-weight:bold;margin-top:10px;">易错点2：正方形队列人数计算错误</p>
+<p>先确定边长（取列数和行数中的较大值），再边长×边长。(4,6)中最大是6，所以6×6=36，不是24。</p>
+</div></div>
+<div class="tab-content" id="tab3"><div class="kg-content">
+<p><strong>学科：</strong>数学</p>
+<p><strong>年级：</strong>六年级上册</p>
+<p><strong>教材：</strong>人教版（RJ）</p>
+<p><strong>单元：</strong>第二单元 位置与方向（二）</p>
+<p><strong>知识点：</strong>数对的实际应用、同行同列规律、正方形队列</p>
+<p><strong>核心规律：</strong>同行第2个数相同，同列第1个数相同</p>
+</div></div>
+<div class="tab-content" id="tab4"><div class="img-grid">
+<img src="images/p002_q02.png" onclick="showImage(this.src)" alt="原题">
+</div></div>
+<div class="tab-content" id="tab5">
+<div class="script-seg"><div class="seg-title">引导语</div><div class="seg-text">同学们，大家好，跟着老师来做这道题。</div></div>
+<div class="script-seg"><div class="seg-title">题目朗读</div><div class="seg-text">二、选择。将正确答案的序号填在括号里。</div></div>
+<div class="script-seg"><div class="seg-title">第(1)问</div><div class="seg-text">3张同一行连号的票，一张是(3,5)。同一行→行数都是5，连号→列号连续。A选项(4,5)(5,5)符合，选A。</div></div>
+<div class="script-seg"><div class="seg-title">第(2)问</div><div class="seg-text">荣荣爸爸(2,3)，同一列→第1个数相同都是2。A选项(2,4)符合，选A。</div></div>
+<div class="script-seg"><div class="seg-title">第(3)问</div><div class="seg-text">正方形队列，荣荣(4,6)→至少6行6列→6×6=36人，选C。</div></div>
+<div class="script-seg"><div class="seg-title">总结</div><div class="seg-text">同一行第2个数相同，同一列第1个数相同。正方形队列人数=边长×边长。</div></div>
+<div class="script-seg"><div class="seg-title">易错点</div><div class="seg-text">易错点一是同行同列搞混。易错点二是正方形人数算错，6×6=36不是24。</div></div>
+</div>
+</div></div>
+
+<div class="card audio-player" id="playerCard">
+<div class="card-title" style="cursor:default;">讲解播放器</div>
+<div class="player-row1">
+<button class="play-btn" onclick="togglePlay()" id="playBtn">▶</button>
+<button class="vol-btn" onclick="toggleMute()" id="volBtn">🔊</button>
+<div class="total-progress" id="totalProgress" onclick="seekTotal(event)"><div class="total-progress-bar" id="totalProgressBar"></div></div>
+<div class="time-display"><span id="currentTime">00:00</span> / <span id="totalTime">00:00</span></div>
+</div>
+<div class="player-row2">
+<button class="seg-btn active" onclick="jumpToSegment(0)">引导语</button>
+<button class="seg-btn" onclick="jumpToSegment(1)">题目朗读</button>
+<button class="seg-btn" onclick="jumpToSegment(2)">第(1)问</button>
+<button class="seg-btn" onclick="jumpToSegment(3)">第(2)问</button>
+<button class="seg-btn" onclick="jumpToSegment(4)">第(3)问</button>
+<button class="seg-btn" onclick="jumpToSegment(5)">总结</button>
+<button class="seg-btn" onclick="jumpToSegment(6)">易错点</button>
+</div>
+</div>
+</div>
+
+<div class="modal" id="imageModal" onclick="closeModal()"><img id="modalImage" src="" alt="放大图片"></div>
+<audio id="audioPlayer"></audio>
+
+<script>
+const segments=[
+{src:'audio/segment0.mp3',name:'引导语',tab:-1,highlight:null,anim_scene:-1,anim_step:0},
+{src:'audio/segment1.mp3',name:'题目朗读',tab:-1,highlight:null,anim_scene:-1,anim_step:0},
+{src:'audio/segment2.mp3',name:'第(1)问',tab:0,highlight:'sq1',anim_scene:0,anim_step:1},
+{src:'audio/segment3.mp3',name:'第(2)问',tab:0,highlight:'sq2',anim_scene:0,anim_step:2},
+{src:'audio/segment4.mp3',name:'第(3)问',tab:0,highlight:'sq3',anim_scene:0,anim_step:3},
+{src:'audio/segment5.mp3',name:'总结',tab:1,highlight:null,anim_scene:-1,anim_step:0},
+{src:'audio/segment6.mp3',name:'易错点',tab:2,highlight:null,anim_scene:-1,anim_step:0}
+];
+let currentSegment=0,isPlaying=false,segmentDurations=[0,0,0,0,0,0,0],totalDuration=0,loadedCount=0;
+const audio=document.getElementById('audioPlayer'),playBtn=document.getElementById('playBtn'),volBtn=document.getElementById('volBtn');
+const totalProgressBar=document.getElementById('totalProgressBar'),currentTimeEl=document.getElementById('currentTime'),totalTimeEl=document.getElementById('totalTime');
+const segBtns=document.querySelectorAll('.seg-btn'),tabBtns=document.querySelectorAll('.tab-btn'),tabContents=document.querySelectorAll('.tab-content');
+segments.forEach((s,i)=>{const t=new Audio(s.src);t.addEventListener('loadedmetadata',()=>{segmentDurations[i]=t.duration;loadedCount++;if(loadedCount===segments.length){totalDuration=segmentDurations.reduce((a,b)=>a+b,0);totalTimeEl.textContent=formatTime(totalDuration);}});});
+function toggleCard(id){const c=document.getElementById(id);if(!c)return;c.classList.toggle('collapsed');const b=c.querySelector('.toggle-btn');if(b)b.textContent=c.classList.contains('collapsed')?'展开':'折叠';}
+const prevUrl='../p002_q01/index.html',nextUrl='../p002_q03/index.html';
+function goPrev(){if(prevUrl)window.location.href=prevUrl;}function goNext(){if(nextUrl)window.location.href=nextUrl;}
+document.addEventListener('DOMContentLoaded',()=>{if(!prevUrl)document.getElementById('prevBtn').style.display='none';if(!nextUrl)document.getElementById('nextBtn').style.display='none';});
+function switchTab(i){tabBtns.forEach((b,idx)=>b.classList.toggle('active',idx===i));tabContents.forEach((c,idx)=>c.classList.toggle('active',idx===i));}
+function switchQTab(i){document.querySelectorAll('.q-tab-btn').forEach((b,idx)=>b.classList.toggle('active',idx===i));document.querySelectorAll('.q-tab-panel').forEach((p,idx)=>p.classList.toggle('active',idx===i));}
+function switchAnimScene(i){document.querySelectorAll('.anim-tab-btn').forEach((b,idx)=>b.classList.toggle('active',idx===i));document.querySelectorAll('.anim-scene').forEach((s,idx)=>s.classList.toggle('active',idx===i));}
+function loadSegment(index){
+document.querySelectorAll('.step-item').forEach(el=>el.classList.remove('active'));
+currentSegment=index;audio.src=segments[index].src;updateSegButtons();
+if(segments[index].tab>=0)switchTab(segments[index].tab);
+if(segments[index].anim_scene>=0)switchAnimScene(segments[index].anim_scene);
+applyAnimStep(segments[index]);
+const h=segments[index].highlight;if(h){const el=document.getElementById(h);if(el)el.classList.add('active');}
+if(index===2)switchQTab(0);if(index===3)switchQTab(1);if(index===4)switchQTab(2);
+}
+function togglePlay(){if(isPlaying){audio.pause();playBtn.textContent='▶';isPlaying=false;}else{audio.play();playBtn.textContent='⏸';isPlaying=true;}}
+function toggleMute(){audio.muted=!audio.muted;volBtn.textContent=audio.muted?'🔇':'🔊';}
+function jumpToSegment(i){loadSegment(i);if(isPlaying)audio.play();}
+function updateSegButtons(){segBtns.forEach((b,i)=>{b.classList.remove('active');b.classList.toggle('played',i<currentSegment);});if(segBtns[currentSegment])segBtns[currentSegment].classList.add('active');}
+audio.addEventListener('ended',()=>{if(currentSegment<segments.length-1)jumpToSegment(currentSegment+1);else{playBtn.textContent='▶';isPlaying=false;}});
+audio.addEventListener('timeupdate',()=>{if(totalDuration>0){const before=segmentDurations.slice(0,currentSegment).reduce((a,b)=>a+b,0);const elapsed=before+audio.currentTime;totalProgressBar.style.width=(elapsed/totalDuration*100)+'%';currentTimeEl.textContent=formatTime(elapsed);}});
+function seekTotal(e){const r=e.currentTarget.getBoundingClientRect();const pct=(e.clientX-r.left)/r.width;const tt=pct*totalDuration;let acc=0;for(let i=0;i<segments.length;i++){if(tt<acc+segmentDurations[i]){loadSegment(i);audio.currentTime=tt-acc;if(isPlaying)audio.play();break;}acc+=segmentDurations[i];}}
+function formatTime(s){const m=Math.floor(s/60),sec=Math.floor(s%60);return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;}
+function showImage(src){document.getElementById('modalImage').src=src;document.getElementById('imageModal').classList.add('active');}
+function closeModal(){document.getElementById('imageModal').classList.remove('active');}
+function applyAnimStep(seg){
+const step=seg.anim_step;
+const at=document.getElementById('animText');
+if(step===1){at.innerHTML='第(1)问：<span class="hl">同一行</span>→第2个数相同（都是5），<span class="hl">连号</span>→列号连续<br>A. (4,5)(5,5) <span class="correct">✓正确</span>；B/C/D <span class="wrong">✗错误</span>';}
+else if(step===2){at.innerHTML='第(2)问：<span class="hl">同一列</span>→第1个数相同（都是2）<br>A. (2,4) <span class="correct">✓正确</span>；B/C/D <span class="wrong">✗错误</span>';}
+else if(step===3){at.innerHTML='第(3)问：<span class="hl">正方形队列</span>→行数=列数<br>荣荣(4,6)→至少6行6列→<span class="correct">6×6=36人</span>';}
+else at.innerHTML='数对 = (<span class="hl">列</span>, <span class="hl">行</span>)，先列后行<br>同一行→第2个数相同；同一列→第1个数相同';
+}
+document.querySelectorAll('.question-text img').forEach(img=>img.addEventListener('click',()=>showImage(img.src)));
+loadSegment(0);
+</script>
+</body>
+</html>
