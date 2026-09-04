@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>长跑比赛路线·方向与距离描述</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Microsoft YaHei', sans-serif;
+  background: linear-gradient(135deg, #0a2e2e 0%, #1b4e4e 50%, #0a3e3e 100%);
+  min-height: 100vh;
+  color: #fff;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background: rgba(0,0,0,0.4);
+}
+.header h1 {
+  font-size: 20px;
+  background: linear-gradient(90deg, #4db6ac, #26a69a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.score-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #4db6ac, #26a69a);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  color: #0a2e2e;
+}
+.main-container {
+  display: flex;
+  gap: 16px;
+  padding: 16px 24px;
+  min-height: calc(100vh - 60px);
+}
+.left-area {
+  flex: 1;
+  background: rgba(77,182,172,0.05);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(77,182,172,0.15);
+ position: relative; overflow: hidden;}
+.map-title {
+  font-size: 18px;
+  color: #4db6ac;
+  margin-bottom: 12px;
+  text-align: center;
+}
+.map-container {
+  position: relative;
+  
+  
+  background: rgba(0,0,0,0.2);
+  border-radius: 12px;
+  border: 1px solid rgba(77,182,172,0.2);
+ transform: scale(1.4); transform-origin: center;}
+.map-svg {
+  width: 100%;
+  height: 100%;
+}
+.location-marker {
+  fill: #ffd700;
+  stroke: #fff;
+  stroke-width: 2;
+}
+.location-label {
+  font-size: 14px;
+  fill: #ffd700;
+  font-weight: bold;
+  text-anchor: middle;
+}
+.route-line {
+  stroke: #ff6b9d;
+  stroke-width: 3;
+  fill: none;
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  transition: stroke-dashoffset 2s ease-in-out;
+}
+.route-line.show {
+  stroke-dashoffset: 0;
+}
+.runner {
+  fill: #4db6ac;
+  stroke: #fff;
+  stroke-width: 2;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.runner.show {
+  opacity: 1;
+}
+.angle-arc {
+  fill: none;
+  stroke: #00bfff;
+  stroke-width: 2;
+  stroke-dasharray: 4,3;
+}
+.angle-text {
+  font-size: 12px;
+  fill: #00bfff;
+  font-weight: bold;
+}
+.north-label {
+  font-size: 14px;
+  fill: #ff6b9d;
+  font-weight: bold;
+}
+.scale-bar {
+  position: absolute;
+  bottom: 15px;
+  left: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.scale-line {
+  width: 50px;
+  height: 4px;
+  background: linear-gradient(90deg, #ff6b9d, #ff8c00);
+  border-radius: 2px;
+}
+.scale-text {
+  font-size: 12px;
+  color: #aaa;
+}
+.btn-play {
+  margin-top: 16px;
+  padding: 12px 28px;
+  border-radius: 25px;
+  border: none;
+  background: linear-gradient(135deg, #4db6ac, #26a69a);
+  color: #fff;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.btn-play:hover { transform: scale(1.05); }
+.btn-play:disabled {
+  background: #555;
+  cursor: not-allowed;
+  transform: none;
+}
+.right-panel {
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+.task-card {
+  background: rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 14px;
+  border-left: 4px solid #4db6ac;
+}
+.task-card h3 {
+  font-size: 15px;
+  color: #4db6ac;
+  margin-bottom: 10px;
+}
+.task-text {
+  font-size: 13px;
+  line-height: 2;
+  color: #ddd;
+  margin-bottom: 10px;
+}
+.task-text input {
+  width: 50px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  border: 1px solid #555;
+  background: rgba(0,0,0,0.3);
+  color: #fff;
+  font-size: 13px;
+  text-align: center;
+  margin: 0 2px;
+}
+.task-text input.wide {
+  width: 70px;
+}
+.task-text input:focus {
+  outline: none;
+  border-color: #4db6ac;
+}
+.btn-verify {
+  padding: 8px 20px;
+  border-radius: 6px;
+  border: none;
+  background: linear-gradient(135deg, #4db6ac, #26a69a);
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 10px;
+}
+.feedback {
+  font-size: 13px;
+  margin-top: 8px;
+  min-height: 18px;
+}
+.feedback.correct { color: #4db6ac; }
+.feedback.wrong { color: #ff6b6b; }
+.hint-box {
+  background: rgba(255,215,0,0.08);
+  border: 1px solid rgba(255,215,0,0.3);
+  border-radius: 8px;
+  padding: 10px;
+  margin-top: 10px;
+}
+.hint-box p {
+  font-size: 12px;
+  color: #ffd700;
+  line-height: 1.6;
+}
+.player-card {
+  background: rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 14px;
+}
+.player-title {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.player-title.listen { color: #00bfff; }
+.player-title.explain { color: #ff8c00; }
+.player-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.play-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #00bfff, #0080ff);
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.play-btn:hover { transform: scale(1.1); }
+.play-btn.playing { background: linear-gradient(135deg, #ff6b6b, #ee5a24); }
+.progress-bar {
+  flex: 1;
+  height: 6px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 3px;
+  cursor: pointer;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00bfff, #0080ff);
+  border-radius: 3px;
+  width: 0%;
+}
+.time-display {
+  font-size: 12px;
+  color: #aaa;
+  min-width: 80px;
+  text-align: right;
+}
+.overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.overlay.show { display: flex; }
+.overlay-content {
+  background: linear-gradient(135deg, #0a2e2e, #1b4e4e);
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  border: 2px solid #4db6ac;
+}
+.overlay-content h2 { font-size: 28px; color: #4db6ac; margin-bottom: 16px; }
+.overlay-content p { font-size: 16px; color: #ddd; margin-bottom: 24px; }
+.overlay-btn {
+  padding: 12px 32px;
+  border-radius: 30px;
+  border: none;
+  background: linear-gradient(135deg, #ff8c00, #ff6b00);
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🏃 长跑比赛路线·方向与距离描述</h1>
+  <div class="score-box">⭐ <span id="score">0</span> 分</div>
+</div>
+
+<div class="main-container">
+  <div class="left-area">
+    <div class="map-title">长跑比赛路线图（比例尺：1段 = 300m）</div>
+    <div class="map-container">
+      <svg class="map-svg" viewBox="0 0 420 400" id="mapSvg">
+        <g id="baseLayer"></g>
+        <g id="routeLayer"></g>
+        <g id="locationsLayer"></g>
+        <g id="runnerLayer"></g>
+      </svg>
+      <div class="scale-bar">
+        <div class="scale-line"></div>
+        <div class="scale-text">300 m</div>
+      </div>
+    </div>
+    <button class="btn-play" id="playBtn" onclick="playRoute()">▶ 播放路线动画</button>
+  </div>
+
+  <div class="right-panel">
+    <div class="task-card">
+      <h3>📋 描述长跑比赛路线</h3>
+      <div class="task-text">
+        从学校出发，先向(<input type="text" id="a1">)偏(<input type="text" id="a2">)(<input type="text" id="a3" class="wide">)方向跑(<input type="text" id="a4">)m到达文化宫，接着向(<input type="text" id="a5">)偏(<input type="text" id="a6">)(<input type="text" id="a7" class="wide">)方向跑(<input type="text" id="a8">)m到达科技馆，再向(<input type="text" id="a9">)偏(<input type="text" id="a10">)(<input type="text" id="a11" class="wide">)方向跑(<input type="text" id="a12">)m到达公园。
+      </div>
+      <button class="btn-verify" onclick="verifyAnswer()">验证答案</button>
+      <div class="feedback" id="fb"></div>
+      <div class="hint-box">
+        <p>💡 提示：先数每段有几段，每段300m；再判断方向（南偏东/北偏西等）</p>
+      </div>
+    </div>
+
+    <div class="player-card">
+      <div class="player-title listen">🎧 听题·动手做</div>
+      <div class="player-controls">
+        <button class="play-btn" id="listenBtn" onclick="toggleListen()">▶</button>
+        <div class="progress-bar" onclick="seekListen(event)">
+          <div class="progress-fill" id="listenProgress"></div>
+        </div>
+        <div class="time-display" id="listenTime">0:00 / 0:00</div>
+      </div>
+    </div>
+
+    <div class="player-card">
+      <div class="player-title explain">📖 听讲·老师做</div>
+      <div class="player-controls">
+        <button class="play-btn" id="explainBtn" onclick="toggleExplain()">▶</button>
+        <div class="progress-bar" onclick="seekExplain(event)">
+          <div class="progress-fill" id="explainProgress"></div>
+        </div>
+        <div class="time-display" id="explainTime">0:00 / 0:00</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="completeOverlay">
+  <div class="overlay-content">
+    <h2>🎉 完成啦！</h2>
+    <p>你已经完成了所有题目，来听听老师的讲解吧！</p>
+    <button class="overlay-btn" onclick="playExplainFromOverlay()">📖 听讲·老师做</button>
+  </div>
+</div>
+
+<audio id="listenAudio" src="audio/intro.mp3" preload="metadata"></audio>
+<audio id="explainAudio" src="audio/explain.mp3" preload="metadata"></audio>
+
+<script>
+const SCHOOL = {x: 140, y: 100};
+const CULTURE = {x: 320, y: 300};
+const SCIENCE = {x: 240, y: 100};
+const PARK = {x: 180, y: 60};
+let score = 0;
+let answerVerified = false;
+let routePlaying = false;
+let correctAnswersShown = false;
+
+function initMap() {
+  const base = document.getElementById('baseLayer');
+  
+  const northText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  northText.setAttribute('x', 380);
+  northText.setAttribute('y', 150);
+  northText.setAttribute('class', 'north-label');
+  northText.textContent = '北 ↑';
+  base.appendChild(northText);
+  
+  const locations = document.getElementById('locationsLayer');
+  
+  const points = [
+    {name: '学校', x: SCHOOL.x, y: SCHOOL.y},
+    {name: '文化宫', x: CULTURE.x, y: CULTURE.y},
+    {name: '科技馆', x: SCIENCE.x, y: SCIENCE.y},
+    {name: '公园', x: PARK.x, y: PARK.y}
+  ];
+  
+  points.forEach(p => {
+    const marker = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    marker.setAttribute('cx', p.x);
+    marker.setAttribute('cy', p.y);
+    marker.setAttribute('r', '8');
+    marker.setAttribute('class', 'location-marker');
+    locations.appendChild(marker);
+    
+    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    label.setAttribute('x', p.x);
+    label.setAttribute('y', p.y - 15);
+    label.setAttribute('class', 'location-label');
+    label.textContent = p.name;
+    locations.appendChild(label);
+  });
+  
+  const route = document.getElementById('routeLayer');
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', `M ${SCHOOL.x} ${SCHOOL.y} L ${CULTURE.x} ${CULTURE.y} L ${SCIENCE.x} ${SCIENCE.y} L ${PARK.x} ${PARK.y}`);
+  path.setAttribute('class', 'route-line');
+  path.setAttribute('id', 'routePath');
+  route.appendChild(path);
+  
+  const runner = document.getElementById('runnerLayer');
+  const runnerCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  runnerCircle.setAttribute('cx', SCHOOL.x);
+  runnerCircle.setAttribute('cy', SCHOOL.y);
+  runnerCircle.setAttribute('r', '10');
+  runnerCircle.setAttribute('class', 'runner');
+  runnerCircle.setAttribute('id', 'runner');
+  runner.appendChild(runnerCircle);
+}
+
+function playRoute() {
+  if (routePlaying) return;
+  routePlaying = true;
+  
+  document.getElementById('playBtn').textContent = '🏃 路线播放中...';
+  document.getElementById('playBtn').disabled = true;
+  
+  const routePath = document.getElementById('routePath');
+  const runner = document.getElementById('runner');
+  
+  routePath.classList.add('show');
+  runner.classList.add('show');
+  
+  const pathLength = routePath.getTotalLength();
+  let progress = 0;
+  const duration = 4000;
+  const startTime = Date.now();
+  
+  function animate() {
+    const elapsed = Date.now() - startTime;
+    progress = Math.min(elapsed / duration, 1);
+    
+    const point = routePath.getPointAtLength(progress * pathLength);
+    runner.setAttribute('cx', point.x);
+    runner.setAttribute('cy', point.y);
+    
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      setTimeout(() => {
+        document.getElementById('playBtn').textContent = '✅ 路线播放完成';
+        addScore(5);
+      }, 300);
+    }
+  }
+  
+  animate();
+}
+
+function verifyAnswer() {
+  if (answerVerified) return;
+  
+  const answers = {
+    a1: document.getElementById('a1').value,
+    a2: document.getElementById('a2').value,
+    a3: document.getElementById('a3').value,
+    a4: document.getElementById('a4').value,
+    a5: document.getElementById('a5').value,
+    a6: document.getElementById('a6').value,
+    a7: document.getElementById('a7').value,
+    a8: document.getElementById('a8').value,
+    a9: document.getElementById('a9').value,
+    a10: document.getElementById('a10').value,
+    a11: document.getElementById('a11').value,
+    a12: document.getElementById('a12').value
+  };
+  
+  const correct = {
+    a1: '南', a2: '东', a3: '45°', a4: '1500',
+    a5: '北', a6: '西', a7: '30°', a8: '1200',
+    a9: '北', a10: '西', a11: '45°', a12: '300'
+  };
+  
+  let allCorrect = true;
+  for (let key in correct) {
+    if (answers[key] !== correct[key]) {
+      allCorrect = false;
+      break;
+    }
+  }
+  
+  const fb = document.getElementById('fb');
+  if (allCorrect) {
+    fb.textContent = '✅ 完全正确！路线描述准确无误！';
+    fb.className = 'feedback correct';
+    answerVerified = true;
+    addScore(15);
+    if (!routePlaying) playRoute();
+    setTimeout(() => {
+      document.getElementById('completeOverlay').classList.add('show');
+    }, 1000);
+  } else {
+    fb.textContent = '❌ 有错误，再检查一下方向和距离。提示：学校到文化宫5段，文化宫到科技馆4段，科技馆到公园1段';
+    fb.className = 'feedback wrong';
+  }
+}
+
+function addScore(points) {
+  score += points;
+  document.getElementById('score').textContent = score;
+}
+
+// 双播放器逻辑
+const listenAudio = document.getElementById('listenAudio');
+const explainAudio = document.getElementById('explainAudio');
+let listenPlaying = false;
+let explainPlaying = false;
+
+function initDualPlayers() {
+  listenAudio.addEventListener('loadedmetadata', () => {
+    document.getElementById('listenTime').textContent = '0:00 / ' + formatTime(listenAudio.duration);
+  });
+  explainAudio.addEventListener('loadedmetadata', () => {
+    document.getElementById('explainTime').textContent = '0:00 / ' + formatTime(explainAudio.duration);
+  });
+  listenAudio.addEventListener('timeupdate', updateListenProgress);
+  explainAudio.addEventListener('timeupdate', updateExplainProgress);
+  listenAudio.addEventListener('ended', () => {
+    listenPlaying = false;
+    document.getElementById('listenBtn').textContent = '▶';
+    document.getElementById('listenBtn').classList.remove('playing');
+  });
+  explainAudio.addEventListener('ended', () => {
+    explainPlaying = false;
+    document.getElementById('explainBtn').textContent = '▶';
+    document.getElementById('explainBtn').classList.remove('playing');
+  });
+}
+
+function toggleListen() {
+  if (listenPlaying) {
+    listenAudio.pause();
+    listenPlaying = false;
+    document.getElementById('listenBtn').textContent = '▶';
+    document.getElementById('listenBtn').classList.remove('playing');
+  } else {
+    if (explainPlaying) toggleExplain();
+    listenAudio.play();
+    listenPlaying = true;
+    document.getElementById('listenBtn').textContent = '⏸';
+    document.getElementById('listenBtn').classList.add('playing');
+  }
+}
+
+function toggleExplain() {
+  if (explainPlaying) {
+    explainAudio.pause();
+    explainPlaying = false;
+    document.getElementById('explainBtn').textContent = '▶';
+    document.getElementById('explainBtn').classList.remove('playing');
+  } else {
+    if (listenPlaying) toggleListen();
+    explainAudio.play();
+    explainPlaying = true;
+    document.getElementById('explainBtn').textContent = '⏸';
+    document.getElementById('explainBtn').classList.add('playing');
+    if (!correctAnswersShown) showCorrectAnswers();
+  }
+}
+
+function playExplainFromOverlay() {
+  document.getElementById('completeOverlay').classList.remove('show');
+  listenAudio.pause();
+  listenAudio.currentTime = 0;
+  listenPlaying = false;
+  document.getElementById('listenBtn').textContent = '▶';
+  document.getElementById('listenBtn').classList.remove('playing');
+  explainAudio.currentTime = 0;
+  explainAudio.play();
+  explainPlaying = true;
+  document.getElementById('explainBtn').textContent = '⏸';
+  document.getElementById('explainBtn').classList.add('playing');
+  if (!correctAnswersShown) showCorrectAnswers();
+}
+
+function showCorrectAnswers() {
+  correctAnswersShown = true;
+  if (!routePlaying) playRoute();
+  document.getElementById('a1').value = '南';
+  document.getElementById('a2').value = '东';
+  document.getElementById('a3').value = '45°';
+  document.getElementById('a4').value = '1500';
+  document.getElementById('a5').value = '北';
+  document.getElementById('a6').value = '西';
+  document.getElementById('a7').value = '30°';
+  document.getElementById('a8').value = '1200';
+  document.getElementById('a9').value = '北';
+  document.getElementById('a10').value = '西';
+  document.getElementById('a11').value = '45°';
+  document.getElementById('a12').value = '300';
+}
+
+function seekListen(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const percent = (e.clientX - rect.left) / rect.width;
+  listenAudio.currentTime = percent * listenAudio.duration;
+}
+
+function seekExplain(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const percent = (e.clientX - rect.left) / rect.width;
+  explainAudio.currentTime = percent * explainAudio.duration;
+}
+
+function updateListenProgress() {
+  const percent = (listenAudio.currentTime / listenAudio.duration) * 100;
+  document.getElementById('listenProgress').style.width = percent + '%';
+  document.getElementById('listenTime').textContent = formatTime(listenAudio.currentTime) + ' / ' + formatTime(listenAudio.duration);
+}
+
+function updateExplainProgress() {
+  const percent = (explainAudio.currentTime / explainAudio.duration) * 100;
+  document.getElementById('explainProgress').style.width = percent + '%';
+  document.getElementById('explainTime').textContent = formatTime(explainAudio.currentTime) + ' / ' + formatTime(explainAudio.duration);
+}
+
+function formatTime(seconds) {
+  if (isNaN(seconds)) return '0:00';
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+initMap();
+initDualPlayers();
+</script>
+</body>
+</html>

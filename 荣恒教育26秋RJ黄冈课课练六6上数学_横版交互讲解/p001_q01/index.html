@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>电影院找座位 - 数对表示位置</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: #1a1a2e;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* 16:9 容器（铺满全屏） */
+.stage {
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #16213e 0%, #1a1a2e 50%, #0f3460 100%);
+  border-radius: 0;
+  box-shadow: none;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 顶部栏 */
+.top-bar {
+  height: 60px;
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  flex-shrink: 0;
+}
+.top-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.top-title .icon { font-size: 28px; }
+.top-right { display: flex; align-items: center; gap: 16px; }
+.score-display {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn {
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn-audio { background: rgba(255,255,255,0.15); color: #fff; }
+.btn-audio:hover { background: rgba(255,255,255,0.25); }
+.btn-audio.playing { background: #3b82f6; }
+.btn-hint { background: rgba(255,255,255,0.15); color: #fff; }
+.btn-hint:hover { background: rgba(255,255,255,0.25); }
+.btn-reset { background: rgba(239,68,68,0.2); color: #fca5a5; }
+.btn-reset:hover { background: rgba(239,68,68,0.3); }
+
+/* 主内容区 */
+.main-content {
+  flex: 1;
+  display: flex;
+  padding: 20px;
+  gap: 20px;
+  overflow: hidden;
+}
+
+/* 电影院区域 */
+.cinema-area {
+  flex: 1;
+  background: rgba(0,0,0,0.3);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  --seat-w: 32px;
+  --seat-h: 28px;
+}
+.screen {
+  width: 80%;
+  height: 24px;
+  background: linear-gradient(180deg, #e0e7ff 0%, #c7d2fe 100%);
+  border-radius: 4px 4px 0 0;
+  margin-bottom: 4px;
+  box-shadow: 0 0 30px rgba(199,210,254,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #4338ca;
+  font-weight: 600;
+  letter-spacing: 4px;
+}
+.screen-glow {
+  width: 90%;
+  height: 8px;
+  background: linear-gradient(180deg, rgba(199,210,254,0.3) 0%, transparent 100%);
+  margin-bottom: 12px;
+}
+
+/* 座位网格 */
+.seat-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: center;
+}
+.seat-row {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+.row-label {
+  width: 24px;
+  text-align: center;
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+  font-weight: 600;
+}
+.seat {
+  width: var(--seat-w);
+  height: var(--seat-h);
+  background: linear-gradient(180deg, #dc2626 0%, #991b1b 100%);
+  border-radius: 4px 4px 2px 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: rgba(255,255,255,0.6);
+}
+.seat:hover {
+  background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
+  transform: scale(1.1);
+  box-shadow: 0 0 10px rgba(239,68,68,0.5);
+}
+.seat.drag-over {
+  background: linear-gradient(180deg, #fbbf24 0%, #d97706 100%);
+  transform: scale(1.15);
+  box-shadow: 0 0 15px rgba(251,191,36,0.6);
+}
+.seat.occupied {
+  background: linear-gradient(180deg, #22c55e 0%, #15803d 100%);
+  cursor: default;
+}
+.seat.occupied .student-avatar {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 20px;
+  animation: sitDown 0.5s ease;
+}
+@keyframes sitDown {
+  0% { transform: translateX(-50%) translateY(-30px) scale(0.5); opacity: 0; }
+  100% { transform: translateX(-50%) translateY(0) scale(1); opacity: 1; }
+}
+.seat.wrong-flash {
+  animation: wrongFlash 0.4s ease;
+}
+@keyframes wrongFlash {
+  0%, 100% { background: linear-gradient(180deg, #dc2626 0%, #991b1b 100%); }
+  25% { background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%); transform: translateX(-3px); }
+  75% { background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%); transform: translateX(3px); }
+}
+.col-labels {
+  display: flex;
+  gap: 5px;
+  margin-left: 29px;
+  margin-top: 6px;
+}
+.col-label {
+  width: var(--seat-w);
+  text-align: center;
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  font-weight: 600;
+}
+
+/* 右侧人物卡片区 */
+.students-panel {
+  width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.panel-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.panel-subtitle {
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+.student-card {
+  background: rgba(255,255,255,0.1);
+  border: 2px solid rgba(255,255,255,0.2);
+  border-radius: 12px;
+  padding: 14px;
+  cursor: grab;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  user-select: none;
+}
+.student-card:hover {
+  background: rgba(255,255,255,0.15);
+  border-color: rgba(255,255,255,0.4);
+  transform: translateX(4px);
+}
+.student-card:active { cursor: grabbing; }
+.student-card.dragging { opacity: 0.4; transform: scale(0.95); }
+.student-card.placed {
+  opacity: 0.3;
+  cursor: default;
+  pointer-events: none;
+  border-color: #22c55e;
+  background: rgba(34,197,94,0.1);
+}
+.student-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #60a5fa, #3b82f6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+.student-info { flex: 1; }
+.student-name { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 2px; }
+.student-hint { font-size: 12px; color: rgba(255,255,255,0.6); }
+.student-status {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.7);
+}
+.student-status.done { background: rgba(34,197,94,0.2); color: #86efac; }
+
+/* 提示框 */
+.hint-box {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  padding: 10px 24px;
+  border-radius: 20px;
+  font-size: 14px;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  z-index: 10;
+  animation: fadeInUp 0.3s ease;
+}
+.hint-box.show { display: flex; }
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* 完成弹窗 */
+.complete-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(8px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.complete-overlay.show { display: flex; animation: fadeIn 0.5s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.complete-card {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border: 2px solid rgba(34,197,94,0.3);
+  border-radius: 20px;
+  padding: 36px;
+  text-align: center;
+  max-width: 560px;
+  width: 90%;
+  box-shadow: 0 0 60px rgba(34,197,94,0.2);
+  animation: popIn 0.5s ease;
+}
+@keyframes popIn {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.complete-icon { font-size: 64px; margin-bottom: 16px; }
+.complete-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 8px;
+}
+.complete-subtitle {
+  font-size: 15px;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 24px;
+}
+.complete-scores {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+.score-item {
+  background: rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 16px 24px;
+  min-width: 100px;
+}
+.score-value { font-size: 28px; font-weight: 800; color: #fbbf24; }
+.score-label { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 4px; }
+
+/* 答案解析 */
+.explanation {
+  background: rgba(59,130,246,0.1);
+  border: 1px solid rgba(59,130,246,0.3);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+.explanation-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #93c5fd;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.explanation-content {
+  font-size: 13px;
+  color: rgba(255,255,255,0.8);
+  line-height: 1.8;
+}
+.explanation-content .pair {
+  display: inline-block;
+  background: rgba(251,191,36,0.2);
+  color: #fcd34d;
+  padding: 1px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  margin: 0 2px;
+}
+.complete-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+.btn-explain {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: #fff;
+  padding: 12px 28px;
+  font-size: 15px;
+}
+.btn-explain:hover { background: linear-gradient(135deg, #60a5fa, #3b82f6); }
+.btn-explain.playing { background: linear-gradient(135deg, #22c55e, #16a34a); }
+.btn-again {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  padding: 12px 28px;
+  font-size: 15px;
+}
+.btn-again:hover { background: rgba(255,255,255,0.2); }
+
+/* 彩带 */
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: -10px;
+  pointer-events: none;
+  z-index: 99;
+  animation: confettiFall 3s linear forwards;
+}
+@keyframes confettiFall {
+  to { transform: translateY(720px) rotate(720deg); opacity: 0; }
+}
+
+/* 得分飘字 */
+.score-popup {
+  position: absolute;
+  font-size: 24px;
+  font-weight: 800;
+  color: #fbbf24;
+  pointer-events: none;
+  z-index: 50;
+  animation: scoreFloat 1s ease forwards;
+  text-shadow: 0 2px 10px rgba(251,191,36,0.5);
+}
+@keyframes scoreFloat {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-40px) scale(1.3); }
+}
+
+/* 讲解播放器 */
+.explain-card {
+  background: rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+  margin-top: 12px;
+}
+.explain-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #f5deb3;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.explain-player {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.explain-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.explain-play-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.explain-play-btn:hover { background: #ef4444; transform: scale(1.05); }
+.explain-progress {
+  flex: 1;
+  height: 5px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+  cursor: pointer;
+  overflow: hidden;
+}
+.explain-progress-bar {
+  height: 100%;
+  background: #dc2626;
+  width: 0%;
+  transition: width 0.1s;
+}
+.explain-time {
+  font-size: 10px;
+  color: rgba(255,255,255,0.5);
+  min-width: 70px;
+  text-align: right;
+  font-family: 'Courier New', monospace;
+}
+.explain-segments {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.explain-seg-btn {
+  padding: 3px 8px;
+  font-size: 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.6);
+  border: 1px solid rgba(255,255,255,0.1);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.explain-seg-btn:hover {
+  background: rgba(220,38,38,0.2);
+  color: #fca5a5;
+}
+.explain-seg-btn.active {
+  background: #dc2626;
+  color: #fff;
+  border-color: #dc2626;
+}
+
+/* 正确答案展示 */
+.seat.has-correct {
+  background: linear-gradient(180deg, #16a34a 0%, #15803d 100%) !important;
+  box-shadow: 0 0 8px rgba(34,197,94,0.6);
+}
+.correct-student {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  z-index: 5;
+  animation: correctPop 0.5s ease;
+}
+@keyframes correctPop {
+  0% { transform: translate(-50%, -50%) scale(0); }
+  50% { transform: translate(-50%, -50%) scale(1.2); }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}
+.correct-avatar {
+  font-size: 14px;
+  line-height: 1;
+}
+.correct-name {
+  font-size: 8px;
+  color: #fff;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  white-space: nowrap;
+}
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+  <!-- 顶部栏 -->
+  <div class="top-bar">
+    <div class="top-title">
+      <span class="icon">🎬</span>
+      <span>电影院找座位 · 数对表示位置</span>
+    </div>
+    <div class="top-right">
+      <div class="score-display">⭐ <span id="score">0</span> 分</div>
+      <button class="btn btn-hint" onclick="showHint()">💡 提示</button>
+      <button class="btn btn-reset" onclick="resetGame()">🔄 重置</button>
+    </div>
+  </div>
+
+  <!-- 主内容区 -->
+  <div class="main-content">
+    <!-- 电影院区域 -->
+    <div class="cinema-area" id="cinemaArea">
+      <div class="screen">银 幕</div>
+      <div class="screen-glow"></div>
+      <div class="seat-grid" id="seatGrid"></div>
+      <div class="col-labels" id="colLabels"></div>
+      <div class="hint-box" id="hintBox">💡 用数对表示位置时，先列后行，如第4列第7行表示为(4,7)</div>
+    </div>
+
+    <!-- 右侧人物卡片 -->
+    <div class="students-panel">
+      <div class="panel-title">👨‍👩‍👧 待入座同学</div>
+      <div class="panel-subtitle">把同学拖到对应的座位上<br>（列数从左往右数，行数从前往后数）</div>
+      
+      <div class="student-card" id="card-rongrong" draggable="true" data-student="rongrong" data-col="4" data-row="7">
+        <div class="student-avatar">👦</div>
+        <div class="student-info">
+          <div class="student-name">荣荣</div>
+          <div class="student-hint">第4列第7行</div>
+        </div>
+        <div class="student-status" id="status-rongrong">待入座</div>
+      </div>
+
+      <div class="student-card" id="card-liuming" draggable="true" data-student="liuming" data-col="5" data-row="11">
+        <div class="student-avatar">👧</div>
+        <div class="student-info">
+          <div class="student-name">柳明</div>
+          <div class="student-hint">第5列第11行</div>
+        </div>
+        <div class="student-status" id="status-liuming">待入座</div>
+      </div>
+
+      <div class="student-card" id="card-xiaodong" draggable="true" data-student="xiaodong" data-col="2" data-row="5">
+        <div class="student-avatar">🧒</div>
+        <div class="student-info">
+          <div class="student-name">晓东</div>
+          <div class="student-hint">第2列第5行</div>
+        </div>
+        <div class="student-status" id="status-xiaodong">待入座</div>
+      </div>
+
+      <!-- 播放器1：听题·动手做 -->
+      <div class="explain-card">
+        <div class="explain-title">🎧 听题·动手做</div>
+        <div class="explain-player">
+          <div class="explain-controls">
+            <button class="explain-play-btn" id="listenPlayBtn" onclick="toggleListen()">▶</button>
+            <div class="explain-progress" id="listenProgress" onclick="seekListen(event)">
+              <div class="explain-progress-bar" id="listenProgressBar"></div>
+            </div>
+            <div class="explain-time" id="listenTime">0:00 / 0:00</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 播放器2：听讲·老师做 -->
+      <div class="explain-card">
+        <div class="explain-title">📖 听讲·老师做</div>
+        <div class="explain-player">
+          <div class="explain-controls">
+            <button class="explain-play-btn" id="explainPlayBtn" onclick="toggleExplain()">▶</button>
+            <div class="explain-progress" id="explainProgress" onclick="seekExplain(event)">
+              <div class="explain-progress-bar" id="explainProgressBar"></div>
+            </div>
+            <div class="explain-time" id="explainTime">0:00 / 0:00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 完成弹窗 -->
+  <div class="complete-overlay" id="completeOverlay">
+    <div class="complete-card">
+      <div class="complete-icon">🎉</div>
+      <div class="complete-title">全部找对啦！</div>
+      <div class="complete-subtitle">三位同学都找到了自己的座位，真棒！</div>
+      <div class="complete-scores">
+        <div class="score-item">
+          <div class="score-value" id="finalScore">30</div>
+          <div class="score-label">总得分</div>
+        </div>
+        <div class="score-item">
+          <div class="score-value">3/3</div>
+          <div class="score-label">正确座位</div>
+        </div>
+        <div class="score-item">
+          <div class="score-value">⭐⭐⭐</div>
+          <div class="score-label">获得星星</div>
+        </div>
+      </div>
+      <div class="explanation">
+        <div class="explanation-title">📖 答案解析</div>
+        <div class="explanation-content">
+          用数对表示位置时，<strong>第一个数表示列，第二个数表示行</strong>，先列后行。<br>
+          荣荣：第4列第7行 → <span class="pair">(4,7)</span><br>
+          柳明：第5列第11行 → <span class="pair">(5,11)</span><br>
+          晓东：第2列第5行 → <span class="pair">(2,5)</span><br>
+          记住：中间用逗号隔开，外面加上小括号。
+        </div>
+      </div>
+      <div class="complete-actions">
+        <button class="btn btn-explain" id="explainBtn" onclick="playExplainFromOverlay()">📖 听讲·老师做</button>
+        <button class="btn btn-again" onclick="resetGame()">🔄 再玩一次</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<audio id="introAudio" src="audio/intro.mp3" preload="auto"></audio>
+<audio id="explainAudio" src="audio/explain.mp3" preload="auto"></audio>
+
+<script>
+// 配置
+const TOTAL_COLS = 12;
+const TOTAL_ROWS = 12;
+const students = {
+  rongrong: { name: '荣荣', avatar: '👦', col: 4, row: 7 },
+  liuming: { name: '柳明', avatar: '👧', col: 5, row: 11 },
+  xiaodong: { name: '晓东', avatar: '🧒', col: 2, row: 5 }
+};
+
+let score = 0;
+let placedCount = 0;
+let currentAudio = null;
+let draggedStudent = null;
+
+// 初始化座位网格
+function initSeats() {
+  const grid = document.getElementById('seatGrid');
+  const colLabels = document.getElementById('colLabels');
+  grid.innerHTML = '';
+  colLabels.innerHTML = '';
+
+  // 列标签
+  for (let c = 1; c <= TOTAL_COLS; c++) {
+    const label = document.createElement('div');
+    label.className = 'col-label';
+    label.textContent = c;
+    colLabels.appendChild(label);
+  }
+
+  // 座位行（从前往后，第1行在最前面）
+  for (let r = 1; r <= TOTAL_ROWS; r++) {
+    const row = document.createElement('div');
+    row.className = 'seat-row';
+    
+    const rowLabel = document.createElement('div');
+    rowLabel.className = 'row-label';
+    rowLabel.textContent = r;
+    row.appendChild(rowLabel);
+
+    for (let c = 1; c <= TOTAL_COLS; c++) {
+      const seat = document.createElement('div');
+      seat.className = 'seat';
+      seat.dataset.col = c;
+      seat.dataset.row = r;
+      seat.textContent = '';
+      
+      // 拖拽事件
+      seat.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        seat.classList.add('drag-over');
+      });
+      seat.addEventListener('dragleave', () => {
+        seat.classList.remove('drag-over');
+      });
+      seat.addEventListener('drop', (e) => {
+        e.preventDefault();
+        seat.classList.remove('drag-over');
+        handleDrop(seat, draggedStudent);
+      });
+      
+      row.appendChild(seat);
+    }
+    grid.appendChild(row);
+  }
+}
+
+// 动态调整网格大小，占主展示区的80%
+function resizeGrid() {
+  const area = document.getElementById('cinemaArea');
+  if (!area) return;
+  const areaW = area.clientWidth;
+  const areaH = area.clientHeight;
+  
+  // 预留空间：银幕24 + 光晕8 + margin16 + 列标签约18 + 行标签24 + padding32 + gap
+  const reservedH = 24 + 8 + 16 + 18 + 32;
+  const reservedW = 24 + 32;
+  
+  const gap = 5;
+  const maxW = (areaW * 0.8 - reservedW - (TOTAL_COLS - 1) * gap) / TOTAL_COLS;
+  const maxH = (areaH * 0.8 - reservedH - (TOTAL_ROWS - 1) * gap) / TOTAL_ROWS;
+  
+  // 保持32:28的宽高比
+  let seatW = Math.floor(Math.min(maxW, maxH * 32 / 28));
+  let seatH = Math.floor(seatW * 28 / 32);
+  seatW = Math.max(seatW, 16);
+  seatH = Math.max(seatH, 14);
+  
+  area.style.setProperty('--seat-w', seatW + 'px');
+  area.style.setProperty('--seat-h', seatH + 'px');
+}
+
+// 初始化人物卡片拖拽
+function initDrag() {
+  document.querySelectorAll('.student-card').forEach(card => {
+    card.addEventListener('dragstart', (e) => {
+      if (card.classList.contains('placed')) {
+        e.preventDefault();
+        return;
+      }
+      draggedStudent = card.dataset.student;
+      card.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    card.addEventListener('dragend', () => {
+      card.classList.remove('dragging');
+      draggedStudent = null;
+    });
+  });
+}
+
+// 处理放置
+function handleDrop(seat, studentKey) {
+  if (!studentKey || seat.classList.contains('occupied')) return;
+  
+  const student = students[studentKey];
+  const col = parseInt(seat.dataset.col);
+  const row = parseInt(seat.dataset.row);
+  
+  if (col === student.col && row === student.row) {
+    // 放对了
+    seat.classList.add('occupied');
+    const avatar = document.createElement('div');
+    avatar.className = 'student-avatar';
+    avatar.textContent = student.avatar;
+    avatar.title = student.name;
+    seat.appendChild(avatar);
+    
+    // 卡片标记为已放置
+    const card = document.getElementById('card-' + studentKey);
+    card.classList.add('placed');
+    const status = document.getElementById('status-' + studentKey);
+    status.textContent = '已入座 ✓';
+    status.classList.add('done');
+    
+    // 加分
+    score += 10;
+    document.getElementById('score').textContent = score;
+    showScorePopup(seat, '+10');
+    
+    placedCount++;
+    if (placedCount === 3) {
+      setTimeout(showComplete, 800);
+    }
+  } else {
+    // 放错了
+    seat.classList.add('wrong-flash');
+    setTimeout(() => seat.classList.remove('wrong-flash'), 400);
+    showHintBox(`❌ 不对哦，${student.name}应该在第${student.col}列第${student.row}行，再试试！`);
+  }
+}
+
+// 得分飘字
+function showScorePopup(element, text) {
+  const rect = element.getBoundingClientRect();
+  const stageRect = document.getElementById('stage').getBoundingClientRect();
+  const popup = document.createElement('div');
+  popup.className = 'score-popup';
+  popup.textContent = text;
+  popup.style.left = (rect.left - stageRect.left + rect.width / 2 - 20) + 'px';
+  popup.style.top = (rect.top - stageRect.top - 10) + 'px';
+  document.getElementById('stage').appendChild(popup);
+  setTimeout(() => popup.remove(), 1000);
+}
+
+// 显示提示
+function showHint() {
+  const box = document.getElementById('hintBox');
+  box.classList.add('show');
+  setTimeout(() => box.classList.remove('show'), 4000);
+}
+
+function showHintBox(text) {
+  const box = document.getElementById('hintBox');
+  box.innerHTML = text;
+  box.classList.add('show');
+  setTimeout(() => box.classList.remove('show'), 3500);
+}
+
+// 播放引导语
+function playIntro() {
+  stopAllAudio();
+  const audio = document.getElementById('introAudio');
+  const btn = document.getElementById('introBtn');
+  audio.play();
+  currentAudio = audio;
+  btn.classList.add('playing');
+  btn.innerHTML = '⏸ 暂停';
+  audio.onended = () => {
+    btn.classList.remove('playing');
+    btn.innerHTML = '🔊 听引导';
+    currentAudio = null;
+  };
+}
+
+// 播放讲解
+function playExplain() {
+  stopAllAudio();
+  const audio = document.getElementById('explainAudio');
+  const btn = document.getElementById('explainBtn');
+  audio.play();
+  currentAudio = audio;
+  btn.classList.add('playing');
+  btn.innerHTML = '⏸ 暂停讲解';
+  audio.onended = () => {
+    btn.classList.remove('playing');
+    btn.innerHTML = '🔊 听讲解';
+    currentAudio = null;
+  };
+}
+
+function stopAllAudio() {
+  document.querySelectorAll('audio').forEach(a => {
+    a.pause();
+    a.currentTime = 0;
+  });
+  document.querySelectorAll('.btn-audio, .btn-explain').forEach(b => {
+    b.classList.remove('playing');
+    if (b.id === 'introBtn') b.innerHTML = '🔊 听引导';
+    if (b.id === 'explainBtn') b.innerHTML = '🔊 听讲解';
+  });
+  currentAudio = null;
+}
+
+// 显示完成
+function showComplete() {
+  document.getElementById('finalScore').textContent = score;
+  document.getElementById('completeOverlay').classList.add('show');
+  launchConfetti();
+}
+
+// 彩带
+function launchConfetti() {
+  const colors = ['#f59e0b', '#22c55e', '#3b82f6', '#ec4899', '#a855f7', '#ef4444'];
+  const stage = document.getElementById('stage');
+  for (let i = 0; i < 60; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random() * 1280 + 'px';
+    c.style.background = colors[Math.floor(Math.random() * colors.length)];
+    c.style.animationDelay = Math.random() * 1.5 + 's';
+    c.style.animationDuration = (2 + Math.random() * 2) + 's';
+    c.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+    stage.appendChild(c);
+    setTimeout(() => c.remove(), 4000);
+  }
+}
+
+// 重置
+function resetGame() {
+  stopAllAudio();
+  score = 0;
+  placedCount = 0;
+  document.getElementById('score').textContent = '0';
+  document.getElementById('completeOverlay').classList.remove('show');
+  document.querySelectorAll('.student-card').forEach(c => {
+    c.classList.remove('placed');
+  });
+  document.querySelectorAll('.student-status').forEach(s => {
+    s.textContent = '待入座';
+    s.classList.remove('done');
+  });
+  initSeats();
+  resizeGrid();
+  correctAnswersShown = false;
+  if (listenAudio) { listenAudio.pause(); listenAudio.currentTime = 0; }
+  if (explainAudio) { explainAudio.pause(); explainAudio.currentTime = 0; }
+  listenPlaying = false;
+  explainPlaying = false;
+  updateListenPlayBtn();
+  updateExplainPlayBtn();
+  updateListenProgress();
+  updateExplainProgress();
+}
+
+// ============ 双播放器：听题·动手做 + 听讲·老师做 ============
+let listenAudio = null;
+let explainAudio = null;
+let listenPlaying = false;
+let explainPlaying = false;
+let correctAnswersShown = false;
+
+function initDualPlayers() {
+  listenAudio = new Audio('audio/intro.mp3');
+  explainAudio = new Audio('audio/explain.mp3');
+  
+  listenAudio.addEventListener('timeupdate', updateListenProgress);
+  listenAudio.addEventListener('loadedmetadata', updateListenProgress);
+  listenAudio.addEventListener('ended', () => {
+    listenPlaying = false;
+    updateListenPlayBtn();
+  });
+  
+  explainAudio.addEventListener('timeupdate', updateExplainProgress);
+  explainAudio.addEventListener('loadedmetadata', updateExplainProgress);
+  explainAudio.addEventListener('ended', () => {
+    explainPlaying = false;
+    updateExplainPlayBtn();
+  });
+}
+
+// 播放器1：听题·动手做
+function toggleListen() {
+  if (explainPlaying) {
+    explainAudio.pause();
+    explainPlaying = false;
+    updateExplainPlayBtn();
+  }
+  if (listenPlaying) {
+    listenAudio.pause();
+    listenPlaying = false;
+  } else {
+    listenAudio.play();
+    listenPlaying = true;
+  }
+  updateListenPlayBtn();
+}
+
+function updateListenPlayBtn() {
+  const btn = document.getElementById('listenPlayBtn');
+  if (btn) btn.innerHTML = listenPlaying ? '⏸' : '▶';
+}
+
+function updateListenProgress() {
+  if (!listenAudio) return;
+  const percent = listenAudio.duration > 0 ? (listenAudio.currentTime / listenAudio.duration) * 100 : 0;
+  const bar = document.getElementById('listenProgressBar');
+  const time = document.getElementById('listenTime');
+  if (bar) bar.style.width = percent + '%';
+  if (time) time.textContent = fmtTime(listenAudio.currentTime) + ' / ' + fmtTime(listenAudio.duration);
+}
+
+function seekListen(e) {
+  if (!listenAudio || !listenAudio.duration) return;
+  const rect = e.currentTarget.getBoundingClientRect();
+  const ratio = (e.clientX - rect.left) / rect.width;
+  listenAudio.currentTime = ratio * listenAudio.duration;
+}
+
+// 播放器2：听讲·老师做
+function toggleExplain() {
+  if (listenPlaying) {
+    listenAudio.pause();
+    listenPlaying = false;
+    updateListenPlayBtn();
+  }
+  if (explainPlaying) {
+    explainAudio.pause();
+    explainPlaying = false;
+  } else {
+    explainAudio.play();
+    explainPlaying = true;
+    if (!correctAnswersShown) {
+      showCorrectAnswers();
+      correctAnswersShown = true;
+    }
+  }
+  updateExplainPlayBtn();
+}
+
+function playExplainFromOverlay() {
+  document.getElementById('completeOverlay').classList.remove('show');
+  if (listenPlaying) {
+    listenAudio.pause();
+    listenPlaying = false;
+    updateListenPlayBtn();
+  }
+  explainAudio.currentTime = 0;
+  explainAudio.play();
+  explainPlaying = true;
+  if (!correctAnswersShown) {
+    showCorrectAnswers();
+    correctAnswersShown = true;
+  }
+  updateExplainPlayBtn();
+}
+
+function updateExplainPlayBtn() {
+  const btn = document.getElementById('explainPlayBtn');
+  if (btn) btn.innerHTML = explainPlaying ? '⏸' : '▶';
+}
+
+function updateExplainProgress() {
+  if (!explainAudio) return;
+  const percent = explainAudio.duration > 0 ? (explainAudio.currentTime / explainAudio.duration) * 100 : 0;
+  const bar = document.getElementById('explainProgressBar');
+  const time = document.getElementById('explainTime');
+  if (bar) bar.style.width = percent + '%';
+  if (time) time.textContent = fmtTime(explainAudio.currentTime) + ' / ' + fmtTime(explainAudio.duration);
+}
+
+function seekExplain(e) {
+  if (!explainAudio || !explainAudio.duration) return;
+  const rect = e.currentTarget.getBoundingClientRect();
+  const ratio = (e.clientX - rect.left) / rect.width;
+  explainAudio.currentTime = ratio * explainAudio.duration;
+}
+
+// 展示正确答案（左侧主显示区）
+function showCorrectAnswers() {
+  const students = [
+    { name: '荣荣', col: 4, row: 7, emoji: '👧' },
+    { name: '柳明', col: 5, row: 11, emoji: '👦' },
+    { name: '晓东', col: 2, row: 5, emoji: '🧒' }
+  ];
+  students.forEach(s => {
+    const seat = document.querySelector(`.seat[data-col="${s.col}"][data-row="${s.row}"]`);
+    if (seat && !seat.querySelector('.correct-student')) {
+      const tag = document.createElement('div');
+      tag.className = 'correct-student';
+      tag.innerHTML = `<div class="correct-avatar">${s.emoji}</div><div class="correct-name">${s.name}</div>`;
+      seat.appendChild(tag);
+      seat.classList.add('has-correct');
+    }
+  });
+}
+
+function fmtTime(s) {
+  if (isNaN(s) || s < 0) s = 0;
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return m + ':' + (sec < 10 ? '0' : '') + sec;
+}
+
+// 初始化
+initSeats();
+initDrag();
+resizeGrid();
+initDualPlayers();
+window.addEventListener('resize', resizeGrid);
+
+// 页面加载完成，播放器就绪（不自动播放，由用户手动点击）
+</script>
+
+</body>
+</html>

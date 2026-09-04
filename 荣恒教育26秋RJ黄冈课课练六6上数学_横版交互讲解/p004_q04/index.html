@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>画图填空·等腰三角形面积计算</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Microsoft YaHei', sans-serif;
+  background: linear-gradient(135deg, #2e1a0a 0%, #4e2d1b 50%, #3e1f0a 100%);
+  min-height: 100vh;
+  color: #fff;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background: rgba(0,0,0,0.4);
+}
+.header h1 {
+  font-size: 20px;
+  background: linear-gradient(90deg, #ffb74d, #ffa726);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.score-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #ffb74d, #ffa726);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  color: #2e1a0a;
+}
+.main-container {
+  display: flex;
+  gap: 16px;
+  padding: 16px 24px;
+  min-height: calc(100vh - 60px);
+}
+.left-area {
+  flex: 1;
+  background: rgba(255,183,77,0.05);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,183,77,0.15);
+ position: relative; overflow: hidden;}
+.map-title {
+  font-size: 18px;
+  color: #ffb74d;
+  margin-bottom: 12px;
+  text-align: center;
+}
+.map-container {
+  position: relative;
+  
+  
+  background: rgba(0,0,0,0.2);
+  border-radius: 12px;
+  border: 1px solid rgba(255,183,77,0.2);
+ transform: scale(1.4); transform-origin: center;}
+.map-svg {
+  width: 100%;
+  height: 100%;
+}
+.axis-line {
+  stroke: #ff6b9d;
+  stroke-width: 2;
+}
+.axis-arrow {
+  fill: #ff6b9d;
+}
+.direction-label {
+  font-size: 16px;
+  font-weight: bold;
+  fill: #ff6b9d;
+  text-anchor: middle;
+}
+.point-marker {
+  fill: #ffd700;
+  stroke: #fff;
+  stroke-width: 2;
+}
+.point-label {
+  font-size: 16px;
+  fill: #ffd700;
+  font-weight: bold;
+  text-anchor: middle;
+}
+.b-marker, .c-marker {
+  fill: #4fc3f7;
+  stroke: #fff;
+  stroke-width: 2;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+.b-marker.show, .c-marker.show {
+  opacity: 1;
+}
+.b-label, .c-label {
+  font-size: 16px;
+  fill: #4fc3f7;
+  font-weight: bold;
+  text-anchor: middle;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+.b-label.show, .c-label.show {
+  opacity: 1;
+}
+.triangle-fill {
+  fill: rgba(255,183,77,0.2);
+  stroke: #ffb74d;
+  stroke-width: 2;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+.triangle-fill.show {
+  opacity: 1;
+}
+.ray-line {
+  stroke: #4fc3f7;
+  stroke-width: 2;
+  stroke-dasharray: 6,3;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+.ray-line.show {
+  opacity: 1;
+}
+.angle-arc {
+  fill: none;
+  stroke: #00bfff;
+  stroke-width: 2;
+  stroke-dasharray: 4,3;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+.angle-arc.show {
+  opacity: 1;
+}
+.angle-text {
+  font-size: 12px;
+  fill: #00bfff;
+  font-weight: bold;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+.angle-text.show {
+  opacity: 1;
+}
+.scale-bar {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.scale-line {
+  width: 40px;
+  height: 4px;
+  background: linear-gradient(90deg, #ff6b9d, #ff8c00);
+  border-radius: 2px;
+}
+.scale-text {
+  font-size: 12px;
+  color: #aaa;
+}
+.btn-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+.btn-action {
+  padding: 10px 24px;
+  border-radius: 25px;
+  border: none;
+  background: linear-gradient(135deg, #ffb74d, #fb8c00);
+  color: #fff;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.btn-action:hover { transform: scale(1.05); }
+.btn-action:disabled {
+  background: #555;
+  cursor: not-allowed;
+  transform: none;
+}
+.right-panel {
+  width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+.task-card {
+  background: rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 14px;
+  border-left: 4px solid #ffb74d;
+}
+.task-card h3 {
+  font-size: 15px;
+  color: #ffb74d;
+  margin-bottom: 10px;
+}
+.task-text {
+  font-size: 13px;
+  line-height: 1.8;
+  color: #ddd;
+  margin-bottom: 10px;
+}
+.task-text input {
+  width: 60px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  border: 1px solid #555;
+  background: rgba(0,0,0,0.3);
+  color: #fff;
+  font-size: 13px;
+  text-align: center;
+  margin: 0 2px;
+}
+.task-text input.wide {
+  width: 80px;
+}
+.task-text input:focus {
+  outline: none;
+  border-color: #ffb74d;
+}
+.btn-verify {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: none;
+  background: linear-gradient(135deg, #ffb74d, #fb8c00);
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 13px;
+  margin-top: 8px;
+}
+.feedback {
+  font-size: 13px;
+  margin-top: 6px;
+  min-height: 18px;
+}
+.feedback.correct { color: #ffb74d; }
+.feedback.wrong { color: #ff6b6b; }
+.hint-box {
+  background: rgba(255,215,0,0.08);
+  border: 1px solid rgba(255,215,0,0.3);
+  border-radius: 8px;
+  padding: 10px;
+  margin-top: 10px;
+}
+.hint-box p {
+  font-size: 12px;
+  color: #ffd700;
+  line-height: 1.6;
+}
+.player-card {
+  background: rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 14px;
+}
+.player-title {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.player-title.listen { color: #00bfff; }
+.player-title.explain { color: #ff8c00; }
+.player-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.play-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #00bfff, #0080ff);
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.play-btn:hover { transform: scale(1.1); }
+.play-btn.playing { background: linear-gradient(135deg, #ff6b6b, #ee5a24); }
+.progress-bar {
+  flex: 1;
+  height: 6px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 3px;
+  cursor: pointer;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00bfff, #0080ff);
+  border-radius: 3px;
+  width: 0%;
+}
+.time-display {
+  font-size: 12px;
+  color: #aaa;
+  min-width: 80px;
+  text-align: right;
+}
+.overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.overlay.show { display: flex; }
+.overlay-content {
+  background: linear-gradient(135deg, #2e1a0a, #4e2d1b);
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  border: 2px solid #ffb74d;
+}
+.overlay-content h2 { font-size: 28px; color: #ffb74d; margin-bottom: 16px; }
+.overlay-content p { font-size: 16px; color: #ddd; margin-bottom: 24px; }
+.overlay-btn {
+  padding: 12px 32px;
+  border-radius: 30px;
+  border: none;
+  background: linear-gradient(135deg, #ff8c00, #ff6b00);
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📐 画图填空·等腰三角形面积计算</h1>
+  <div class="score-box">⭐ <span id="score">0</span> 分</div>
+</div>
+
+<div class="main-container">
+  <div class="left-area">
+    <div class="map-title">方位图（比例尺：1段 = 100m）</div>
+    <div class="map-container">
+      <svg class="map-svg" viewBox="0 0 400 380" id="mapSvg">
+        <g id="baseLayer"></g>
+        <g id="raysLayer"></g>
+        <g id="pointsLayer"></g>
+        <g id="triangleLayer"></g>
+      </svg>
+      <div class="scale-bar">
+        <div class="scale-line"></div>
+        <div class="scale-text">100 m</div>
+      </div>
+    </div>
+    <div class="btn-group">
+      <button class="btn-action" id="markBtn" onclick="markBC()">📍 标出B点和C点</button>
+      <button class="btn-action" id="triBtn" onclick="drawTriangle()" disabled>🔺 连接三角形</button>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <div class="task-card">
+      <h3>📋 第(1)问·操作题</h3>
+      <div class="task-text">
+        B点在A点的东偏南45°方向200m处。如果以南北方向为对称轴，那么C点正好是B点的对应点。请在图中标出B点和C点。
+      </div>
+      <button class="btn-verify" onclick="verifyQ1()">我已标出</button>
+      <div class="feedback" id="fb1"></div>
+    </div>
+
+    <div class="task-card">
+      <h3>📋 第(2)问·填空题</h3>
+      <div class="task-text">
+        将A、B、C三点顺次连成封闭图形，这是一个(<input type="text" id="q2a" class="wide">)三角形。这个三角形的实际面积是(<input type="text" id="q2b">)m²。
+      </div>
+      <button class="btn-verify" onclick="verifyQ2()">验证</button>
+      <div class="feedback" id="fb2"></div>
+      <div class="hint-box">
+        <p>💡 提示：三角形面积 = 底 × 高 ÷ 2，先算底和高的实际长度</p>
+      </div>
+    </div>
+
+    <div class="player-card">
+      <div class="player-title listen">🎧 听题·动手做</div>
+      <div class="player-controls">
+        <button class="play-btn" id="listenBtn" onclick="toggleListen()">▶</button>
+        <div class="progress-bar" onclick="seekListen(event)">
+          <div class="progress-fill" id="listenProgress"></div>
+        </div>
+        <div class="time-display" id="listenTime">0:00 / 0:00</div>
+      </div>
+    </div>
+
+    <div class="player-card">
+      <div class="player-title explain">📖 听讲·老师做</div>
+      <div class="player-controls">
+        <button class="play-btn" id="explainBtn" onclick="toggleExplain()">▶</button>
+        <div class="progress-bar" onclick="seekExplain(event)">
+          <div class="progress-fill" id="explainProgress"></div>
+        </div>
+        <div class="time-display" id="explainTime">0:00 / 0:00</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="completeOverlay">
+  <div class="overlay-content">
+    <h2>🎉 完成啦！</h2>
+    <p>你已经完成了所有题目，来听听老师的讲解吧！</p>
+    <button class="overlay-btn" onclick="playExplainFromOverlay()">📖 听讲·老师做</button>
+  </div>
+</div>
+
+<audio id="listenAudio" src="audio/intro.mp3" preload="metadata"></audio>
+<audio id="explainAudio" src="audio/explain.mp3" preload="metadata"></audio>
+
+<script>
+const A = {x: 200, y: 140};
+const B = {x: 280, y: 220};
+const C = {x: 120, y: 220};
+let score = 0;
+let q1done = false;
+let q2done = false;
+let bcMarked = false;
+let triangleDrawn = false;
+let correctAnswersShown = false;
+
+function initMap() {
+  const base = document.getElementById('baseLayer');
+  
+  const hLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  hLine.setAttribute('x1', 80);
+  hLine.setAttribute('y1', A.y);
+  hLine.setAttribute('x2', 320);
+  hLine.setAttribute('y2', A.y);
+  hLine.setAttribute('class', 'axis-line');
+  base.appendChild(hLine);
+  
+  const vLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  vLine.setAttribute('x1', A.x);
+  vLine.setAttribute('y1', 40);
+  vLine.setAttribute('x2', A.x);
+  vLine.setAttribute('y2', 320);
+  vLine.setAttribute('class', 'axis-line');
+  base.appendChild(vLine);
+  
+  const northArrow = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+  northArrow.setAttribute('points', `${A.x},35 ${A.x-8},50 ${A.x+8},50`);
+  northArrow.setAttribute('class', 'axis-arrow');
+  base.appendChild(northArrow);
+  
+  const southArrow = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+  southArrow.setAttribute('points', `${A.x},325 ${A.x-8},310 ${A.x+8},310`);
+  southArrow.setAttribute('class', 'axis-arrow');
+  base.appendChild(southArrow);
+  
+  const westArrow = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+  westArrow.setAttribute('points', `75,${A.y} 90,${A.y-8} 90,${A.y+8}`);
+  westArrow.setAttribute('class', 'axis-arrow');
+  base.appendChild(westArrow);
+  
+  const eastArrow = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+  eastArrow.setAttribute('points', `325,${A.y} 310,${A.y-8} 310,${A.y+8}`);
+  eastArrow.setAttribute('class', 'axis-arrow');
+  base.appendChild(eastArrow);
+  
+  const dirs = [
+    {name: '北', x: A.x, y: 25},
+    {name: '南', x: A.x, y: 345},
+    {name: '西', x: 60, y: A.y + 5},
+    {name: '东', x: 340, y: A.y + 5}
+  ];
+  dirs.forEach(d => {
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', d.x);
+    text.setAttribute('y', d.y);
+    text.setAttribute('class', 'direction-label');
+    text.textContent = d.name;
+    base.appendChild(text);
+  });
+  
+  const points = document.getElementById('pointsLayer');
+  
+  const aPoint = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  aPoint.setAttribute('cx', A.x);
+  aPoint.setAttribute('cy', A.y);
+  aPoint.setAttribute('r', '8');
+  aPoint.setAttribute('class', 'point-marker');
+  points.appendChild(aPoint);
+  
+  const aLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  aLabel.setAttribute('x', A.x - 20);
+  aLabel.setAttribute('y', A.y - 5);
+  aLabel.setAttribute('class', 'point-label');
+  aLabel.setAttribute('text-anchor', 'end');
+  aLabel.textContent = 'A';
+  points.appendChild(aLabel);
+  
+  const bPoint = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  bPoint.setAttribute('cx', B.x);
+  bPoint.setAttribute('cy', B.y);
+  bPoint.setAttribute('r', '8');
+  bPoint.setAttribute('class', 'b-marker');
+  bPoint.setAttribute('id', 'bPoint');
+  points.appendChild(bPoint);
+  
+  const bLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  bLabel.setAttribute('x', B.x + 15);
+  bLabel.setAttribute('y', B.y + 5);
+  bLabel.setAttribute('class', 'b-label');
+  bLabel.setAttribute('id', 'bLabel');
+  bLabel.setAttribute('text-anchor', 'start');
+  bLabel.textContent = 'B';
+  points.appendChild(bLabel);
+  
+  const cPoint = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  cPoint.setAttribute('cx', C.x);
+  cPoint.setAttribute('cy', C.y);
+  cPoint.setAttribute('r', '8');
+  cPoint.setAttribute('class', 'c-marker');
+  cPoint.setAttribute('id', 'cPoint');
+  points.appendChild(cPoint);
+  
+  const cLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  cLabel.setAttribute('x', C.x - 15);
+  cLabel.setAttribute('y', C.y + 5);
+  cLabel.setAttribute('class', 'c-label');
+  cLabel.setAttribute('id', 'cLabel');
+  cLabel.setAttribute('text-anchor', 'end');
+  cLabel.textContent = 'C';
+  points.appendChild(cLabel);
+}
+
+function markBC() {
+  if (bcMarked) return;
+  bcMarked = true;
+  
+  const rays = document.getElementById('raysLayer');
+  
+  const rayB = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  rayB.setAttribute('x1', A.x);
+  rayB.setAttribute('y1', A.y);
+  rayB.setAttribute('x2', B.x);
+  rayB.setAttribute('y2', B.y);
+  rayB.setAttribute('class', 'ray-line');
+  rays.appendChild(rayB);
+  setTimeout(() => rayB.classList.add('show'), 100);
+  
+  const rayC = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  rayC.setAttribute('x1', A.x);
+  rayC.setAttribute('y1', A.y);
+  rayC.setAttribute('x2', C.x);
+  rayC.setAttribute('y2', C.y);
+  rayC.setAttribute('class', 'ray-line');
+  rays.appendChild(rayC);
+  setTimeout(() => rayC.classList.add('show'), 200);
+  
+  const arcB = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  const r = 30;
+  const startRad = 0;
+  const endRad = 45 * Math.PI / 180;
+  const sx = A.x + r * Math.cos(startRad);
+  const sy = A.y + r * Math.sin(startRad);
+  const ex = A.x + r * Math.cos(endRad);
+  const ey = A.y + r * Math.sin(endRad);
+  arcB.setAttribute('d', `M ${sx} ${sy} A ${r} ${r} 0 0 1 ${ex} ${ey}`);
+  arcB.setAttribute('class', 'angle-arc');
+  rays.appendChild(arcB);
+  setTimeout(() => arcB.classList.add('show'), 300);
+  
+  const angleText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  const textRad = 22.5 * Math.PI / 180;
+  angleText.setAttribute('x', A.x + 45 * Math.cos(textRad));
+  angleText.setAttribute('y', A.y + 45 * Math.sin(textRad));
+  angleText.setAttribute('class', 'angle-text');
+  angleText.textContent = '45°';
+  rays.appendChild(angleText);
+  setTimeout(() => angleText.classList.add('show'), 400);
+  
+  setTimeout(() => {
+    document.getElementById('bPoint').classList.add('show');
+    document.getElementById('bLabel').classList.add('show');
+  }, 500);
+  
+  setTimeout(() => {
+    document.getElementById('cPoint').classList.add('show');
+    document.getElementById('cLabel').classList.add('show');
+  }, 600);
+  
+  document.getElementById('markBtn').textContent = '✅ 已标出B点和C点';
+  document.getElementById('markBtn').disabled = true;
+  document.getElementById('triBtn').disabled = false;
+  addScore(10);
+}
+
+function drawTriangle() {
+  if (triangleDrawn) return;
+  triangleDrawn = true;
+  
+  const triangle = document.getElementById('triangleLayer');
+  const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+  polygon.setAttribute('points', `${A.x},${A.y} ${B.x},${B.y} ${C.x},${C.y}`);
+  polygon.setAttribute('class', 'triangle-fill');
+  triangle.appendChild(polygon);
+  setTimeout(() => polygon.classList.add('show'), 100);
+  
+  document.getElementById('triBtn').textContent = '✅ 已连接三角形';
+  document.getElementById('triBtn').disabled = true;
+  addScore(5);
+}
+
+function verifyQ1() {
+  if (q1done) return;
+  if (!bcMarked) {
+    markBC();
+  }
+  if (!triangleDrawn) {
+    drawTriangle();
+  }
+  q1done = true;
+  document.getElementById('fb1').textContent = '✅ B点和C点已标出，三角形已连接！';
+  document.getElementById('fb1').className = 'feedback correct';
+  addScore(10);
+  checkComplete();
+}
+
+function verifyQ2() {
+  if (q2done) return;
+  const a = document.getElementById('q2a').value;
+  const b = document.getElementById('q2b').value;
+  const fb = document.getElementById('fb2');
+  if (a.includes('等腰') && b === '20000') {
+    fb.textContent = '✅ 正确！这是一个等腰三角形，面积是20000m²';
+    fb.className = 'feedback correct';
+    q2done = true;
+    addScore(10);
+    checkComplete();
+  } else {
+    fb.textContent = '❌ 再想想，AB=AC所以是等腰三角形，面积=底×高÷2';
+    fb.className = 'feedback wrong';
+  }
+}
+
+function checkComplete() {
+  if (q1done && q2done) {
+    setTimeout(() => {
+      document.getElementById('completeOverlay').classList.add('show');
+    }, 500);
+  }
+}
+
+function addScore(points) {
+  score += points;
+  document.getElementById('score').textContent = score;
+}
+
+// 双播放器逻辑
+const listenAudio = document.getElementById('listenAudio');
+const explainAudio = document.getElementById('explainAudio');
+let listenPlaying = false;
+let explainPlaying = false;
+
+function initDualPlayers() {
+  listenAudio.addEventListener('loadedmetadata', () => {
+    document.getElementById('listenTime').textContent = '0:00 / ' + formatTime(listenAudio.duration);
+  });
+  explainAudio.addEventListener('loadedmetadata', () => {
+    document.getElementById('explainTime').textContent = '0:00 / ' + formatTime(explainAudio.duration);
+  });
+  listenAudio.addEventListener('timeupdate', updateListenProgress);
+  explainAudio.addEventListener('timeupdate', updateExplainProgress);
+  listenAudio.addEventListener('ended', () => {
+    listenPlaying = false;
+    document.getElementById('listenBtn').textContent = '▶';
+    document.getElementById('listenBtn').classList.remove('playing');
+  });
+  explainAudio.addEventListener('ended', () => {
+    explainPlaying = false;
+    document.getElementById('explainBtn').textContent = '▶';
+    document.getElementById('explainBtn').classList.remove('playing');
+  });
+}
+
+function toggleListen() {
+  if (listenPlaying) {
+    listenAudio.pause();
+    listenPlaying = false;
+    document.getElementById('listenBtn').textContent = '▶';
+    document.getElementById('listenBtn').classList.remove('playing');
+  } else {
+    if (explainPlaying) toggleExplain();
+    listenAudio.play();
+    listenPlaying = true;
+    document.getElementById('listenBtn').textContent = '⏸';
+    document.getElementById('listenBtn').classList.add('playing');
+  }
+}
+
+function toggleExplain() {
+  if (explainPlaying) {
+    explainAudio.pause();
+    explainPlaying = false;
+    document.getElementById('explainBtn').textContent = '▶';
+    document.getElementById('explainBtn').classList.remove('playing');
+  } else {
+    if (listenPlaying) toggleListen();
+    explainAudio.play();
+    explainPlaying = true;
+    document.getElementById('explainBtn').textContent = '⏸';
+    document.getElementById('explainBtn').classList.add('playing');
+    if (!correctAnswersShown) showCorrectAnswers();
+  }
+}
+
+function playExplainFromOverlay() {
+  document.getElementById('completeOverlay').classList.remove('show');
+  listenAudio.pause();
+  listenAudio.currentTime = 0;
+  listenPlaying = false;
+  document.getElementById('listenBtn').textContent = '▶';
+  document.getElementById('listenBtn').classList.remove('playing');
+  explainAudio.currentTime = 0;
+  explainAudio.play();
+  explainPlaying = true;
+  document.getElementById('explainBtn').textContent = '⏸';
+  document.getElementById('explainBtn').classList.add('playing');
+  if (!correctAnswersShown) showCorrectAnswers();
+}
+
+function showCorrectAnswers() {
+  correctAnswersShown = true;
+  if (!bcMarked) markBC();
+  if (!triangleDrawn) drawTriangle();
+  document.getElementById('q2a').value = '等腰';
+  document.getElementById('q2b').value = '20000';
+}
+
+function seekListen(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const percent = (e.clientX - rect.left) / rect.width;
+  listenAudio.currentTime = percent * listenAudio.duration;
+}
+
+function seekExplain(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const percent = (e.clientX - rect.left) / rect.width;
+  explainAudio.currentTime = percent * explainAudio.duration;
+}
+
+function updateListenProgress() {
+  const percent = (listenAudio.currentTime / listenAudio.duration) * 100;
+  document.getElementById('listenProgress').style.width = percent + '%';
+  document.getElementById('listenTime').textContent = formatTime(listenAudio.currentTime) + ' / ' + formatTime(listenAudio.duration);
+}
+
+function updateExplainProgress() {
+  const percent = (explainAudio.currentTime / explainAudio.duration) * 100;
+  document.getElementById('explainProgress').style.width = percent + '%';
+  document.getElementById('explainTime').textContent = formatTime(explainAudio.currentTime) + ' / ' + formatTime(explainAudio.duration);
+}
+
+function formatTime(seconds) {
+  if (isNaN(seconds)) return '0:00';
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+initMap();
+initDualPlayers();
+</script>
+</body>
+</html>

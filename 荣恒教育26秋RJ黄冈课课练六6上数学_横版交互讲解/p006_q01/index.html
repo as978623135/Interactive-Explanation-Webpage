@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>中医药橱·数对位置</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Microsoft YaHei', sans-serif;
+  background: linear-gradient(135deg, #2e1a0a 0%, #4e2d1b 50%, #3e2a0a 100%);
+  min-height: 100vh;
+  color: #fff;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background: rgba(0,0,0,0.4);
+}
+.header h1 {
+  font-size: 20px;
+  background: linear-gradient(90deg, #ffb74d, #ffa726);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.score-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #ffb74d, #ffa726);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  color: #2e1a0a;
+}
+.main-container {
+  display: flex;
+  gap: 16px;
+  padding: 16px 24px;
+  min-height: calc(100vh - 60px);
+}
+.left-area {
+  flex: 1;
+  background: rgba(255,183,77,0.05);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,183,77,0.15);
+ position: relative; overflow: hidden;}
+.map-title {
+  font-size: 18px;
+  color: #ffb74d;
+  margin-bottom: 12px;
+  text-align: center;
+}
+.grid-container {
+  position: relative;
+  
+  
+  background: rgba(139,69,19,0.2);
+  border-radius: 12px;
+  border: 2px solid #8b4513;
+  padding: 10px;
+ transform: scale(1.4); transform-origin: center;}
+.grid-svg {
+  width: 100%;
+  height: 100%;
+}
+.grid-cell {
+  fill: rgba(255,248,220,0.9);
+  stroke: #8b4513;
+  stroke-width: 1;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.grid-cell:hover {
+  fill: rgba(255,215,0,0.5);
+}
+.grid-cell.selected {
+  fill: rgba(255,107,107,0.6);
+}
+.grid-cell.correct {
+  fill: rgba(76,175,80,0.6);
+}
+.herb-text {
+  font-size: 11px;
+  fill: #333;
+  font-weight: bold;
+  text-anchor: middle;
+  pointer-events: none;
+}
+.col-label {
+  font-size: 12px;
+  fill: #ffb74d;
+  font-weight: bold;
+  text-anchor: middle;
+}
+.row-label {
+  font-size: 12px;
+  fill: #ffb74d;
+  font-weight: bold;
+  text-anchor: middle;
+}
+.hint-text {
+  font-size: 13px;
+  color: #ffd700;
+  margin-top: 12px;
+  text-align: center;
+}
+.right-panel {
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+.task-card {
+  background: rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 14px;
+  border-left: 4px solid #ffb74d;
+}
+.task-card h3 {
+  font-size: 15px;
+  color: #ffb74d;
+  margin-bottom: 10px;
+}
+.task-text {
+  font-size: 13px;
+  line-height: 2;
+  color: #ddd;
+  margin-bottom: 10px;
+}
+.task-text input {
+  width: 50px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  border: 1px solid #555;
+  background: rgba(0,0,0,0.3);
+  color: #fff;
+  font-size: 13px;
+  text-align: center;
+  margin: 0 2px;
+}
+.task-text input.wide {
+  width: 80px;
+}
+.task-text input:focus {
+  outline: none;
+  border-color: #ffb74d;
+}
+.btn-verify {
+  padding: 8px 20px;
+  border-radius: 6px;
+  border: none;
+  background: linear-gradient(135deg, #ffb74d, #ffa726);
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 10px;
+}
+.feedback {
+  font-size: 13px;
+  margin-top: 8px;
+  min-height: 18px;
+}
+.feedback.correct { color: #ffb74d; }
+.feedback.wrong { color: #ff6b6b; }
+.hint-box {
+  background: rgba(255,215,0,0.08);
+  border: 1px solid rgba(255,215,0,0.3);
+  border-radius: 8px;
+  padding: 10px;
+  margin-top: 10px;
+}
+.hint-box p {
+  font-size: 12px;
+  color: #ffd700;
+  line-height: 1.6;
+}
+.player-card {
+  background: rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 14px;
+}
+.player-title {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.player-title.listen { color: #00bfff; }
+.player-title.explain { color: #ff8c00; }
+.player-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.play-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #00bfff, #0080ff);
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.play-btn:hover { transform: scale(1.1); }
+.play-btn.playing { background: linear-gradient(135deg, #ff6b6b, #ee5a24); }
+.progress-bar {
+  flex: 1;
+  height: 6px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 3px;
+  cursor: pointer;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00bfff, #0080ff);
+  border-radius: 3px;
+  width: 0%;
+}
+.time-display {
+  font-size: 12px;
+  color: #aaa;
+  min-width: 80px;
+  text-align: right;
+}
+.overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.overlay.show { display: flex; }
+.overlay-content {
+  background: linear-gradient(135deg, #2e1a0a, #4e2d1b);
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  border: 2px solid #ffb74d;
+}
+.overlay-content h2 { font-size: 28px; color: #ffb74d; margin-bottom: 16px; }
+.overlay-content p { font-size: 16px; color: #ddd; margin-bottom: 24px; }
+.overlay-btn {
+  padding: 12px 32px;
+  border-radius: 30px;
+  border: none;
+  background: linear-gradient(135deg, #ff8c00, #ff6b00);
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🌿 中医药橱·数对位置</h1>
+  <div class="score-box">⭐ <span id="score">0</span> 分</div>
+</div>
+
+<div class="main-container">
+  <div class="left-area">
+    <div class="map-title">中医药橱（点击第(3)问的格子标记三七）</div>
+    <div class="grid-container">
+      <svg class="grid-svg" viewBox="0 0 460 300" id="gridSvg"></svg>
+    </div>
+    <div class="hint-text" id="hintText">第(3)问：请点击第10列第6行的格子标记三七</div>
+  </div>
+
+  <div class="right-panel">
+    <div class="task-card">
+      <h3>📋 第(1)问</h3>
+      <div class="task-text">
+        如果当归的位置用有序数对(8,5)表示，那么菊花的位置用有序数对表示是(<input type="text" id="a1">, <input type="text" id="a2">)。
+      </div>
+      <button class="btn-verify" onclick="verifyQ1()">验证</button>
+      <div class="feedback" id="fb1"></div>
+    </div>
+
+    <div class="task-card">
+      <h3>📋 第(2)问</h3>
+      <div class="task-text">
+        一味中药的位置是(4,4)，它是(<input type="text" id="b1" class="wide">)。（填中药名）
+      </div>
+      <button class="btn-verify" onclick="verifyQ2()">验证</button>
+      <div class="feedback" id="fb2"></div>
+    </div>
+
+    <div class="task-card">
+      <h3>📋 第(3)问</h3>
+      <div class="task-text">
+        三七的位置是(10,6)，请你在图中标出来。（点击左侧药橱中对应的格子）
+      </div>
+      <div class="feedback" id="fb3"></div>
+    </div>
+
+    <div class="player-card">
+      <div class="player-title listen">🎧 听题·动手做</div>
+      <div class="player-controls">
+        <button class="play-btn" id="listenBtn" onclick="toggleListen()">▶</button>
+        <div class="progress-bar" onclick="seekListen(event)">
+          <div class="progress-fill" id="listenProgress"></div>
+        </div>
+        <div class="time-display" id="listenTime">0:00 / 0:00</div>
+      </div>
+    </div>
+
+    <div class="player-card">
+      <div class="player-title explain">📖 听讲·老师做</div>
+      <div class="player-controls">
+        <button class="play-btn" id="explainBtn" onclick="toggleExplain()">▶</button>
+        <div class="progress-bar" onclick="seekExplain(event)">
+          <div class="progress-fill" id="explainProgress"></div>
+        </div>
+        <div class="time-display" id="explainTime">0:00 / 0:00</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="completeOverlay">
+  <div class="overlay-content">
+    <h2>🎉 完成啦！</h2>
+    <p>你已经完成了所有题目，来听听老师的讲解吧！</p>
+    <button class="overlay-btn" onclick="playExplainFromOverlay()">📖 听讲·老师做</button>
+  </div>
+</div>
+
+<audio id="listenAudio" src="audio/intro.mp3" preload="metadata"></audio>
+<audio id="explainAudio" src="audio/explain.mp3" preload="metadata"></audio>
+
+<script>
+const herbs = {
+  '6,6': '菊花',
+  '1,5': '大枣',
+  '8,5': '当归',
+  '4,4': '五味子',
+  '9,4': '黄连',
+  '2,3': '陈皮',
+  '6,3': '山药',
+  '8,3': '金银花',
+  '3,1': '麦冬'
+};
+
+let score = 0;
+let q1done = false;
+let q2done = false;
+let q3done = false;
+let selectedCell = null;
+let correctAnswersShown = false;
+
+function initGrid() {
+  const svg = document.getElementById('gridSvg');
+  const cellW = 40;
+  const cellH = 38;
+  const startX = 30;
+  const startY = 20;
+  
+  for (let row = 6; row >= 1; row--) {
+    const y = startY + (6 - row) * cellH;
+    const rowLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    rowLabel.setAttribute('x', 15);
+    rowLabel.setAttribute('y', y + cellH / 2 + 4);
+    rowLabel.setAttribute('class', 'row-label');
+    rowLabel.textContent = row;
+    svg.appendChild(rowLabel);
+    
+    for (let col = 1; col <= 10; col++) {
+      const x = startX + (col - 1) * cellW;
+      const cell = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      cell.setAttribute('x', x);
+      cell.setAttribute('y', y);
+      cell.setAttribute('width', cellW - 2);
+      cell.setAttribute('height', cellH - 2);
+      cell.setAttribute('class', 'grid-cell');
+      cell.setAttribute('data-col', col);
+      cell.setAttribute('data-row', row);
+      cell.addEventListener('click', () => selectCell(col, row));
+      svg.appendChild(cell);
+      
+      const key = col + ',' + row;
+      if (herbs[key]) {
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', x + (cellW - 2) / 2);
+        text.setAttribute('y', y + (cellH - 2) / 2 + 4);
+        text.setAttribute('class', 'herb-text');
+        text.textContent = herbs[key];
+        svg.appendChild(text);
+      }
+    }
+  }
+  
+  for (let col = 1; col <= 10; col++) {
+    const x = startX + (col - 1) * cellW + (cellW - 2) / 2;
+    const colLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    colLabel.setAttribute('x', x);
+    colLabel.setAttribute('y', startY + 6 * cellH + 15);
+    colLabel.setAttribute('class', 'col-label');
+    colLabel.textContent = col;
+    svg.appendChild(colLabel);
+  }
+}
+
+function selectCell(col, row) {
+  if (q3done) return;
+  
+  document.querySelectorAll('.grid-cell').forEach(c => c.classList.remove('selected'));
+  
+  const cell = document.querySelector(`.grid-cell[data-col="${col}"][data-row="${row}"]`);
+  cell.classList.add('selected');
+  selectedCell = {col, row};
+  
+  if (col === 10 && row === 6) {
+    cell.classList.remove('selected');
+    cell.classList.add('correct');
+    q3done = true;
+    addScore(10);
+    document.getElementById('fb3').textContent = '✅ 正确！三七的位置是(10,6)';
+    document.getElementById('fb3').className = 'feedback correct';
+    document.getElementById('hintText').textContent = '三七已标记在(10,6)位置';
+    checkComplete();
+  } else {
+    document.getElementById('fb3').textContent = `你选的是(${col},${row})，再想想，三七在第10列第6行`;
+    document.getElementById('fb3').className = 'feedback wrong';
+  }
+}
+
+function verifyQ1() {
+  if (q1done) return;
+  const a1 = document.getElementById('a1').value;
+  const a2 = document.getElementById('a2').value;
+  const fb = document.getElementById('fb1');
+  if (a1 === '6' && a2 === '6') {
+    fb.textContent = '✅ 正确！菊花的位置是(6,6)';
+    fb.className = 'feedback correct';
+    q1done = true;
+    addScore(10);
+    checkComplete();
+  } else {
+    fb.textContent = '❌ 再想想，数对是先列后行，菊花在第几列第几行？';
+    fb.className = 'feedback wrong';
+  }
+}
+
+function verifyQ2() {
+  if (q2done) return;
+  const b1 = document.getElementById('b1').value;
+  const fb = document.getElementById('fb2');
+  if (b1 === '五味子') {
+    fb.textContent = '✅ 正确！位置(4,4)的中药是五味子';
+    fb.className = 'feedback correct';
+    q2done = true;
+    addScore(10);
+    checkComplete();
+  } else {
+    fb.textContent = '❌ 再看看，第4列第4行是什么中药？';
+    fb.className = 'feedback wrong';
+  }
+}
+
+function checkComplete() {
+  if (q1done && q2done && q3done) {
+    setTimeout(() => {
+      document.getElementById('completeOverlay').classList.add('show');
+    }, 1000);
+  }
+}
+
+function addScore(points) {
+  score += points;
+  document.getElementById('score').textContent = score;
+}
+
+// 双播放器逻辑
+const listenAudio = document.getElementById('listenAudio');
+const explainAudio = document.getElementById('explainAudio');
+let listenPlaying = false;
+let explainPlaying = false;
+
+function initDualPlayers() {
+  listenAudio.addEventListener('loadedmetadata', () => {
+    document.getElementById('listenTime').textContent = '0:00 / ' + formatTime(listenAudio.duration);
+  });
+  explainAudio.addEventListener('loadedmetadata', () => {
+    document.getElementById('explainTime').textContent = '0:00 / ' + formatTime(explainAudio.duration);
+  });
+  listenAudio.addEventListener('timeupdate', updateListenProgress);
+  explainAudio.addEventListener('timeupdate', updateExplainProgress);
+  listenAudio.addEventListener('ended', () => {
+    listenPlaying = false;
+    document.getElementById('listenBtn').textContent = '▶';
+    document.getElementById('listenBtn').classList.remove('playing');
+  });
+  explainAudio.addEventListener('ended', () => {
+    explainPlaying = false;
+    document.getElementById('explainBtn').textContent = '▶';
+    document.getElementById('explainBtn').classList.remove('playing');
+  });
+}
+
+function toggleListen() {
+  if (listenPlaying) {
+    listenAudio.pause();
+    listenPlaying = false;
+    document.getElementById('listenBtn').textContent = '▶';
+    document.getElementById('listenBtn').classList.remove('playing');
+  } else {
+    if (explainPlaying) toggleExplain();
+    listenAudio.play();
+    listenPlaying = true;
+    document.getElementById('listenBtn').textContent = '⏸';
+    document.getElementById('listenBtn').classList.add('playing');
+  }
+}
+
+function toggleExplain() {
+  if (explainPlaying) {
+    explainAudio.pause();
+    explainPlaying = false;
+    document.getElementById('explainBtn').textContent = '▶';
+    document.getElementById('explainBtn').classList.remove('playing');
+  } else {
+    if (listenPlaying) toggleListen();
+    explainAudio.play();
+    explainPlaying = true;
+    document.getElementById('explainBtn').textContent = '⏸';
+    document.getElementById('explainBtn').classList.add('playing');
+    if (!correctAnswersShown) showCorrectAnswers();
+  }
+}
+
+function playExplainFromOverlay() {
+  document.getElementById('completeOverlay').classList.remove('show');
+  listenAudio.pause();
+  listenAudio.currentTime = 0;
+  listenPlaying = false;
+  document.getElementById('listenBtn').textContent = '▶';
+  document.getElementById('listenBtn').classList.remove('playing');
+  explainAudio.currentTime = 0;
+  explainAudio.play();
+  explainPlaying = true;
+  document.getElementById('explainBtn').textContent = '⏸';
+  document.getElementById('explainBtn').classList.add('playing');
+  if (!correctAnswersShown) showCorrectAnswers();
+}
+
+function showCorrectAnswers() {
+  correctAnswersShown = true;
+  document.getElementById('a1').value = '6';
+  document.getElementById('a2').value = '6';
+  document.getElementById('b1').value = '五味子';
+  if (!q3done) {
+    const cell = document.querySelector('.grid-cell[data-col="10"][data-row="6"]');
+    if (cell) cell.classList.add('correct');
+    q3done = true;
+  }
+}
+
+function seekListen(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const percent = (e.clientX - rect.left) / rect.width;
+  listenAudio.currentTime = percent * listenAudio.duration;
+}
+
+function seekExplain(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const percent = (e.clientX - rect.left) / rect.width;
+  explainAudio.currentTime = percent * explainAudio.duration;
+}
+
+function updateListenProgress() {
+  const percent = (listenAudio.currentTime / listenAudio.duration) * 100;
+  document.getElementById('listenProgress').style.width = percent + '%';
+  document.getElementById('listenTime').textContent = formatTime(listenAudio.currentTime) + ' / ' + formatTime(listenAudio.duration);
+}
+
+function updateExplainProgress() {
+  const percent = (explainAudio.currentTime / explainAudio.duration) * 100;
+  document.getElementById('explainProgress').style.width = percent + '%';
+  document.getElementById('explainTime').textContent = formatTime(explainAudio.currentTime) + ' / ' + formatTime(explainAudio.duration);
+}
+
+function formatTime(seconds) {
+  if (isNaN(seconds)) return '0:00';
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+initGrid();
+initDualPlayers();
+</script>
+</body>
+</html>

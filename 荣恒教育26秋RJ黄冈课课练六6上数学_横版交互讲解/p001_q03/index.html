@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>古诗找字 - 有序数对填数验证</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'KaiTi', serif;
+  background: #2c3e50;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* 16:9 容器（铺满全屏） */
+.stage {
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #f5f0e8 0%, #e8dcc8 50%, #d4c4a8 100%);
+  border-radius: 0;
+  box-shadow: none;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 装饰纹理 */
+.stage::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 30%, rgba(139,90,43,0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(139,90,43,0.05) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* 顶部栏 */
+.top-bar {
+  height: 60px;
+  background: linear-gradient(135deg, #8b4513 0%, #654321 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+.top-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #f5deb3;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'KaiTi', 'STKaiti', serif;
+}
+.top-title .icon { font-size: 26px; }
+.top-right { display: flex; align-items: center; gap: 14px; }
+.score-display {
+  background: linear-gradient(135deg, #d4a574, #b8860b);
+  color: #fff;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn {
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn-audio { background: rgba(255,255,255,0.2); color: #f5deb3; }
+.btn-audio:hover { background: rgba(255,255,255,0.3); }
+.btn-audio.playing { background: #cd853f; color: #fff; }
+.btn-hint { background: rgba(255,255,255,0.2); color: #f5deb3; }
+.btn-hint:hover { background: rgba(255,255,255,0.3); }
+.btn-reset { background: rgba(220,38,38,0.3); color: #fecaca; }
+.btn-reset:hover { background: rgba(220,38,38,0.4); }
+
+/* 主内容区 */
+.main-content {
+  flex: 1;
+  display: flex;
+  padding: 24px;
+  gap: 24px;
+  overflow: hidden;
+  position: relative;
+  z-index: 5;
+}
+
+/* 左侧古诗网格 */
+.poem-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  --cell-size: 56px;
+}
+.poem-label {
+  font-size: 15px;
+  color: #8b4513;
+  font-weight: 700;
+  margin-bottom: 12px;
+  font-family: 'KaiTi', 'STKaiti', serif;
+}
+
+/* 网格 */
+.grid-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255,255,255,0.5);
+  padding: 16px;
+  border-radius: 12px;
+  border: 2px solid rgba(139,69,19,0.2);
+  box-shadow: 0 4px 20px rgba(139,69,19,0.1);
+}
+.grid-row {
+  display: flex;
+  align-items: center;
+}
+.row-label {
+  width: 28px;
+  text-align: center;
+  font-size: 15px;
+  color: #8b4513;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.cell {
+  width: var(--cell-size);
+  height: var(--cell-size);
+  border: 1px solid rgba(139,69,19,0.25);
+  background: rgba(255,255,255,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  font-weight: 600;
+  color: #3d2817;
+  font-family: 'KaiTi', 'STKaiti', 'SimSun', serif;
+  position: relative;
+  transition: all 0.2s;
+  cursor: default;
+}
+.cell:hover {
+  background: rgba(255,255,255,0.9);
+}
+
+/* 示例字（桑） */
+.cell.example {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border: 2px solid #3b82f6;
+  color: #1e40af;
+  font-weight: 700;
+}
+.cell.example::after {
+  content: '(3,2)';
+  position: absolute;
+  bottom: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: #3b82f6;
+  font-weight: 700;
+  background: #fff;
+  padding: 1px 5px;
+  border-radius: 4px;
+  border: 1px solid #3b82f6;
+  font-family: 'Courier New', monospace;
+}
+
+/* 目标字（郭）- 待找 */
+.cell.target {
+  cursor: pointer;
+  animation: targetPulse 1.5s ease-in-out infinite;
+}
+.cell.target:hover {
+  background: rgba(255,215,0,0.3);
+  transform: scale(1.05);
+}
+@keyframes targetPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,165,0,0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(255,165,0,0); }
+}
+
+/* 目标字已找到 */
+.cell.found {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 2px solid #f59e0b;
+  color: #92400e;
+  font-weight: 700;
+  animation: foundPop 0.5s ease;
+}
+@keyframes foundPop {
+  0% { transform: scale(1.2); }
+  50% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+/* 目标字已验证正确 */
+.cell.correct {
+  background: linear-gradient(135deg, #bbf7d0 0%, #86efac 100%);
+  border: 2px solid #22c55e;
+  color: #14532d;
+  font-weight: 700;
+}
+.cell.correct::after {
+  content: '(5,3)';
+  position: absolute;
+  bottom: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: #16a34a;
+  font-weight: 700;
+  background: #fff;
+  padding: 1px 5px;
+  border-radius: 4px;
+  border: 1px solid #22c55e;
+  font-family: 'Courier New', monospace;
+}
+
+/* 列标签 */
+.col-labels {
+  display: flex;
+  margin-left: 28px;
+  margin-top: 8px;
+}
+.col-label {
+  width: var(--cell-size);
+  text-align: center;
+  font-size: 14px;
+  color: #8b4513;
+  font-weight: 700;
+}
+
+/* 右侧任务面板 */
+.task-panel {
+  width: 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 题目卡片 */
+.question-card {
+  background: rgba(255,255,255,0.7);
+  border-radius: 12px;
+  padding: 16px;
+  border: 2px solid rgba(139,69,19,0.15);
+  box-shadow: 0 2px 10px rgba(139,69,19,0.08);
+}
+.question-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #8b4513;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.question-text {
+  font-size: 13.5px;
+  color: #5c4033;
+  line-height: 1.7;
+}
+.question-text .highlight {
+  background: linear-gradient(180deg, transparent 60%, #fde68a 60%);
+  font-weight: 700;
+  padding: 0 2px;
+}
+.question-text .pair {
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  color: #3b82f6;
+}
+
+/* 填数区域 */
+.input-card {
+  background: rgba(255,255,255,0.7);
+  border-radius: 12px;
+  padding: 20px;
+  border: 2px solid rgba(139,69,19,0.15);
+  box-shadow: 0 2px 10px rgba(139,69,19,0.08);
+}
+.input-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #8b4513;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.input-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.input-label {
+  font-size: 16px;
+  color: #5c4033;
+  font-weight: 600;
+}
+.input-box {
+  width: 60px;
+  height: 48px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: #8b4513;
+  border: 2px solid rgba(139,69,19,0.3);
+  border-radius: 8px;
+  background: #fff;
+  outline: none;
+  transition: all 0.2s;
+  font-family: 'Courier New', monospace;
+}
+.input-box:focus {
+  border-color: #8b4513;
+  box-shadow: 0 0 0 3px rgba(139,69,19,0.15);
+}
+.input-box.error {
+  border-color: #dc2626;
+  background: #fef2f2;
+  animation: shake 0.4s ease;
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+.input-box.correct {
+  border-color: #22c55e;
+  background: #f0fdf4;
+  color: #16a34a;
+}
+.input-sep {
+  font-size: 20px;
+  color: #8b4513;
+  font-weight: 700;
+}
+
+/* 验证按钮 */
+.btn-verify {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #8b4513 0%, #654321 100%);
+  color: #f5deb3;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-verify:hover {
+  background: linear-gradient(135deg, #a0522d 0%, #8b4513 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139,69,19,0.3);
+}
+.btn-verify:active { transform: translateY(0); }
+.btn-verify:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 状态提示 */
+.status-msg {
+  text-align: center;
+  font-size: 13px;
+  margin-top: 10px;
+  min-height: 20px;
+  font-weight: 600;
+}
+.status-msg.error { color: #dc2626; }
+.status-msg.success { color: #16a34a; }
+.status-msg.info { color: #8b4513; }
+
+/* 提示按钮区 */
+.hint-row {
+  display: flex;
+  gap: 10px;
+}
+.btn-hint-sm {
+  flex: 1;
+  padding: 10px;
+  background: rgba(139,69,19,0.1);
+  color: #8b4513;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid rgba(139,69,19,0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-hint-sm:hover {
+  background: rgba(139,69,19,0.15);
+}
+
+/* 完成弹窗 */
+.complete-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(6px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.complete-overlay.show { display: flex; animation: fadeIn 0.5s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.complete-card {
+  background: linear-gradient(135deg, #f5f0e8 0%, #e8dcc8 100%);
+  border: 3px solid #8b4513;
+  border-radius: 20px;
+  padding: 32px;
+  text-align: center;
+  max-width: 520px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  animation: popIn 0.5s ease;
+}
+@keyframes popIn {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.complete-icon { font-size: 56px; margin-bottom: 12px; }
+.complete-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #8b4513;
+  margin-bottom: 6px;
+  font-family: 'KaiTi', 'STKaiti', serif;
+}
+.complete-subtitle {
+  font-size: 14px;
+  color: #8b6914;
+  margin-bottom: 20px;
+}
+.complete-scores {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+.score-item {
+  background: rgba(139,69,19,0.08);
+  border-radius: 12px;
+  padding: 14px 20px;
+  min-width: 90px;
+}
+.score-value { font-size: 28px; font-weight: 800; color: #b8860b; }
+.score-label { font-size: 12px; color: #8b6914; margin-top: 4px; }
+
+.explanation {
+  background: rgba(139,69,19,0.08);
+  border: 1px solid rgba(139,69,19,0.2);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 18px;
+  text-align: left;
+}
+.explanation-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #8b4513;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.explanation-content {
+  font-size: 13px;
+  color: #5c4033;
+  line-height: 1.8;
+}
+.explanation-content .pair {
+  display: inline-block;
+  background: rgba(34,197,94,0.15);
+  color: #16a34a;
+  padding: 1px 7px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+}
+.complete-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+.btn-explain {
+  background: linear-gradient(135deg, #8b4513, #654321);
+  color: #f5deb3;
+  padding: 11px 26px;
+  font-size: 14px;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-explain:hover { background: linear-gradient(135deg, #a0522d, #8b4513); }
+.btn-explain.playing { background: linear-gradient(135deg, #228b22, #006400); color: #fff; }
+.btn-again {
+  background: rgba(139,69,19,0.1);
+  color: #8b4513;
+  padding: 11px 26px;
+  font-size: 14px;
+  font-weight: 700;
+  border: 1px solid rgba(139,69,19,0.2);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-again:hover { background: rgba(139,69,19,0.15); }
+
+/* 彩带 */
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: -10px;
+  pointer-events: none;
+  z-index: 99;
+  animation: confettiFall 3s linear forwards;
+}
+@keyframes confettiFall {
+  to { transform: translateY(720px) rotate(720deg); opacity: 0; }
+}
+
+/* 得分飘字 */
+.score-popup {
+  position: absolute;
+  font-size: 24px;
+  font-weight: 800;
+  color: #b8860b;
+  pointer-events: none;
+  z-index: 50;
+  animation: scoreFloat 1s ease forwards;
+  text-shadow: 0 2px 10px rgba(184,134,11,0.4);
+}
+@keyframes scoreFloat {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-40px) scale(1.3); }
+}
+
+/* 讲解播放器 */
+.explain-card {
+  background: rgba(255,255,255,0.5);
+  border-radius: 12px;
+  padding: 14px;
+  border: 2px solid rgba(139,69,19,0.15);
+  box-shadow: 0 2px 10px rgba(139,69,19,0.08);
+  margin-top: 16px;
+}
+.explain-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #8b4513;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.explain-player {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.explain-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.explain-play-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8b4513 0%, #654321 100%);
+  color: #f5deb3;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.explain-play-btn:hover { background: linear-gradient(135deg, #a0522d, #8b4513); transform: scale(1.05); }
+.explain-progress {
+  flex: 1;
+  height: 6px;
+  background: rgba(139,69,19,0.1);
+  border-radius: 3px;
+  cursor: pointer;
+  overflow: hidden;
+}
+.explain-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #8b4513, #d4a574);
+  width: 0%;
+  transition: width 0.1s;
+}
+.explain-time {
+  font-size: 11px;
+  color: rgba(139,69,19,0.5);
+  min-width: 75px;
+  text-align: right;
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+}
+.explain-segments {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.explain-seg-btn {
+  padding: 5px 12px;
+  font-size: 12px;
+  border-radius: 14px;
+  background: rgba(139,69,19,0.08);
+  color: rgba(139,69,19,0.6);
+  border: 1px solid rgba(139,69,19,0.15);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 600;
+}
+.explain-seg-btn:hover {
+  background: rgba(139,69,19,0.15);
+  color: #8b4513;
+}
+.explain-seg-btn.active {
+  background: linear-gradient(135deg, #8b4513, #654321);
+  color: #f5deb3;
+  border-color: #8b4513;
+}
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+  <!-- 顶部栏 -->
+  <div class="top-bar">
+    <div class="top-title">
+      <span class="icon">📜</span>
+      <span>古诗找字 · 有序数对填数验证</span>
+    </div>
+    <div class="top-right">
+      <div class="score-display">⭐ <span id="score">0</span> 分</div>
+      <button class="btn btn-hint" onclick="showHint()">💡 提示</button>
+      <button class="btn btn-reset" onclick="resetGame()">🔄 重置</button>
+    </div>
+  </div>
+
+  <!-- 主内容区 -->
+  <div class="main-content">
+    <!-- 左侧古诗网格 -->
+    <div class="poem-area">
+      <div class="poem-label">📖 古诗汉字网格（列：从左往右，行：从下往上）</div>
+      <div class="grid-wrapper">
+        <div id="gridContainer"></div>
+        <div class="col-labels" id="colLabels"></div>
+      </div>
+    </div>
+
+    <!-- 右侧任务面板 -->
+    <div class="task-panel">
+      <!-- 题目说明 -->
+      <div class="question-card">
+        <div class="question-title">📝 题目</div>
+        <div class="question-text">
+          如果<span class="highlight">"桑"</span>字的位置用有序数对<span class="pair">(3,2)</span>表示，<br>
+          那么<span class="highlight">"郭"</span>字的位置用有序数对表示是多少？
+        </div>
+      </div>
+
+      <!-- 填数验证 -->
+      <div class="input-card">
+        <div class="input-title">✍️ 填入"郭"字的位置</div>
+        <div class="input-row">
+          <span class="input-label">第</span>
+          <input type="text" class="input-box" id="inputCol" maxlength="1" placeholder="?" inputmode="numeric">
+          <span class="input-label">列</span>
+          <span class="input-sep">，</span>
+          <span class="input-label">第</span>
+          <input type="text" class="input-box" id="inputRow" maxlength="1" placeholder="?" inputmode="numeric">
+          <span class="input-label">行</span>
+        </div>
+        <button class="btn-verify" id="verifyBtn" onclick="verifyAnswer()">✅ 验证答案</button>
+        <div class="status-msg" id="statusMsg">先在左边找到"郭"字，再填入它的位置哦</div>
+      </div>
+
+      <!-- 提示按钮 -->
+      <div class="hint-row">
+        <button class="btn-hint-sm" onclick="showHintCol()">💡 提示列数</button>
+        <button class="btn-hint-sm" onclick="showHintRow()">💡 提示行数</button>
+      </div>
+
+      <!-- 播放器1：听题·动手做 -->
+      <div class="explain-card">
+        <div class="explain-title">🎧 听题·动手做</div>
+        <div class="explain-player">
+          <div class="explain-controls">
+            <button class="explain-play-btn" id="listenPlayBtn" onclick="toggleListen()">▶</button>
+            <div class="explain-progress" id="listenProgress" onclick="seekListen(event)">
+              <div class="explain-progress-bar" id="listenProgressBar"></div>
+            </div>
+            <div class="explain-time" id="listenTime">0:00 / 0:00</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 播放器2：听讲·老师做 -->
+      <div class="explain-card">
+        <div class="explain-title">📖 听讲·老师做</div>
+        <div class="explain-player">
+          <div class="explain-controls">
+            <button class="explain-play-btn" id="explainPlayBtn" onclick="toggleExplain()">▶</button>
+            <div class="explain-progress" id="explainProgress" onclick="seekExplain(event)">
+              <div class="explain-progress-bar" id="explainProgressBar"></div>
+            </div>
+            <div class="explain-time" id="explainTime">0:00 / 0:00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 完成弹窗 -->
+  <div class="complete-overlay" id="completeOverlay">
+    <div class="complete-card">
+      <div class="complete-icon">🎉</div>
+      <div class="complete-title">回答正确！</div>
+      <div class="complete-subtitle">你已经掌握了用有序数对表示位置</div>
+      <div class="complete-scores">
+        <div class="score-item">
+          <div class="score-value" id="finalScore">10</div>
+          <div class="score-label">获得分数</div>
+        </div>
+        <div class="score-item">
+          <div class="score-value">⭐</div>
+          <div class="score-label">获得星星</div>
+        </div>
+        <div class="score-item">
+          <div class="score-value" id="tryCount">1</div>
+          <div class="score-label">尝试次数</div>
+        </div>
+      </div>
+      <div class="explanation">
+        <div class="explanation-title">📖 答案解析</div>
+        <div class="explanation-content">
+          "郭"字在古诗网格的<strong>第5列第3行</strong>，<br>
+          所以用有序数对表示为 <span class="pair">(5,3)</span>。<br>
+          记住：第一个数表示<strong>列</strong>，第二个数表示<strong>行</strong>，先列后行。
+        </div>
+      </div>
+      <div class="complete-actions">
+        <button class="btn-explain" id="explainBtn" onclick="playExplainFromOverlay()">📖 听讲·老师做</button>
+        <button class="btn-again" onclick="resetGame()">🔄 再做一次</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<audio id="introAudio" src="audio/intro.mp3" preload="auto"></audio>
+<audio id="explainAudio" src="audio/explain.mp3" preload="auto"></audio>
+
+<script>
+// 古诗网格数据（行从5到1，列从1到8）
+const poemGrid = {
+  5: ['还','待','把','开','青','绿','邀','故'],
+  4: ['来','到','酒','轩','山','树','我','人'],
+  3: ['就','重','话','面','郭','村','至','具'],
+  2: ['菊','阳','桑','场','外','边','田','鸡'],
+  1: ['花','日','麻','圃','斜','合','家','黍']
+};
+
+// 答案
+const ANSWER_COL = 5;
+const ANSWER_ROW = 3;
+
+let score = 0;
+let tryCount = 0;
+let foundTarget = false;
+let verified = false;
+let currentAudio = null;
+
+// 初始化网格
+function initGrid() {
+  const container = document.getElementById('gridContainer');
+  const colLabels = document.getElementById('colLabels');
+  container.innerHTML = '';
+  colLabels.innerHTML = '';
+
+  // 列标签
+  for (let c = 1; c <= 8; c++) {
+    const label = document.createElement('div');
+    label.className = 'col-label';
+    label.textContent = c;
+    colLabels.appendChild(label);
+  }
+
+  // 行：从第5行到第1行
+  for (let r = 5; r >= 1; r--) {
+    const row = document.createElement('div');
+    row.className = 'grid-row';
+    
+    const rowLabel = document.createElement('div');
+    rowLabel.className = 'row-label';
+    rowLabel.textContent = r;
+    row.appendChild(rowLabel);
+
+    for (let c = 1; c <= 8; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.dataset.col = c;
+      cell.dataset.row = r;
+      cell.textContent = poemGrid[r][c - 1];
+
+      // 桑字 - 示例
+      if (c === 3 && r === 2) {
+        cell.classList.add('example');
+      }
+
+      // 郭字 - 目标
+      if (c === ANSWER_COL && r === ANSWER_ROW) {
+        cell.classList.add('target');
+        cell.addEventListener('click', () => handleTargetClick(cell));
+      }
+
+      row.appendChild(cell);
+    }
+    container.appendChild(row);
+  }
+}
+
+// 动态调整网格大小，占主展示区的80%
+function resizeGrid() {
+  const area = document.querySelector('.poem-area');
+  if (!area) return;
+  const areaW = area.clientWidth;
+  const areaH = area.clientHeight;
+  
+  // 预留空间：标签约30 + 列标签约20 + 行标签28 + grid-wrapper padding32
+  const reservedH = 30 + 20 + 32;
+  const reservedW = 28 + 32;
+  
+  const maxW = (areaW * 0.8 - reservedW) / 8;
+  const maxH = (areaH * 0.8 - reservedH) / 5;
+  
+  let cellSize = Math.floor(Math.min(maxW, maxH));
+  cellSize = Math.max(cellSize, 24);
+  
+  area.style.setProperty('--cell-size', cellSize + 'px');
+}
+
+// 点击目标字
+function handleTargetClick(cell) {
+  if (verified) return;
+  
+  if (!foundTarget) {
+    foundTarget = true;
+    cell.classList.remove('target');
+    cell.classList.add('found');
+    setStatus('找到了！"郭"字在这里，现在填入它的列数和行数吧', 'success');
+    // 自动聚焦到列输入框
+    document.getElementById('inputCol').focus();
+  }
+}
+
+// 验证答案
+function verifyAnswer() {
+  if (verified) return;
+  
+  const colInput = document.getElementById('inputCol');
+  const rowInput = document.getElementById('inputRow');
+  const col = parseInt(colInput.value);
+  const row = parseInt(rowInput.value);
+
+  // 检查是否填写
+  if (!colInput.value || !rowInput.value) {
+    setStatus('请先填入列数和行数哦', 'error');
+    if (!colInput.value) shakeInput(colInput);
+    if (!rowInput.value) shakeInput(rowInput);
+    return;
+  }
+
+  // 检查是否是数字
+  if (isNaN(col) || isNaN(row)) {
+    setStatus('请输入数字哦', 'error');
+    shakeInput(colInput);
+    shakeInput(rowInput);
+    return;
+  }
+
+  tryCount++;
+
+  if (col === ANSWER_COL && row === ANSWER_ROW) {
+    // 正确
+    verified = true;
+    colInput.classList.add('correct');
+    rowInput.classList.add('correct');
+    document.getElementById('verifyBtn').disabled = true;
+    
+    // 高亮目标字
+    const targetCell = document.querySelector(`.cell[data-col="${ANSWER_COL}"][data-row="${ANSWER_ROW}"]`);
+    if (targetCell) {
+      targetCell.classList.remove('found', 'target');
+      targetCell.classList.add('correct');
+    }
+
+    // 加分
+    score = 10;
+    document.getElementById('score').textContent = score;
+    showScorePopup(targetCell || colInput, '+10');
+    
+    setStatus('回答正确！太棒了！', 'success');
+    
+    // 显示完成弹窗
+    setTimeout(() => {
+      document.getElementById('tryCount').textContent = tryCount;
+      document.getElementById('finalScore').textContent = score;
+      document.getElementById('completeOverlay').classList.add('show');
+      launchConfetti();
+    }, 800);
+  } else {
+    // 错误
+    colInput.classList.add('error');
+    rowInput.classList.add('error');
+    setTimeout(() => {
+      colInput.classList.remove('error');
+      rowInput.classList.remove('error');
+    }, 500);
+
+    // 智能提示
+    let hint = '不对哦，再想想。';
+    if (col !== ANSWER_COL && row !== ANSWER_ROW) {
+      hint = '列数和行数都不对，先列后行，再仔细看看网格。';
+    } else if (col !== ANSWER_COL) {
+      hint = '列数不对，"郭"字在第几列呢？从左往右数数看。';
+    } else if (row !== ANSWER_ROW) {
+      hint = '行数不对，"郭"字在第几行呢？从下往上数数看。';
+    }
+    setStatus(hint, 'error');
+    
+    // 清空错误输入
+    colInput.value = '';
+    rowInput.value = '';
+    colInput.focus();
+  }
+}
+
+// 输入框抖动
+function shakeInput(input) {
+  input.classList.add('error');
+  setTimeout(() => input.classList.remove('error'), 500);
+}
+
+// 设置状态消息
+function setStatus(text, type) {
+  const msg = document.getElementById('statusMsg');
+  msg.textContent = text;
+  msg.className = 'status-msg ' + (type || 'info');
+}
+
+// 提示列数
+function showHintCol() {
+  const colInput = document.getElementById('inputCol');
+  if (verified) return;
+  colInput.value = ANSWER_COL;
+  colInput.classList.add('correct');
+  setTimeout(() => colInput.classList.remove('correct'), 1000);
+  setStatus(`提示："郭"字在第${ANSWER_COL}列，现在想想第几行？`, 'info');
+}
+
+// 提示行数
+function showHintRow() {
+  const rowInput = document.getElementById('inputRow');
+  if (verified) return;
+  rowInput.value = ANSWER_ROW;
+  rowInput.classList.add('correct');
+  setTimeout(() => rowInput.classList.remove('correct'), 1000);
+  setStatus(`提示："郭"字在第${ANSWER_ROW}行，列数自己想想哦`, 'info');
+}
+
+// 显示提示
+function showHint() {
+  setStatus('💡 用有序数对表示位置时，第一个数表示列（从左往右数），第二个数表示行（从下往上数），先列后行。', 'info');
+}
+
+// 得分飘字
+function showScorePopup(element, text) {
+  const rect = element.getBoundingClientRect();
+  const stageRect = document.getElementById('stage').getBoundingClientRect();
+  const popup = document.createElement('div');
+  popup.className = 'score-popup';
+  popup.textContent = text;
+  popup.style.left = (rect.left - stageRect.left + rect.width / 2 - 20) + 'px';
+  popup.style.top = (rect.top - stageRect.top - 10) + 'px';
+  document.getElementById('stage').appendChild(popup);
+  setTimeout(() => popup.remove(), 1000);
+}
+
+// 播放引导语
+function playIntro() {
+  stopAllAudio();
+  const audio = document.getElementById('introAudio');
+  const btn = document.getElementById('introBtn');
+  audio.play();
+  currentAudio = audio;
+  btn.classList.add('playing');
+  btn.innerHTML = '⏸ 暂停';
+  audio.onended = () => {
+    btn.classList.remove('playing');
+    btn.innerHTML = '🔊 听引导';
+    currentAudio = null;
+  };
+}
+
+// 播放讲解
+function playExplain() {
+  stopAllAudio();
+  const audio = document.getElementById('explainAudio');
+  const btn = document.getElementById('explainBtn');
+  audio.play();
+  currentAudio = audio;
+  btn.classList.add('playing');
+  btn.innerHTML = '⏸ 暂停讲解';
+  audio.onended = () => {
+    btn.classList.remove('playing');
+    btn.innerHTML = '🔊 听讲解';
+    currentAudio = null;
+  };
+}
+
+function stopAllAudio() {
+  document.querySelectorAll('audio').forEach(a => {
+    a.pause();
+    a.currentTime = 0;
+  });
+  document.querySelectorAll('.btn-audio, .btn-explain').forEach(b => {
+    b.classList.remove('playing');
+    if (b.id === 'introBtn') b.innerHTML = '🔊 听引导';
+    if (b.id === 'explainBtn') b.innerHTML = '🔊 听讲解';
+  });
+  currentAudio = null;
+}
+
+// 彩带
+function launchConfetti() {
+  const colors = ['#8b4513', '#d4a574', '#b8860b', '#cd853f', '#daa520', '#f5deb3'];
+  const stage = document.getElementById('stage');
+  for (let i = 0; i < 50; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random() * 1280 + 'px';
+    c.style.background = colors[Math.floor(Math.random() * colors.length)];
+    c.style.animationDelay = Math.random() * 1.5 + 's';
+    c.style.animationDuration = (2 + Math.random() * 2) + 's';
+    c.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+    stage.appendChild(c);
+    setTimeout(() => c.remove(), 4000);
+  }
+}
+
+// 重置
+function resetGame() {
+  stopAllAudio();
+  score = 0;
+  tryCount = 0;
+  foundTarget = false;
+  verified = false;
+  document.getElementById('score').textContent = '0';
+  document.getElementById('completeOverlay').classList.remove('show');
+  document.getElementById('inputCol').value = '';
+  document.getElementById('inputRow').value = '';
+  document.getElementById('inputCol').classList.remove('correct', 'error');
+  document.getElementById('inputRow').classList.remove('correct', 'error');
+  document.getElementById('verifyBtn').disabled = false;
+  setStatus('先在左边找到"郭"字，再填入它的位置哦', 'info');
+  initGrid();
+  resizeGrid();
+  correctAnswersShown = false;
+  if (listenAudio) { listenAudio.pause(); listenAudio.currentTime = 0; }
+  if (explainAudio) { explainAudio.pause(); explainAudio.currentTime = 0; }
+  listenPlaying = false;
+  explainPlaying = false;
+  updateListenPlayBtn();
+  updateExplainPlayBtn();
+  updateListenProgress();
+  updateExplainProgress();
+}
+
+// 输入框回车验证
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('inputCol').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('inputRow').focus();
+  });
+  document.getElementById('inputRow').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') verifyAnswer();
+  });
+});
+
+// ============ 双播放器：听题·动手做 + 听讲·老师做 ============
+let listenAudio = null;
+let explainAudio = null;
+let listenPlaying = false;
+let explainPlaying = false;
+let correctAnswersShown = false;
+
+function initDualPlayers() {
+  listenAudio = new Audio('audio/intro.mp3');
+  explainAudio = new Audio('audio/explain.mp3');
+  
+  listenAudio.addEventListener('timeupdate', updateListenProgress);
+  listenAudio.addEventListener('loadedmetadata', updateListenProgress);
+  listenAudio.addEventListener('ended', () => {
+    listenPlaying = false;
+    updateListenPlayBtn();
+  });
+  
+  explainAudio.addEventListener('timeupdate', updateExplainProgress);
+  explainAudio.addEventListener('loadedmetadata', updateExplainProgress);
+  explainAudio.addEventListener('ended', () => {
+    explainPlaying = false;
+    updateExplainPlayBtn();
+  });
+}
+
+// 播放器1：听题·动手做
+function toggleListen() {
+  if (explainPlaying) {
+    explainAudio.pause();
+    explainPlaying = false;
+    updateExplainPlayBtn();
+  }
+  if (listenPlaying) {
+    listenAudio.pause();
+    listenPlaying = false;
+  } else {
+    listenAudio.play();
+    listenPlaying = true;
+  }
+  updateListenPlayBtn();
+}
+
+function updateListenPlayBtn() {
+  const btn = document.getElementById('listenPlayBtn');
+  if (btn) btn.innerHTML = listenPlaying ? '⏸' : '▶';
+}
+
+function updateListenProgress() {
+  if (!listenAudio) return;
+  const percent = listenAudio.duration > 0 ? (listenAudio.currentTime / listenAudio.duration) * 100 : 0;
+  const bar = document.getElementById('listenProgressBar');
+  const time = document.getElementById('listenTime');
+  if (bar) bar.style.width = percent + '%';
+  if (time) time.textContent = fmtTime(listenAudio.currentTime) + ' / ' + fmtTime(listenAudio.duration);
+}
+
+function seekListen(e) {
+  if (!listenAudio || !listenAudio.duration) return;
+  const rect = e.currentTarget.getBoundingClientRect();
+  const ratio = (e.clientX - rect.left) / rect.width;
+  listenAudio.currentTime = ratio * listenAudio.duration;
+}
+
+// 播放器2：听讲·老师做
+function toggleExplain() {
+  if (listenPlaying) {
+    listenAudio.pause();
+    listenPlaying = false;
+    updateListenPlayBtn();
+  }
+  if (explainPlaying) {
+    explainAudio.pause();
+    explainPlaying = false;
+  } else {
+    explainAudio.play();
+    explainPlaying = true;
+    if (!correctAnswersShown) {
+      showCorrectAnswers();
+      correctAnswersShown = true;
+    }
+  }
+  updateExplainPlayBtn();
+}
+
+function playExplainFromOverlay() {
+  document.getElementById('completeOverlay').classList.remove('show');
+  if (listenPlaying) {
+    listenAudio.pause();
+    listenPlaying = false;
+    updateListenPlayBtn();
+  }
+  explainAudio.currentTime = 0;
+  explainAudio.play();
+  explainPlaying = true;
+  if (!correctAnswersShown) {
+    showCorrectAnswers();
+    correctAnswersShown = true;
+  }
+  updateExplainPlayBtn();
+}
+
+function updateExplainPlayBtn() {
+  const btn = document.getElementById('explainPlayBtn');
+  if (btn) btn.innerHTML = explainPlaying ? '⏸' : '▶';
+}
+
+function updateExplainProgress() {
+  if (!explainAudio) return;
+  const percent = explainAudio.duration > 0 ? (explainAudio.currentTime / explainAudio.duration) * 100 : 0;
+  const bar = document.getElementById('explainProgressBar');
+  const time = document.getElementById('explainTime');
+  if (bar) bar.style.width = percent + '%';
+  if (time) time.textContent = fmtTime(explainAudio.currentTime) + ' / ' + fmtTime(explainAudio.duration);
+}
+
+function seekExplain(e) {
+  if (!explainAudio || !explainAudio.duration) return;
+  const rect = e.currentTarget.getBoundingClientRect();
+  const ratio = (e.clientX - rect.left) / rect.width;
+  explainAudio.currentTime = ratio * explainAudio.duration;
+}
+
+// 展示正确答案（左侧主显示区高亮郭字）
+function showCorrectAnswers() {
+  const targetCell = document.querySelector(`.cell[data-col="5"][data-row="3"]`);
+  if (targetCell) {
+    targetCell.classList.remove('found', 'target');
+    targetCell.classList.add('correct');
+    if (!targetCell.querySelector('.correct-pair')) {
+      const pair = document.createElement('div');
+      pair.className = 'correct-pair';
+      pair.textContent = '(5,3)';
+      pair.style.cssText = 'position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:12px;color:#16a34a;font-weight:700;background:#fff;padding:1px 6px;border-radius:4px;border:1px solid #22c55e;font-family:Courier New,monospace;z-index:10;';
+      targetCell.appendChild(pair);
+    }
+  }
+}
+
+function fmtTime(s) {
+  if (isNaN(s) || s < 0) s = 0;
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return m + ':' + (sec < 10 ? '0' : '') + sec;
+}
+
+// 初始化
+initGrid();
+resizeGrid();
+initDualPlayers();
+window.addEventListener('resize', resizeGrid);
+
+// 页面加载完成，播放器就绪（不自动播放，由用户手动点击）
+</script>
+
+</body>
+</html>

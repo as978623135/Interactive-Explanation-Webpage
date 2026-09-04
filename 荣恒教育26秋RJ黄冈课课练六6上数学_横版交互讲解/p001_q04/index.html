@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>飞机选座·数对表示位置</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Microsoft YaHei', sans-serif;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  min-height: 100vh;
+  color: #fff;
+  overflow-x: hidden;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background: rgba(0,0,0,0.3);
+}
+.header h1 {
+  font-size: 20px;
+  background: linear-gradient(90deg, #ffd700, #ff8c00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.score-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #ffd700, #ff8c00);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  color: #1a1a2e;
+}
+.main-container {
+  display: flex;
+  gap: 16px;
+  padding: 16px 24px;
+  height: calc(100vh - 60px);
+}
+.left-area {
+  flex: 1;
+  background: rgba(255,255,255,0.05);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+ overflow: hidden;}
+.plane-title {
+  font-size: 18px;
+  color: #ffd700;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.seat-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+ transform: scale(1.4); transform-origin: center;}
+.seat-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.row-label {
+  width: 24px;
+  text-align: center;
+  font-size: 14px;
+  color: #aaa;
+}
+.seat-group {
+  display: flex;
+  gap: 6px;
+}
+.aisle {
+  width: 30px;
+}
+.seat {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 2px solid transparent;
+  position: relative;
+}
+.seat.available {
+  background: rgba(255,255,255,0.15);
+  border-color: rgba(255,255,255,0.3);
+}
+.seat.available:hover {
+  background: rgba(255,215,0,0.3);
+  border-color: #ffd700;
+  transform: scale(1.1);
+}
+.seat.selected {
+  background: linear-gradient(135deg, #ff6b9d, #c44569);
+  border-color: #ff6b9d;
+}
+.seat.circle-mark {
+  background: rgba(255,255,255,0.15);
+  border: 3px solid #00ff88;
+  box-shadow: 0 0 10px rgba(0,255,136,0.5);
+}
+.seat.square-mark {
+  background: rgba(255,255,255,0.15);
+  border: 3px solid #00bfff;
+  box-shadow: 0 0 10px rgba(0,191,255,0.5);
+}
+.seat.correct {
+  background: linear-gradient(135deg, #00ff88, #00c853) !important;
+  border-color: #00ff88 !important;
+  box-shadow: 0 0 15px rgba(0,255,136,0.6);
+  animation: correctPop 0.5s ease;
+}
+.seat.wrong {
+  background: linear-gradient(135deg, #ff4444, #cc0000) !important;
+  border-color: #ff4444 !important;
+  animation: shake 0.4s ease;
+}
+@keyframes correctPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+.col-labels {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+  padding-left: 30px;
+}
+.col-label {
+  width: 36px;
+  text-align: center;
+  font-size: 14px;
+  color: #ffd700;
+  font-weight: bold;
+}
+.legend {
+  display: flex;
+  gap: 20px;
+  margin-top: 16px;
+  font-size: 13px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.legend-box {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+}
+.right-panel {
+  width: 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+.task-card {
+  background: rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 14px;
+  border-left: 4px solid #ffd700;
+}
+.task-card h3 {
+  font-size: 15px;
+  color: #ffd700;
+  margin-bottom: 8px;
+}
+.task-card p {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #ddd;
+  margin-bottom: 8px;
+}
+.answer-input {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0;
+}
+.answer-input input {
+  width: 50px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #555;
+  background: rgba(0,0,0,0.3);
+  color: #fff;
+  font-size: 14px;
+  text-align: center;
+}
+.answer-input input:focus {
+  outline: none;
+  border-color: #ffd700;
+}
+.btn-verify {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: none;
+  background: linear-gradient(135deg, #00ff88, #00c853);
+  color: #1a1a2e;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 13px;
+  transition: transform 0.2s;
+}
+.btn-verify:hover {
+  transform: scale(1.05);
+}
+.feedback {
+  font-size: 13px;
+  margin-top: 6px;
+  min-height: 18px;
+}
+.feedback.correct { color: #00ff88; }
+.feedback.wrong { color: #ff6b6b; }
+.player-card {
+  background: rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 14px;
+}
+.player-title {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.player-title.listen { color: #00bfff; }
+.player-title.explain { color: #ff8c00; }
+.player-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.play-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #00bfff, #0080ff);
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.play-btn:hover { transform: scale(1.1); }
+.play-btn.playing {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+}
+.progress-bar {
+  flex: 1;
+  height: 6px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 3px;
+  cursor: pointer;
+  position: relative;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00bfff, #0080ff);
+  border-radius: 3px;
+  width: 0%;
+  transition: width 0.1s;
+}
+.time-display {
+  font-size: 12px;
+  color: #aaa;
+  min-width: 80px;
+  text-align: right;
+}
+.overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.overlay.show { display: flex; }
+.overlay-content {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  border: 2px solid #ffd700;
+  box-shadow: 0 0 40px rgba(255,215,0,0.3);
+}
+.overlay-content h2 {
+  font-size: 28px;
+  color: #ffd700;
+  margin-bottom: 16px;
+}
+.overlay-content p {
+  font-size: 16px;
+  color: #ddd;
+  margin-bottom: 24px;
+}
+.overlay-btn {
+  padding: 12px 32px;
+  border-radius: 30px;
+  border: none;
+  background: linear-gradient(135deg, #ff8c00, #ff6b00);
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.overlay-btn:hover { transform: scale(1.05); }
+.correct-answer-tag {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #00ff88;
+  color: #1a1a2e;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: bold;
+  display: none;
+}
+.seat.correct .correct-answer-tag { display: block; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>✈️ 飞机选座 · 数对表示位置</h1>
+  <div class="score-box">⭐ <span id="score">0</span> 分</div>
+</div>
+
+<div class="main-container">
+  <div class="left-area">
+    <div class="plane-title">飞机部分座位分布图（A~G列，1~8行）</div>
+    <div class="seat-container" id="seatContainer">
+      <div class="col-labels">
+        <div class="col-label">A</div>
+        <div class="col-label">B</div>
+        <div class="aisle"></div>
+        <div class="col-label">D</div>
+        <div class="col-label">E</div>
+        <div class="col-label">F</div>
+        <div class="col-label">G</div>
+      </div>
+    </div>
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-box" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3)"></div>
+        <span>可选座位</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-box" style="background:linear-gradient(135deg,#ff6b9d,#c44569)"></div>
+        <span>已选座位</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-box" style="background:rgba(255,255,255,0.15);border:3px solid #00ff88"></div>
+        <span>○标出</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-box" style="background:rgba(255,255,255,0.15);border:3px solid #00bfff"></div>
+        <span>□标出</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <div class="task-card">
+      <h3>📋 第(1)问</h3>
+      <p>图中用"○"标出的座位用有序数对表示是( <strong id="ans1a">?</strong> , <strong id="ans1b">?</strong> )；爸爸选择的座位已在图中用"□"标出，用有序数对表示是( <strong id="ans1c">?</strong> , <strong id="ans1d">?</strong> )。</p>
+      <p style="font-size:12px;color:#888">点击图中○和□标出的座位查看答案</p>
+    </div>
+
+    <div class="task-card">
+      <h3>📋 第(2)问</h3>
+      <p>文文选择和爸爸左右挨着坐，她的座位用有序数对表示是( <strong id="ans2a">?</strong> )或( <strong id="ans2b">?</strong> )。</p>
+      <p style="font-size:12px;color:#888">点击图中爸爸左右两侧的座位</p>
+    </div>
+
+    <div class="task-card">
+      <h3>📋 第(3)问 ①</h3>
+      <p>张老师喜欢靠过道的座位，你为她推荐的座位应该在第( <strong id="ans3a">?</strong> )列或第( <strong id="ans3b">?</strong> )列。</p>
+      <div class="answer-input">
+        <input type="text" id="input3a" placeholder="列" maxlength="1">
+        <span>列 或</span>
+        <input type="text" id="input3b" placeholder="列" maxlength="1">
+        <span>列</span>
+        <button class="btn-verify" onclick="verifyQ3a()">验证</button>
+      </div>
+      <div class="feedback" id="fb3a"></div>
+    </div>
+
+    <div class="task-card">
+      <h3>📋 第(3)问 ②</h3>
+      <p>王爷爷老两口想要独立的两连座，有几种选择？请用有序数对表示出来。</p>
+      <p style="font-size:12px;color:#888">点击图中相邻的两个可选座位（同一行左右相邻）</p>
+      <div class="feedback" id="fb3b"></div>
+    </div>
+
+    <div class="player-card">
+      <div class="player-title listen">🎧 听题·动手做</div>
+      <div class="player-controls">
+        <button class="play-btn" id="listenBtn" onclick="toggleListen()">▶</button>
+        <div class="progress-bar" onclick="seekListen(event)">
+          <div class="progress-fill" id="listenProgress"></div>
+        </div>
+        <div class="time-display" id="listenTime">0:00 / 0:00</div>
+      </div>
+    </div>
+
+    <div class="player-card">
+      <div class="player-title explain">📖 听讲·老师做</div>
+      <div class="player-controls">
+        <button class="play-btn" id="explainBtn" onclick="toggleExplain()">▶</button>
+        <div class="progress-bar" onclick="seekExplain(event)">
+          <div class="progress-fill" id="explainProgress"></div>
+        </div>
+        <div class="time-display" id="explainTime">0:00 / 0:00</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="completeOverlay">
+  <div class="overlay-content">
+    <h2>🎉 完成啦！</h2>
+    <p>你已经完成了所有题目，来听听老师的讲解吧！</p>
+    <button class="overlay-btn" onclick="playExplainFromOverlay()">📖 听讲·老师做</button>
+  </div>
+</div>
+
+<audio id="listenAudio" src="audio/intro.mp3" preload="metadata"></audio>
+<audio id="explainAudio" src="audio/explain.mp3" preload="metadata"></audio>
+
+<script>
+const COLS = ['A', 'B', 'D', 'E', 'F', 'G'];
+const ROWS = 8;
+const SELECTED_SEATS = ['A4', 'A5', 'A6', 'A7', 'A8'];
+const CIRCLE_SEAT = 'B2';
+const SQUARE_SEAT = 'F5';
+let score = 0;
+let clickedSeats = new Set();
+let correctAnswersShown = false;
+
+function initSeats() {
+  const container = document.getElementById('seatContainer');
+  for (let row = 1; row <= ROWS; row++) {
+    const rowDiv = document.createElement('div');
+    rowDiv.className = 'seat-row';
+    rowDiv.innerHTML = `<div class="row-label">${row}</div>`;
+    
+    const leftGroup = document.createElement('div');
+    leftGroup.className = 'seat-group';
+    ['A', 'B'].forEach(col => {
+      leftGroup.appendChild(createSeat(col, row));
+    });
+    rowDiv.appendChild(leftGroup);
+    
+    const aisle = document.createElement('div');
+    aisle.className = 'aisle';
+    rowDiv.appendChild(aisle);
+    
+    const rightGroup = document.createElement('div');
+    rightGroup.className = 'seat-group';
+    ['D', 'E', 'F', 'G'].forEach(col => {
+      rightGroup.appendChild(createSeat(col, row));
+    });
+    rowDiv.appendChild(rightGroup);
+    
+    container.appendChild(rowDiv);
+  }
+}
+
+function createSeat(col, row) {
+  const seat = document.createElement('div');
+  const id = col + row;
+  seat.className = 'seat';
+  seat.dataset.id = id;
+  seat.dataset.col = col;
+  seat.dataset.row = row;
+  
+  if (SELECTED_SEATS.includes(id)) {
+    seat.classList.add('selected');
+  } else {
+    seat.classList.add('available');
+  }
+  if (id === CIRCLE_SEAT) seat.classList.add('circle-mark');
+  if (id === SQUARE_SEAT) seat.classList.add('square-mark');
+  
+  const tag = document.createElement('div');
+  tag.className = 'correct-answer-tag';
+  tag.textContent = id;
+  seat.appendChild(tag);
+  
+  seat.addEventListener('click', () => handleSeatClick(id, col, row, seat));
+  return seat;
+}
+
+function handleSeatClick(id, col, row, seatEl) {
+  if (SELECTED_SEATS.includes(id)) return;
+  
+  if (id === CIRCLE_SEAT) {
+    document.getElementById('ans1a').textContent = col;
+    document.getElementById('ans1b').textContent = row;
+    addScore(5);
+    showFeedback('fb3b', '正确！○标出的座位是(' + col + ',' + row + ')', 'correct');
+  }
+  if (id === SQUARE_SEAT) {
+    document.getElementById('ans1c').textContent = col;
+    document.getElementById('ans1d').textContent = row;
+    addScore(5);
+  }
+  
+  if (id === 'E5' || id === 'G5') {
+    if (id === 'E5') document.getElementById('ans2a').textContent = 'E,5';
+    if (id === 'G5') document.getElementById('ans2b').textContent = 'G,5';
+    addScore(5);
+  }
+  
+  if (!clickedSeats.has(id)) {
+    clickedSeats.add(id);
+    seatEl.style.background = 'rgba(0,191,255,0.3)';
+    seatEl.style.borderColor = '#00bfff';
+  }
+  
+  checkQ3b();
+  checkComplete();
+}
+
+function verifyQ3a() {
+  const a = document.getElementById('input3a').value.toUpperCase();
+  const b = document.getElementById('input3b').value.toUpperCase();
+  const fb = document.getElementById('fb3a');
+  if ((a === 'B' && b === 'D') || (a === 'D' && b === 'B')) {
+    fb.textContent = '✅ 正确！靠过道的是B列和D列';
+    fb.className = 'feedback correct';
+    document.getElementById('ans3a').textContent = 'B';
+    document.getElementById('ans3b').textContent = 'D';
+    addScore(10);
+  } else {
+    fb.textContent = '❌ 再想想，过道在B列和D列之间';
+    fb.className = 'feedback wrong';
+  }
+}
+
+function checkQ3b() {
+  const pairs = [['A1','B1'],['A2','B2'],['A3','B3'],['D1','E1'],['D2','E2'],['D3','E3'],['E1','F1'],['F1','G1'],['E2','F2'],['F2','G2'],['E3','F3'],['F3','G3'],['D6','E6'],['E6','F6'],['F6','G6'],['D7','E7'],['E7','F7'],['F7','G7'],['D8','E8'],['E8','F8'],['F8','G8']];
+  let found = 0;
+  pairs.forEach(pair => {
+    if (clickedSeats.has(pair[0]) && clickedSeats.has(pair[1])) found++;
+  });
+  if (found > 0) {
+    document.getElementById('fb3b').textContent = `已找到 ${found} 组两连座，继续找！（共多种选择）`;
+    document.getElementById('fb3b').className = 'feedback correct';
+    addScore(5);
+  }
+}
+
+function checkComplete() {
+  const q1done = document.getElementById('ans1a').textContent !== '?' && document.getElementById('ans1c').textContent !== '?';
+  const q2done = document.getElementById('ans2a').textContent !== '?' || document.getElementById('ans2b').textContent !== '?';
+  const q3adone = document.getElementById('ans3a').textContent !== '?';
+  if (q1done && q2done && q3adone && clickedSeats.size >= 4) {
+    setTimeout(() => {
+      document.getElementById('completeOverlay').classList.add('show');
+    }, 500);
+  }
+}
+
+function addScore(points) {
+  score += points;
+  document.getElementById('score').textContent = score;
+}
+
+function showFeedback(id, text, type) {
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.className = 'feedback ' + type;
+}
+
+// 双播放器逻辑
+const listenAudio = document.getElementById('listenAudio');
+const explainAudio = document.getElementById('explainAudio');
+let listenPlaying = false;
+let explainPlaying = false;
+
+function initDualPlayers() {
+  listenAudio.addEventListener('loadedmetadata', () => {
+    document.getElementById('listenTime').textContent = '0:00 / ' + formatTime(listenAudio.duration);
+  });
+  explainAudio.addEventListener('loadedmetadata', () => {
+    document.getElementById('explainTime').textContent = '0:00 / ' + formatTime(explainAudio.duration);
+  });
+  listenAudio.addEventListener('timeupdate', updateListenProgress);
+  explainAudio.addEventListener('timeupdate', updateExplainProgress);
+  listenAudio.addEventListener('ended', () => {
+    listenPlaying = false;
+    document.getElementById('listenBtn').textContent = '▶';
+    document.getElementById('listenBtn').classList.remove('playing');
+  });
+  explainAudio.addEventListener('ended', () => {
+    explainPlaying = false;
+    document.getElementById('explainBtn').textContent = '▶';
+    document.getElementById('explainBtn').classList.remove('playing');
+  });
+}
+
+function toggleListen() {
+  if (listenPlaying) {
+    listenAudio.pause();
+    listenPlaying = false;
+    document.getElementById('listenBtn').textContent = '▶';
+    document.getElementById('listenBtn').classList.remove('playing');
+  } else {
+    if (explainPlaying) toggleExplain();
+    listenAudio.play();
+    listenPlaying = true;
+    document.getElementById('listenBtn').textContent = '⏸';
+    document.getElementById('listenBtn').classList.add('playing');
+  }
+}
+
+function toggleExplain() {
+  if (explainPlaying) {
+    explainAudio.pause();
+    explainPlaying = false;
+    document.getElementById('explainBtn').textContent = '▶';
+    document.getElementById('explainBtn').classList.remove('playing');
+  } else {
+    if (listenPlaying) toggleListen();
+    explainAudio.play();
+    explainPlaying = true;
+    document.getElementById('explainBtn').textContent = '⏸';
+    document.getElementById('explainBtn').classList.add('playing');
+    if (!correctAnswersShown) showCorrectAnswers();
+  }
+}
+
+function playExplainFromOverlay() {
+  document.getElementById('completeOverlay').classList.remove('show');
+  listenAudio.pause();
+  listenAudio.currentTime = 0;
+  listenPlaying = false;
+  document.getElementById('listenBtn').textContent = '▶';
+  document.getElementById('listenBtn').classList.remove('playing');
+  explainAudio.currentTime = 0;
+  explainAudio.play();
+  explainPlaying = true;
+  document.getElementById('explainBtn').textContent = '⏸';
+  document.getElementById('explainBtn').classList.add('playing');
+  if (!correctAnswersShown) showCorrectAnswers();
+}
+
+function showCorrectAnswers() {
+  correctAnswersShown = true;
+  document.querySelectorAll('.seat').forEach(seat => {
+    const id = seat.dataset.id;
+    if (id === CIRCLE_SEAT || id === SQUARE_SEAT || id === 'E5' || id === 'G5') {
+      seat.classList.add('correct');
+    }
+  });
+  document.getElementById('ans1a').textContent = 'B';
+  document.getElementById('ans1b').textContent = '2';
+  document.getElementById('ans1c').textContent = 'F';
+  document.getElementById('ans1d').textContent = '5';
+  document.getElementById('ans2a').textContent = 'E,5';
+  document.getElementById('ans2b').textContent = 'G,5';
+  document.getElementById('ans3a').textContent = 'B';
+  document.getElementById('ans3b').textContent = 'D';
+}
+
+function seekListen(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const percent = (e.clientX - rect.left) / rect.width;
+  listenAudio.currentTime = percent * listenAudio.duration;
+}
+
+function seekExplain(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const percent = (e.clientX - rect.left) / rect.width;
+  explainAudio.currentTime = percent * explainAudio.duration;
+}
+
+function updateListenProgress() {
+  const percent = (listenAudio.currentTime / listenAudio.duration) * 100;
+  document.getElementById('listenProgress').style.width = percent + '%';
+  document.getElementById('listenTime').textContent = formatTime(listenAudio.currentTime) + ' / ' + formatTime(listenAudio.duration);
+}
+
+function updateExplainProgress() {
+  const percent = (explainAudio.currentTime / explainAudio.duration) * 100;
+  document.getElementById('explainProgress').style.width = percent + '%';
+  document.getElementById('explainTime').textContent = formatTime(explainAudio.currentTime) + ' / ' + formatTime(explainAudio.duration);
+}
+
+function formatTime(seconds) {
+  if (isNaN(seconds)) return '0:00';
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+initSeats();
+initDualPlayers();
+</script>
+</body>
+</html>

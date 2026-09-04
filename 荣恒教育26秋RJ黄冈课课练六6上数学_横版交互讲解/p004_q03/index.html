@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>位置与方向·小薇家电影院游泳馆</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Microsoft YaHei', sans-serif;
+  background: linear-gradient(135deg, #0a2e1a 0%, #1b4e2d 50%, #0a3e1f 100%);
+  min-height: 100vh;
+  color: #fff;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background: rgba(0,0,0,0.4);
+}
+.header h1 {
+  font-size: 20px;
+  background: linear-gradient(90deg, #81c784, #66bb6a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.score-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #81c784, #66bb6a);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  color: #0a2e1a;
+}
+.main-container {
+  display: flex;
+  gap: 16px;
+  padding: 16px 24px;
+  min-height: calc(100vh - 60px);
+}
+.left-area {
+  flex: 1;
+  background: rgba(129,199,132,0.05);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(129,199,132,0.15);
+ position: relative; overflow: hidden;}
+.map-title {
+  font-size: 18px;
+  color: #81c784;
+  margin-bottom: 12px;
+  text-align: center;
+}
+.map-container {
+  position: relative;
+  
+  
+  background: rgba(0,0,0,0.2);
+  border-radius: 12px;
+  border: 1px solid rgba(129,199,132,0.2);
+ transform: scale(1.4); transform-origin: center;}
+.map-svg {
+  width: 100%;
+  height: 100%;
+}
+.dashed-line {
+  stroke: #ff6b9d;
+  stroke-width: 1;
+  stroke-dasharray: 4,4;
+  opacity: 0.6;
+}
+.connection-line {
+  stroke: #ff6b9d;
+  stroke-width: 2;
+}
+.location-marker {
+  fill: #ffd700;
+  stroke: #fff;
+  stroke-width: 2;
+}
+.location-label {
+  font-size: 14px;
+  fill: #ffd700;
+  font-weight: bold;
+  text-anchor: middle;
+}
+.swim-marker {
+  fill: #81c784;
+  stroke: #fff;
+  stroke-width: 2;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+.swim-marker.show {
+  opacity: 1;
+}
+.swim-label {
+  font-size: 14px;
+  fill: #81c784;
+  font-weight: bold;
+  text-anchor: middle;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+.swim-label.show {
+  opacity: 1;
+}
+.ray-line {
+  stroke: #81c784;
+  stroke-width: 2;
+  stroke-dasharray: 6,3;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+.ray-line.show {
+  opacity: 1;
+}
+.angle-arc {
+  fill: none;
+  stroke: #00bfff;
+  stroke-width: 2;
+  stroke-dasharray: 4,3;
+}
+.angle-text {
+  font-size: 13px;
+  fill: #00bfff;
+  font-weight: bold;
+}
+.north-label {
+  font-size: 14px;
+  fill: #ff6b9d;
+  font-weight: bold;
+}
+.scale-bar {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.scale-line {
+  width: 40px;
+  height: 4px;
+  background: linear-gradient(90deg, #ff6b9d, #ff8c00);
+  border-radius: 2px;
+}
+.scale-text {
+  font-size: 12px;
+  color: #aaa;
+}
+.btn-mark {
+  margin-top: 16px;
+  padding: 12px 28px;
+  border-radius: 25px;
+  border: none;
+  background: linear-gradient(135deg, #81c784, #4caf50);
+  color: #fff;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.btn-mark:hover { transform: scale(1.05); }
+.btn-mark:disabled {
+  background: #555;
+  cursor: not-allowed;
+  transform: none;
+}
+.right-panel {
+  width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+.task-card {
+  background: rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 14px;
+  border-left: 4px solid #81c784;
+}
+.task-card h3 {
+  font-size: 15px;
+  color: #81c784;
+  margin-bottom: 10px;
+}
+.task-text {
+  font-size: 13px;
+  line-height: 1.8;
+  color: #ddd;
+  margin-bottom: 10px;
+}
+.task-text input {
+  width: 50px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  border: 1px solid #555;
+  background: rgba(0,0,0,0.3);
+  color: #fff;
+  font-size: 13px;
+  text-align: center;
+  margin: 0 2px;
+}
+.task-text input:focus {
+  outline: none;
+  border-color: #81c784;
+}
+.btn-verify {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: none;
+  background: linear-gradient(135deg, #81c784, #4caf50);
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 13px;
+  margin-top: 8px;
+}
+.feedback {
+  font-size: 13px;
+  margin-top: 6px;
+  min-height: 18px;
+}
+.feedback.correct { color: #81c784; }
+.feedback.wrong { color: #ff6b6b; }
+.hint-box {
+  background: rgba(255,215,0,0.08);
+  border: 1px solid rgba(255,215,0,0.3);
+  border-radius: 8px;
+  padding: 10px;
+  margin-top: 10px;
+}
+.hint-box p {
+  font-size: 12px;
+  color: #ffd700;
+  line-height: 1.6;
+}
+.player-card {
+  background: rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 14px;
+}
+.player-title {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.player-title.listen { color: #00bfff; }
+.player-title.explain { color: #ff8c00; }
+.player-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.play-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #00bfff, #0080ff);
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.play-btn:hover { transform: scale(1.1); }
+.play-btn.playing { background: linear-gradient(135deg, #ff6b6b, #ee5a24); }
+.progress-bar {
+  flex: 1;
+  height: 6px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 3px;
+  cursor: pointer;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00bfff, #0080ff);
+  border-radius: 3px;
+  width: 0%;
+}
+.time-display {
+  font-size: 12px;
+  color: #aaa;
+  min-width: 80px;
+  text-align: right;
+}
+.overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.overlay.show { display: flex; }
+.overlay-content {
+  background: linear-gradient(135deg, #0a2e1a, #1b4e2d);
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  border: 2px solid #81c784;
+}
+.overlay-content h2 { font-size: 28px; color: #81c784; margin-bottom: 16px; }
+.overlay-content p { font-size: 16px; color: #ddd; margin-bottom: 24px; }
+.overlay-btn {
+  padding: 12px 32px;
+  border-radius: 30px;
+  border: none;
+  background: linear-gradient(135deg, #ff8c00, #ff6b00);
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🏊 位置与方向·小薇家电影院游泳馆</h1>
+  <div class="score-box">⭐ <span id="score">0</span> 分</div>
+</div>
+
+<div class="main-container">
+  <div class="left-area">
+    <div class="map-title">位置图（比例尺：1段 = 100m）</div>
+    <div class="map-container">
+      <svg class="map-svg" viewBox="0 0 420 360" id="mapSvg">
+        <g id="baseLayer"></g>
+        <g id="locationsLayer"></g>
+        <g id="swimLayer"></g>
+      </svg>
+      <div class="scale-bar">
+        <div class="scale-line"></div>
+        <div class="scale-text">100 m</div>
+      </div>
+    </div>
+    <button class="btn-mark" id="markBtn" onclick="markSwim()">📍 标出游泳馆位置</button>
+  </div>
+
+  <div class="right-panel">
+    <div class="task-card">
+      <h3>📋 第(1)问</h3>
+      <div class="task-text">
+        电影院在小薇家(<input type="text" id="q1a">)偏(<input type="text" id="q1b">)30°方向上，距离是(<input type="text" id="q1c">)m。
+      </div>
+      <button class="btn-verify" onclick="verifyQ1()">验证</button>
+      <div class="feedback" id="fb1"></div>
+      <div class="hint-box">
+        <p>💡 提示：从小薇家看电影院，数一下有几段，每段100m</p>
+      </div>
+    </div>
+
+    <div class="task-card">
+      <h3>📋 第(2)问·操作题</h3>
+      <div class="task-text">
+        游泳馆在电影院的北偏东35°方向300m处，在图中标出游泳馆的位置。
+      </div>
+      <button class="btn-verify" onclick="verifyQ2()">我已标出</button>
+      <div class="feedback" id="fb2"></div>
+    </div>
+
+    <div class="player-card">
+      <div class="player-title listen">🎧 听题·动手做</div>
+      <div class="player-controls">
+        <button class="play-btn" id="listenBtn" onclick="toggleListen()">▶</button>
+        <div class="progress-bar" onclick="seekListen(event)">
+          <div class="progress-fill" id="listenProgress"></div>
+        </div>
+        <div class="time-display" id="listenTime">0:00 / 0:00</div>
+      </div>
+    </div>
+
+    <div class="player-card">
+      <div class="player-title explain">📖 听讲·老师做</div>
+      <div class="player-controls">
+        <button class="play-btn" id="explainBtn" onclick="toggleExplain()">▶</button>
+        <div class="progress-bar" onclick="seekExplain(event)">
+          <div class="progress-fill" id="explainProgress"></div>
+        </div>
+        <div class="time-display" id="explainTime">0:00 / 0:00</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="completeOverlay">
+  <div class="overlay-content">
+    <h2>🎉 完成啦！</h2>
+    <p>你已经完成了所有题目，来听听老师的讲解吧！</p>
+    <button class="overlay-btn" onclick="playExplainFromOverlay()">📖 听讲·老师做</button>
+  </div>
+</div>
+
+<audio id="listenAudio" src="audio/intro.mp3" preload="metadata"></audio>
+<audio id="explainAudio" src="audio/explain.mp3" preload="metadata"></audio>
+
+<script>
+const XIAOWEI = {x: 100, y: 80};
+const CINEMA = {x: 300, y: 200};
+let score = 0;
+let q1done = false;
+let q2done = false;
+let swimMarked = false;
+let correctAnswersShown = false;
+
+function initMap() {
+  const base = document.getElementById('baseLayer');
+  
+  const northText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  northText.setAttribute('x', 370);
+  northText.setAttribute('y', 50);
+  northText.setAttribute('class', 'north-label');
+  northText.textContent = '北 ↑';
+  base.appendChild(northText);
+  
+  const dashed1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  dashed1.setAttribute('x1', XIAOWEI.x - 40);
+  dashed1.setAttribute('y1', XIAOWEI.y);
+  dashed1.setAttribute('x2', XIAOWEI.x + 60);
+  dashed1.setAttribute('y2', XIAOWEI.y);
+  dashed1.setAttribute('class', 'dashed-line');
+  base.appendChild(dashed1);
+  
+  const dashed2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  dashed2.setAttribute('x1', XIAOWEI.x);
+  dashed2.setAttribute('y1', XIAOWEI.y - 40);
+  dashed2.setAttribute('x2', XIAOWEI.x);
+  dashed2.setAttribute('y2', XIAOWEI.y + 60);
+  dashed2.setAttribute('class', 'dashed-line');
+  base.appendChild(dashed2);
+  
+  const dashed3 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  dashed3.setAttribute('x1', CINEMA.x - 60);
+  dashed3.setAttribute('y1', CINEMA.y);
+  dashed3.setAttribute('x2', CINEMA.x + 40);
+  dashed3.setAttribute('y2', CINEMA.y);
+  dashed3.setAttribute('class', 'dashed-line');
+  base.appendChild(dashed3);
+  
+  const dashed4 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  dashed4.setAttribute('x1', CINEMA.x);
+  dashed4.setAttribute('y1', CINEMA.y - 60);
+  dashed4.setAttribute('x2', CINEMA.x);
+  dashed4.setAttribute('y2', CINEMA.y + 40);
+  dashed4.setAttribute('class', 'dashed-line');
+  base.appendChild(dashed4);
+  
+  const conn = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  conn.setAttribute('x1', XIAOWEI.x);
+  conn.setAttribute('y1', XIAOWEI.y);
+  conn.setAttribute('x2', CINEMA.x);
+  conn.setAttribute('y2', CINEMA.y);
+  conn.setAttribute('class', 'connection-line');
+  base.appendChild(conn);
+  
+  const arc = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  const r = 35;
+  const startAngle = 0;
+  const endAngle = 30;
+  const startRad = startAngle * Math.PI / 180;
+  const endRad = endAngle * Math.PI / 180;
+  const sx = XIAOWEI.x + r * Math.cos(startRad);
+  const sy = XIAOWEI.y + r * Math.sin(startRad);
+  const ex = XIAOWEI.x + r * Math.cos(endRad);
+  const ey = XIAOWEI.y + r * Math.sin(endRad);
+  arc.setAttribute('d', `M ${sx} ${sy} A ${r} ${r} 0 0 1 ${ex} ${ey}`);
+  arc.setAttribute('class', 'angle-arc');
+  base.appendChild(arc);
+  
+  const angleText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  const textRad = 15 * Math.PI / 180;
+  angleText.setAttribute('x', XIAOWEI.x + 50 * Math.cos(textRad));
+  angleText.setAttribute('y', XIAOWEI.y + 50 * Math.sin(textRad));
+  angleText.setAttribute('class', 'angle-text');
+  angleText.textContent = '30°';
+  base.appendChild(angleText);
+  
+  const locations = document.getElementById('locationsLayer');
+  
+  const xw = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  xw.setAttribute('cx', XIAOWEI.x);
+  xw.setAttribute('cy', XIAOWEI.y);
+  xw.setAttribute('r', '8');
+  xw.setAttribute('class', 'location-marker');
+  locations.appendChild(xw);
+  
+  const xwLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  xwLabel.setAttribute('x', XIAOWEI.x - 20);
+  xwLabel.setAttribute('y', XIAOWEI.y - 5);
+  xwLabel.setAttribute('class', 'location-label');
+  xwLabel.setAttribute('text-anchor', 'end');
+  xwLabel.textContent = '小薇家';
+  locations.appendChild(xwLabel);
+  
+  const cinema = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  cinema.setAttribute('cx', CINEMA.x);
+  cinema.setAttribute('cy', CINEMA.y);
+  cinema.setAttribute('r', '8');
+  cinema.setAttribute('class', 'location-marker');
+  locations.appendChild(cinema);
+  
+  const cinemaLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  cinemaLabel.setAttribute('x', CINEMA.x + 20);
+  cinemaLabel.setAttribute('y', CINEMA.y + 25);
+  cinemaLabel.setAttribute('class', 'location-label');
+  cinemaLabel.setAttribute('text-anchor', 'start');
+  cinemaLabel.textContent = '电影院';
+  locations.appendChild(cinemaLabel);
+}
+
+function markSwim() {
+  if (swimMarked) return;
+  swimMarked = true;
+  
+  const layer = document.getElementById('swimLayer');
+  
+  const angle = -90 + 35;
+  const rad = angle * Math.PI / 180;
+  const dist = 90;
+  const swimX = CINEMA.x + dist * Math.cos(rad);
+  const swimY = CINEMA.y + dist * Math.sin(rad);
+  
+  const ray = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  ray.setAttribute('x1', CINEMA.x);
+  ray.setAttribute('y1', CINEMA.y);
+  ray.setAttribute('x2', swimX);
+  ray.setAttribute('y2', swimY);
+  ray.setAttribute('class', 'ray-line');
+  layer.appendChild(ray);
+  setTimeout(() => ray.classList.add('show'), 100);
+  
+  const swim = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  swim.setAttribute('cx', swimX);
+  swim.setAttribute('cy', swimY);
+  swim.setAttribute('r', '8');
+  swim.setAttribute('class', 'swim-marker');
+  layer.appendChild(swim);
+  setTimeout(() => swim.classList.add('show'), 400);
+  
+  const swimLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  swimLabel.setAttribute('x', swimX);
+  swimLabel.setAttribute('y', swimY - 15);
+  swimLabel.setAttribute('class', 'swim-label');
+  swimLabel.textContent = '游泳馆';
+  layer.appendChild(swimLabel);
+  setTimeout(() => swimLabel.classList.add('show'), 500);
+  
+  document.getElementById('markBtn').textContent = '✅ 已标出游泳馆位置';
+  document.getElementById('markBtn').disabled = true;
+  addScore(10);
+}
+
+function verifyQ1() {
+  if (q1done) return;
+  const a = document.getElementById('q1a').value;
+  const b = document.getElementById('q1b').value;
+  const c = document.getElementById('q1c').value;
+  const fb = document.getElementById('fb1');
+  if ((a === '东' && b === '南' || a === '南' && b === '东') && c === '400') {
+    fb.textContent = '✅ 正确！电影院在小薇家东偏南30°方向，距离400m';
+    fb.className = 'feedback correct';
+    q1done = true;
+    addScore(10);
+    checkComplete();
+  } else {
+    fb.textContent = '❌ 再想想，从小薇家看电影院，方向和距离是多少？';
+    fb.className = 'feedback wrong';
+  }
+}
+
+function verifyQ2() {
+  if (q2done) return;
+  if (!swimMarked) {
+    markSwim();
+  }
+  q2done = true;
+  document.getElementById('fb2').textContent = '✅ 游泳馆位置已标出！';
+  document.getElementById('fb2').className = 'feedback correct';
+  addScore(10);
+  checkComplete();
+}
+
+function checkComplete() {
+  if (q1done && q2done) {
+    setTimeout(() => {
+      document.getElementById('completeOverlay').classList.add('show');
+    }, 500);
+  }
+}
+
+function addScore(points) {
+  score += points;
+  document.getElementById('score').textContent = score;
+}
+
+// 双播放器逻辑
+const listenAudio = document.getElementById('listenAudio');
+const explainAudio = document.getElementById('explainAudio');
+let listenPlaying = false;
+let explainPlaying = false;
+
+function initDualPlayers() {
+  listenAudio.addEventListener('loadedmetadata', () => {
+    document.getElementById('listenTime').textContent = '0:00 / ' + formatTime(listenAudio.duration);
+  });
+  explainAudio.addEventListener('loadedmetadata', () => {
+    document.getElementById('explainTime').textContent = '0:00 / ' + formatTime(explainAudio.duration);
+  });
+  listenAudio.addEventListener('timeupdate', updateListenProgress);
+  explainAudio.addEventListener('timeupdate', updateExplainProgress);
+  listenAudio.addEventListener('ended', () => {
+    listenPlaying = false;
+    document.getElementById('listenBtn').textContent = '▶';
+    document.getElementById('listenBtn').classList.remove('playing');
+  });
+  explainAudio.addEventListener('ended', () => {
+    explainPlaying = false;
+    document.getElementById('explainBtn').textContent = '▶';
+    document.getElementById('explainBtn').classList.remove('playing');
+  });
+}
+
+function toggleListen() {
+  if (listenPlaying) {
+    listenAudio.pause();
+    listenPlaying = false;
+    document.getElementById('listenBtn').textContent = '▶';
+    document.getElementById('listenBtn').classList.remove('playing');
+  } else {
+    if (explainPlaying) toggleExplain();
+    listenAudio.play();
+    listenPlaying = true;
+    document.getElementById('listenBtn').textContent = '⏸';
+    document.getElementById('listenBtn').classList.add('playing');
+  }
+}
+
+function toggleExplain() {
+  if (explainPlaying) {
+    explainAudio.pause();
+    explainPlaying = false;
+    document.getElementById('explainBtn').textContent = '▶';
+    document.getElementById('explainBtn').classList.remove('playing');
+  } else {
+    if (listenPlaying) toggleListen();
+    explainAudio.play();
+    explainPlaying = true;
+    document.getElementById('explainBtn').textContent = '⏸';
+    document.getElementById('explainBtn').classList.add('playing');
+    if (!correctAnswersShown) showCorrectAnswers();
+  }
+}
+
+function playExplainFromOverlay() {
+  document.getElementById('completeOverlay').classList.remove('show');
+  listenAudio.pause();
+  listenAudio.currentTime = 0;
+  listenPlaying = false;
+  document.getElementById('listenBtn').textContent = '▶';
+  document.getElementById('listenBtn').classList.remove('playing');
+  explainAudio.currentTime = 0;
+  explainAudio.play();
+  explainPlaying = true;
+  document.getElementById('explainBtn').textContent = '⏸';
+  document.getElementById('explainBtn').classList.add('playing');
+  if (!correctAnswersShown) showCorrectAnswers();
+}
+
+function showCorrectAnswers() {
+  correctAnswersShown = true;
+  if (!swimMarked) markSwim();
+  document.getElementById('q1a').value = '东';
+  document.getElementById('q1b').value = '南';
+  document.getElementById('q1c').value = '400';
+}
+
+function seekListen(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const percent = (e.clientX - rect.left) / rect.width;
+  listenAudio.currentTime = percent * listenAudio.duration;
+}
+
+function seekExplain(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const percent = (e.clientX - rect.left) / rect.width;
+  explainAudio.currentTime = percent * explainAudio.duration;
+}
+
+function updateListenProgress() {
+  const percent = (listenAudio.currentTime / listenAudio.duration) * 100;
+  document.getElementById('listenProgress').style.width = percent + '%';
+  document.getElementById('listenTime').textContent = formatTime(listenAudio.currentTime) + ' / ' + formatTime(listenAudio.duration);
+}
+
+function updateExplainProgress() {
+  const percent = (explainAudio.currentTime / explainAudio.duration) * 100;
+  document.getElementById('explainProgress').style.width = percent + '%';
+  document.getElementById('explainTime').textContent = formatTime(explainAudio.currentTime) + ' / ' + formatTime(explainAudio.duration);
+}
+
+function formatTime(seconds) {
+  if (isNaN(seconds)) return '0:00';
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+initMap();
+initDualPlayers();
+</script>
+</body>
+</html>

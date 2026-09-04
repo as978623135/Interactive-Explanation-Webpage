@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>长方形顶点·数对表示位置</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Microsoft YaHei', sans-serif;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  min-height: 100vh;
+  color: #fff;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background: rgba(0,0,0,0.3);
+}
+.header h1 {
+  font-size: 20px;
+  background: linear-gradient(90deg, #ffd700, #ff8c00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.score-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #ffd700, #ff8c00);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  color: #1a1a2e;
+}
+.main-container {
+  display: flex;
+  gap: 16px;
+  padding: 16px 24px;
+  min-height: calc(100vh - 60px);
+}
+.left-area {
+  flex: 1;
+  background: rgba(255,255,255,0.05);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+ position: relative; overflow: hidden;}
+.coord-title {
+  font-size: 18px;
+  color: #ffd700;
+  margin-bottom: 12px;
+}
+.coord-container {
+  position: relative;
+ transform: scale(1.4); transform-origin: center;}
+.coord-svg {
+  display: block;
+}
+.coord-point {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.coord-point:hover {
+  filter: brightness(1.3);
+}
+.point-label {
+  font-size: 16px;
+  font-weight: bold;
+  fill: #fff;
+  text-anchor: middle;
+  pointer-events: none;
+}
+.coord-label {
+  font-size: 13px;
+  fill: #ff6b9d;
+  font-weight: bold;
+}
+.right-panel {
+  width: 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+.task-card {
+  background: rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 14px;
+  border-left: 4px solid #ffd700;
+}
+.task-card h3 {
+  font-size: 15px;
+  color: #ffd700;
+  margin-bottom: 10px;
+}
+.task-text {
+  font-size: 13px;
+  line-height: 1.7;
+  color: #ddd;
+  margin-bottom: 12px;
+}
+.points-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.point-answer {
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.05);
+  border: 2px solid rgba(255,255,255,0.1);
+  text-align: center;
+  font-size: 14px;
+}
+.point-answer.done {
+  border-color: #00ff88;
+  background: rgba(0,255,136,0.1);
+}
+.point-answer .name {
+  font-weight: bold;
+  color: #ffd700;
+  margin-right: 6px;
+}
+.point-answer .coord {
+  color: #00ff88;
+  font-weight: bold;
+}
+.hint {
+  font-size: 12px;
+  color: #888;
+  margin-top: 10px;
+}
+.player-card {
+  background: rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 14px;
+}
+.player-title {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.player-title.listen { color: #00bfff; }
+.player-title.explain { color: #ff8c00; }
+.player-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.play-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #00bfff, #0080ff);
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.play-btn:hover { transform: scale(1.1); }
+.play-btn.playing { background: linear-gradient(135deg, #ff6b6b, #ee5a24); }
+.progress-bar {
+  flex: 1;
+  height: 6px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 3px;
+  cursor: pointer;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00bfff, #0080ff);
+  border-radius: 3px;
+  width: 0%;
+}
+.time-display {
+  font-size: 12px;
+  color: #aaa;
+  min-width: 80px;
+  text-align: right;
+}
+.overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.overlay.show { display: flex; }
+.overlay-content {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  border: 2px solid #ffd700;
+}
+.overlay-content h2 { font-size: 28px; color: #ffd700; margin-bottom: 16px; }
+.overlay-content p { font-size: 16px; color: #ddd; margin-bottom: 24px; }
+.overlay-btn {
+  padding: 12px 32px;
+  border-radius: 30px;
+  border: none;
+  background: linear-gradient(135deg, #ff8c00, #ff6b00);
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📐 长方形顶点·数对表示位置</h1>
+  <div class="score-box">⭐ <span id="score">0</span> 分</div>
+</div>
+
+<div class="main-container">
+  <div class="left-area">
+    <div class="coord-title">坐标系（x轴0~12，y轴0~10）</div>
+    <div class="coord-container">
+      <svg class="coord-svg" id="coordSvg" width="520" height="420" viewBox="0 0 520 420">
+        <g id="gridLines"></g>
+        <g id="axis"></g>
+        <g id="rectangles"></g>
+        <g id="pointsLayer"></g>
+        <g id="labelsLayer"></g>
+      </svg>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <div class="task-card">
+      <h3>📋 题目</h3>
+      <div class="task-text">下图中有两个完全相同的长方形，你能用有序数对表示出A、B、C、D这四个点的位置吗？</div>
+      <div class="points-grid">
+        <div class="point-answer" id="ansA"><span class="name">A</span><span class="coord">( ?, ? )</span></div>
+        <div class="point-answer" id="ansB"><span class="name">B</span><span class="coord">( ?, ? )</span></div>
+        <div class="point-answer" id="ansC"><span class="name">C</span><span class="coord">( ?, ? )</span></div>
+        <div class="point-answer" id="ansD"><span class="name">D</span><span class="coord">( ?, ? )</span></div>
+      </div>
+      <div class="hint">💡 点击左侧图中A、B、C、D四个点查看坐标</div>
+    </div>
+
+    <div class="player-card">
+      <div class="player-title listen">🎧 听题·动手做</div>
+      <div class="player-controls">
+        <button class="play-btn" id="listenBtn" onclick="toggleListen()">▶</button>
+        <div class="progress-bar" onclick="seekListen(event)">
+          <div class="progress-fill" id="listenProgress"></div>
+        </div>
+        <div class="time-display" id="listenTime">0:00 / 0:00</div>
+      </div>
+    </div>
+
+    <div class="player-card">
+      <div class="player-title explain">📖 听讲·老师做</div>
+      <div class="player-controls">
+        <button class="play-btn" id="explainBtn" onclick="toggleExplain()">▶</button>
+        <div class="progress-bar" onclick="seekExplain(event)">
+          <div class="progress-fill" id="explainProgress"></div>
+        </div>
+        <div class="time-display" id="explainTime">0:00 / 0:00</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="completeOverlay">
+  <div class="overlay-content">
+    <h2>🎉 完成啦！</h2>
+    <p>你已经找出了所有点的坐标，来听听老师的讲解吧！</p>
+    <button class="overlay-btn" onclick="playExplainFromOverlay()">📖 听讲·老师做</button>
+  </div>
+</div>
+
+<audio id="listenAudio" src="audio/intro.mp3" preload="metadata"></audio>
+<audio id="explainAudio" src="audio/explain.mp3" preload="metadata"></audio>
+
+<script>
+const OFFSET_X = 60;
+const OFFSET_Y = 380;
+const CELL = 32;
+
+let score = 0;
+let foundPoints = {A: false, B: false, C: false, D: false};
+let correctAnswersShown = false;
+
+const points = {
+  A: {x: 2, y: 5},
+  B: {x: 6, y: 2},
+  C: {x: 10, y: 2},
+  D: {x: 10, y: 5}
+};
+
+function coordToSvg(x, y) {
+  return {
+    x: OFFSET_X + x * CELL,
+    y: OFFSET_Y - y * CELL
+  };
+}
+
+function initCoord() {
+  const gridLines = document.getElementById('gridLines');
+  for (let i = 0; i <= 12; i++) {
+    const x = OFFSET_X + i * CELL;
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', x);
+    line.setAttribute('y1', OFFSET_Y - 10 * CELL);
+    line.setAttribute('x2', x);
+    line.setAttribute('y2', OFFSET_Y);
+    line.setAttribute('stroke', 'rgba(255,255,255,0.1)');
+    line.setAttribute('stroke-width', '1');
+    gridLines.appendChild(line);
+  }
+  for (let j = 0; j <= 10; j++) {
+    const y = OFFSET_Y - j * CELL;
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', OFFSET_X);
+    line.setAttribute('y1', y);
+    line.setAttribute('x2', OFFSET_X + 12 * CELL);
+    line.setAttribute('y2', y);
+    line.setAttribute('stroke', 'rgba(255,255,255,0.1)');
+    line.setAttribute('stroke-width', '1');
+    gridLines.appendChild(line);
+  }
+  
+  const axis = document.getElementById('axis');
+  const xAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  xAxis.setAttribute('x1', OFFSET_X);
+  xAxis.setAttribute('y1', OFFSET_Y);
+  xAxis.setAttribute('x2', OFFSET_X + 12 * CELL + 20);
+  xAxis.setAttribute('y2', OFFSET_Y);
+  xAxis.setAttribute('stroke', '#ff6b9d');
+  xAxis.setAttribute('stroke-width', '2');
+  axis.appendChild(xAxis);
+  
+  const yAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  yAxis.setAttribute('x1', OFFSET_X);
+  yAxis.setAttribute('y1', OFFSET_Y);
+  yAxis.setAttribute('x2', OFFSET_X);
+  yAxis.setAttribute('y2', OFFSET_Y - 10 * CELL - 20);
+  yAxis.setAttribute('stroke', '#ff6b9d');
+  yAxis.setAttribute('stroke-width', '2');
+  axis.appendChild(yAxis);
+  
+  const xLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  xLabel.setAttribute('x', OFFSET_X + 12 * CELL + 25);
+  xLabel.setAttribute('y', OFFSET_Y + 5);
+  xLabel.setAttribute('fill', '#ff6b9d');
+  xLabel.setAttribute('font-size', '16');
+  xLabel.textContent = 'x';
+  axis.appendChild(xLabel);
+  
+  const yLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  yLabel.setAttribute('x', OFFSET_X - 5);
+  yLabel.setAttribute('y', OFFSET_Y - 10 * CELL - 25);
+  yLabel.setAttribute('fill', '#ff6b9d');
+  yLabel.setAttribute('font-size', '16');
+  yLabel.textContent = 'y';
+  axis.appendChild(yLabel);
+  
+  for (let i = 1; i <= 11; i++) {
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', OFFSET_X + i * CELL);
+    text.setAttribute('y', OFFSET_Y + 18);
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('fill', '#888');
+    text.setAttribute('font-size', '11');
+    text.textContent = i;
+    axis.appendChild(text);
+  }
+  for (let j = 1; j <= 9; j++) {
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', OFFSET_X - 12);
+    text.setAttribute('y', OFFSET_Y - j * CELL + 4);
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('fill', '#888');
+    text.setAttribute('font-size', '11');
+    text.textContent = j;
+    axis.appendChild(text);
+  }
+  
+  const rects = document.getElementById('rectangles');
+  const r1 = coordToSvg(2, 8);
+  const r1b = coordToSvg(6, 5);
+  const rect1 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  rect1.setAttribute('x', r1.x);
+  rect1.setAttribute('y', r1.y);
+  rect1.setAttribute('width', r1b.x - r1.x);
+  rect1.setAttribute('height', r1b.y - r1.y);
+  rect1.setAttribute('fill', 'rgba(255,107,157,0.2)');
+  rect1.setAttribute('stroke', '#ff6b9d');
+  rect1.setAttribute('stroke-width', '2');
+  rects.appendChild(rect1);
+  
+  const r2 = coordToSvg(6, 5);
+  const r2b = coordToSvg(10, 2);
+  const rect2 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  rect2.setAttribute('x', r2.x);
+  rect2.setAttribute('y', r2.y);
+  rect2.setAttribute('width', r2b.x - r2.x);
+  rect2.setAttribute('height', r2b.y - r2.y);
+  rect2.setAttribute('fill', 'rgba(0,191,255,0.2)');
+  rect2.setAttribute('stroke', '#00bfff');
+  rect2.setAttribute('stroke-width', '2');
+  rects.appendChild(rect2);
+  
+  const knownLabels = [
+    {x: 2, y: 8, text: '(2, 8)'},
+    {x: 6, y: 8, text: '(6, 8)'},
+    {x: 6, y: 5, text: '(6, 5)'}
+  ];
+  knownLabels.forEach(k => {
+    const pos = coordToSvg(k.x, k.y);
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', pos.x);
+    text.setAttribute('y', pos.y - 10);
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('class', 'coord-label');
+    text.textContent = k.text;
+    document.getElementById('labelsLayer').appendChild(text);
+  });
+  
+  const pointsLayer = document.getElementById('pointsLayer');
+  for (const [name, p] of Object.entries(points)) {
+    const pos = coordToSvg(p.x, p.y);
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', pos.x);
+    circle.setAttribute('cy', pos.y);
+    circle.setAttribute('r', '8');
+    circle.setAttribute('fill', 'rgba(255,255,255,0.4)');
+    circle.setAttribute('class', 'coord-point');
+    circle.setAttribute('data-name', name);
+    circle.addEventListener('click', () => handlePointClick(name, p.x, p.y, circle));
+    pointsLayer.appendChild(circle);
+    
+    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    label.setAttribute('x', pos.x + (name === 'A' ? -15 : name === 'D' ? 15 : 0));
+    label.setAttribute('y', pos.y + (name === 'B' || name === 'C' ? 20 : -5));
+    label.setAttribute('text-anchor', 'middle');
+    label.setAttribute('class', 'point-label');
+    label.setAttribute('id', 'label_' + name);
+    label.setAttribute('fill', '#fff');
+    label.textContent = name;
+    document.getElementById('labelsLayer').appendChild(label);
+  }
+}
+
+function handlePointClick(name, x, y, circle) {
+  if (foundPoints[name]) return;
+  foundPoints[name] = true;
+  
+  const colors = {A: '#ff6b9d', B: '#00bfff', C: '#00ff88', D: '#ffd700'};
+  circle.setAttribute('fill', colors[name]);
+  circle.setAttribute('r', '10');
+  
+  document.getElementById('ans' + name).classList.add('done');
+  document.getElementById('ans' + name).querySelector('.coord').textContent = '(' + x + ', ' + y + ')';
+  
+  const label = document.getElementById('label_' + name);
+  label.textContent = name + '(' + x + ',' + y + ')';
+  label.setAttribute('fill', colors[name]);
+  
+  addScore(5);
+  checkComplete();
+}
+
+function checkComplete() {
+  if (foundPoints.A && foundPoints.B && foundPoints.C && foundPoints.D) {
+    setTimeout(() => {
+      document.getElementById('completeOverlay').classList.add('show');
+    }, 500);
+  }
+}
+
+function addScore(points) {
+  score += points;
+  document.getElementById('score').textContent = score;
+}
+
+// 双播放器逻辑
+const listenAudio = document.getElementById('listenAudio');
+const explainAudio = document.getElementById('explainAudio');
+let listenPlaying = false;
+let explainPlaying = false;
+
+function initDualPlayers() {
+  listenAudio.addEventListener('loadedmetadata', () => {
+    document.getElementById('listenTime').textContent = '0:00 / ' + formatTime(listenAudio.duration);
+  });
+  explainAudio.addEventListener('loadedmetadata', () => {
+    document.getElementById('explainTime').textContent = '0:00 / ' + formatTime(explainAudio.duration);
+  });
+  listenAudio.addEventListener('timeupdate', updateListenProgress);
+  explainAudio.addEventListener('timeupdate', updateExplainProgress);
+  listenAudio.addEventListener('ended', () => {
+    listenPlaying = false;
+    document.getElementById('listenBtn').textContent = '▶';
+    document.getElementById('listenBtn').classList.remove('playing');
+  });
+  explainAudio.addEventListener('ended', () => {
+    explainPlaying = false;
+    document.getElementById('explainBtn').textContent = '▶';
+    document.getElementById('explainBtn').classList.remove('playing');
+  });
+}
+
+function toggleListen() {
+  if (listenPlaying) {
+    listenAudio.pause();
+    listenPlaying = false;
+    document.getElementById('listenBtn').textContent = '▶';
+    document.getElementById('listenBtn').classList.remove('playing');
+  } else {
+    if (explainPlaying) toggleExplain();
+    listenAudio.play();
+    listenPlaying = true;
+    document.getElementById('listenBtn').textContent = '⏸';
+    document.getElementById('listenBtn').classList.add('playing');
+  }
+}
+
+function toggleExplain() {
+  if (explainPlaying) {
+    explainAudio.pause();
+    explainPlaying = false;
+    document.getElementById('explainBtn').textContent = '▶';
+    document.getElementById('explainBtn').classList.remove('playing');
+  } else {
+    if (listenPlaying) toggleListen();
+    explainAudio.play();
+    explainPlaying = true;
+    document.getElementById('explainBtn').textContent = '⏸';
+    document.getElementById('explainBtn').classList.add('playing');
+    if (!correctAnswersShown) showCorrectAnswers();
+  }
+}
+
+function playExplainFromOverlay() {
+  document.getElementById('completeOverlay').classList.remove('show');
+  listenAudio.pause();
+  listenAudio.currentTime = 0;
+  listenPlaying = false;
+  document.getElementById('listenBtn').textContent = '▶';
+  document.getElementById('listenBtn').classList.remove('playing');
+  explainAudio.currentTime = 0;
+  explainAudio.play();
+  explainPlaying = true;
+  document.getElementById('explainBtn').textContent = '⏸';
+  document.getElementById('explainBtn').classList.add('playing');
+  if (!correctAnswersShown) showCorrectAnswers();
+}
+
+function showCorrectAnswers() {
+  correctAnswersShown = true;
+  for (const [name, p] of Object.entries(points)) {
+    if (!foundPoints[name]) {
+      const circles = document.querySelectorAll('.coord-point');
+      circles.forEach(c => {
+        if (c.dataset.name === name) {
+          const colors = {A: '#ff6b9d', B: '#00bfff', C: '#00ff88', D: '#ffd700'};
+          c.setAttribute('fill', colors[name]);
+          c.setAttribute('r', '10');
+        }
+      });
+      document.getElementById('ans' + name).classList.add('done');
+      document.getElementById('ans' + name).querySelector('.coord').textContent = '(' + p.x + ', ' + p.y + ')';
+    }
+  }
+}
+
+function seekListen(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const percent = (e.clientX - rect.left) / rect.width;
+  listenAudio.currentTime = percent * listenAudio.duration;
+}
+
+function seekExplain(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const percent = (e.clientX - rect.left) / rect.width;
+  explainAudio.currentTime = percent * explainAudio.duration;
+}
+
+function updateListenProgress() {
+  const percent = (listenAudio.currentTime / listenAudio.duration) * 100;
+  document.getElementById('listenProgress').style.width = percent + '%';
+  document.getElementById('listenTime').textContent = formatTime(listenAudio.currentTime) + ' / ' + formatTime(listenAudio.duration);
+}
+
+function updateExplainProgress() {
+  const percent = (explainAudio.currentTime / explainAudio.duration) * 100;
+  document.getElementById('explainProgress').style.width = percent + '%';
+  document.getElementById('explainTime').textContent = formatTime(explainAudio.currentTime) + ' / ' + formatTime(explainAudio.duration);
+}
+
+function formatTime(seconds) {
+  if (isNaN(seconds)) return '0:00';
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+initCoord();
+initDualPlayers();
+</script>
+</body>
+</html>

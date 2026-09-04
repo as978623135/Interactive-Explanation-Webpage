@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>动物之家·方向与位置</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Microsoft YaHei', sans-serif;
+  background: linear-gradient(135deg, #1a2e0a 0%, #2d4e1b 50%, #1a3e0a 100%);
+  min-height: 100vh;
+  color: #fff;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background: rgba(0,0,0,0.4);
+}
+.header h1 {
+  font-size: 20px;
+  background: linear-gradient(90deg, #aed581, #9ccc65);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.score-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #aed581, #9ccc65);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  color: #1a2e0a;
+}
+.main-container {
+  display: flex;
+  gap: 16px;
+  padding: 16px 24px;
+  min-height: calc(100vh - 60px);
+}
+.left-area {
+  flex: 1;
+  background: rgba(174,213,129,0.05);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(174,213,129,0.15);
+ position: relative; overflow: hidden;}
+.map-title {
+  font-size: 18px;
+  color: #aed581;
+  margin-bottom: 12px;
+  text-align: center;
+}
+.map-container {
+  position: relative;
+  
+  
+  background: rgba(0,0,0,0.2);
+  border-radius: 12px;
+  border: 1px solid rgba(174,213,129,0.2);
+ transform: scale(1.4); transform-origin: center;}
+.map-svg {
+  width: 100%;
+  height: 100%;
+}
+.center-marker {
+  fill: #ff6b6b;
+  stroke: #fff;
+  stroke-width: 2;
+}
+.animal-marker {
+  fill: #ffd700;
+  stroke: #fff;
+  stroke-width: 2;
+}
+.animal-label {
+  font-size: 14px;
+  fill: #ffd700;
+  font-weight: bold;
+  text-anchor: middle;
+}
+.direction-line {
+  stroke: #ff6b9d;
+  stroke-width: 2;
+  stroke-dasharray: 5,3;
+}
+.angle-arc {
+  fill: none;
+  stroke: #00bfff;
+  stroke-width: 2;
+}
+.angle-text {
+  font-size: 12px;
+  fill: #00bfff;
+  font-weight: bold;
+}
+.direction-label {
+  font-size: 16px;
+  fill: #ff6b9d;
+  font-weight: bold;
+}
+.squirrel-marker {
+  fill: #81c784;
+  stroke: #fff;
+  stroke-width: 2;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+.squirrel-marker.show {
+  opacity: 1;
+}
+.squirrel-label {
+  font-size: 14px;
+  fill: #81c784;
+  font-weight: bold;
+  text-anchor: middle;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+.squirrel-label.show {
+  opacity: 1;
+}
+.click-hint {
+  font-size: 13px;
+  color: #ffd700;
+  margin-top: 12px;
+  text-align: center;
+}
+.right-panel {
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+.task-card {
+  background: rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 14px;
+  border-left: 4px solid #aed581;
+}
+.task-card h3 {
+  font-size: 15px;
+  color: #aed581;
+  margin-bottom: 10px;
+}
+.task-text {
+  font-size: 13px;
+  line-height: 2;
+  color: #ddd;
+  margin-bottom: 10px;
+}
+.task-text input {
+  width: 45px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  border: 1px solid #555;
+  background: rgba(0,0,0,0.3);
+  color: #fff;
+  font-size: 13px;
+  text-align: center;
+  margin: 0 2px;
+}
+.task-text input.wide {
+  width: 60px;
+}
+.task-text input:focus {
+  outline: none;
+  border-color: #aed581;
+}
+.btn-verify {
+  padding: 8px 20px;
+  border-radius: 6px;
+  border: none;
+  background: linear-gradient(135deg, #aed581, #9ccc65);
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 10px;
+}
+.feedback {
+  font-size: 13px;
+  margin-top: 8px;
+  min-height: 18px;
+}
+.feedback.correct { color: #aed581; }
+.feedback.wrong { color: #ff6b6b; }
+.hint-box {
+  background: rgba(255,215,0,0.08);
+  border: 1px solid rgba(255,215,0,0.3);
+  border-radius: 8px;
+  padding: 10px;
+  margin-top: 10px;
+}
+.hint-box p {
+  font-size: 12px;
+  color: #ffd700;
+  line-height: 1.6;
+}
+.player-card {
+  background: rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 14px;
+}
+.player-title {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.player-title.listen { color: #00bfff; }
+.player-title.explain { color: #ff8c00; }
+.player-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.play-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #00bfff, #0080ff);
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.play-btn:hover { transform: scale(1.1); }
+.play-btn.playing { background: linear-gradient(135deg, #ff6b6b, #ee5a24); }
+.progress-bar {
+  flex: 1;
+  height: 6px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 3px;
+  cursor: pointer;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00bfff, #0080ff);
+  border-radius: 3px;
+  width: 0%;
+}
+.time-display {
+  font-size: 12px;
+  color: #aaa;
+  min-width: 80px;
+  text-align: right;
+}
+.overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.overlay.show { display: flex; }
+.overlay-content {
+  background: linear-gradient(135deg, #1a2e0a, #2d4e1b);
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  border: 2px solid #aed581;
+}
+.overlay-content h2 { font-size: 28px; color: #aed581; margin-bottom: 16px; }
+.overlay-content p { font-size: 16px; color: #ddd; margin-bottom: 24px; }
+.overlay-btn {
+  padding: 12px 32px;
+  border-radius: 30px;
+  border: none;
+  background: linear-gradient(135deg, #ff8c00, #ff6b00);
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🐰 动物之家·方向与位置</h1>
+  <div class="score-box">⭐ <span id="score">0</span> 分</div>
+</div>
+
+<div class="main-container">
+  <div class="left-area">
+    <div class="map-title">动物之家位置图（比例尺：1段 = 200m）</div>
+    <div class="map-container">
+      <svg class="map-svg" viewBox="0 0 420 400" id="mapSvg"></svg>
+    </div>
+    <div class="click-hint" id="clickHint">第(5)问：点击正西方向500m处标记小松鼠家</div>
+  </div>
+
+  <div class="right-panel">
+    <div class="task-card">
+      <h3>📋 第(1)-(4)问·填空</h3>
+      <div class="task-text">
+        (1) 小兔家在小熊猫家的北偏(<input type="text" id="a1">)(<input type="text" id="a2">)°方向上，距离是(<input type="text" id="a3">)m。<br>
+        (2) 小猴家在小熊猫家的(<input type="text" id="a4">)偏(<input type="text" id="a5">)(<input type="text" id="a6">)°方向上，距离是(<input type="text" id="a7">)m。<br>
+        (3) 小象家在小熊猫家的(<input type="text" id="a8">)偏(<input type="text" id="a9">)(<input type="text" id="a10">)°方向上，距离是(<input type="text" id="a11">)m。<br>
+        (4) 小鹿家在小熊猫家的(<input type="text" id="a12">)偏(<input type="text" id="a13">)(<input type="text" id="a14">)°方向上，距离是(<input type="text" id="a15">)m。
+      </div>
+      <button class="btn-verify" onclick="verifyAnswers()">验证答案</button>
+      <div class="feedback" id="fb"></div>
+      <div class="hint-box">
+        <p>💡 提示：先数每段有几段，每段200m；再判断方向（北偏西/北偏东等）</p>
+      </div>
+    </div>
+
+    <div class="task-card">
+      <h3>📋 第(5)问·标记位置</h3>
+      <div class="task-text">
+        小松鼠家在小熊猫家的正西方向500m处。请在图上标出小松鼠家的位置。（点击左侧图中对应的位置）
+      </div>
+      <div class="feedback" id="fb5"></div>
+    </div>
+
+    <div class="player-card">
+      <div class="player-title listen">🎧 听题·动手做</div>
+      <div class="player-controls">
+        <button class="play-btn" id="listenBtn" onclick="toggleListen()">▶</button>
+        <div class="progress-bar" onclick="seekListen(event)">
+          <div class="progress-fill" id="listenProgress"></div>
+        </div>
+        <div class="time-display" id="listenTime">0:00 / 0:00</div>
+      </div>
+    </div>
+
+    <div class="player-card">
+      <div class="player-title explain">📖 听讲·老师做</div>
+      <div class="player-controls">
+        <button class="play-btn" id="explainBtn" onclick="toggleExplain()">▶</button>
+        <div class="progress-bar" onclick="seekExplain(event)">
+          <div class="progress-fill" id="explainProgress"></div>
+        </div>
+        <div class="time-display" id="explainTime">0:00 / 0:00</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="completeOverlay">
+  <div class="overlay-content">
+    <h2>🎉 完成啦！</h2>
+    <p>你已经完成了所有题目，来听听老师的讲解吧！</p>
+    <button class="overlay-btn" onclick="playExplainFromOverlay()">📖 听讲·老师做</button>
+  </div>
+</div>
+
+<audio id="listenAudio" src="audio/intro.mp3" preload="metadata"></audio>
+<audio id="explainAudio" src="audio/explain.mp3" preload="metadata"></audio>
+
+<script>
+const CENTER = {x: 210, y: 200};
+const SEG_LEN = 60;
+const animals = {
+  '小兔家': {angle: -130, dist: 2, color: '#ffb74d'},
+  '小猴家': {angle: -55, dist: 2, color: '#ff8a65'},
+  '小象家': {angle: 20, dist: 3, color: '#4db6ac'},
+  '小鹿家': {angle: 120, dist: 2, color: '#ba68c8'}
+};
+
+let score = 0;
+let answersDone = false;
+let q5done = false;
+let correctAnswersShown = false;
+
+function initMap() {
+  const svg = document.getElementById('mapSvg');
+  
+  const northText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  northText.setAttribute('x', CENTER.x);
+  northText.setAttribute('y', 30);
+  northText.setAttribute('class', 'direction-label');
+  northText.setAttribute('text-anchor', 'middle');
+  northText.textContent = '北 ↑';
+  svg.appendChild(northText);
+  
+  const southText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  southText.setAttribute('x', CENTER.x);
+  southText.setAttribute('y', 380);
+  southText.setAttribute('class', 'direction-label');
+  southText.setAttribute('text-anchor', 'middle');
+  southText.textContent = '南 ↓';
+  svg.appendChild(southText);
+  
+  const westText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  westText.setAttribute('x', 30);
+  westText.setAttribute('y', CENTER.y + 5);
+  westText.setAttribute('class', 'direction-label');
+  westText.textContent = '← 西';
+  svg.appendChild(westText);
+  
+  const eastText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  eastText.setAttribute('x', 360);
+  eastText.setAttribute('y', CENTER.y + 5);
+  eastText.setAttribute('class', 'direction-label');
+  eastText.textContent = '东 →';
+  svg.appendChild(eastText);
+  
+  const hLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  hLine.setAttribute('x1', 50);
+  hLine.setAttribute('y1', CENTER.y);
+  hLine.setAttribute('x2', 370);
+  hLine.setAttribute('y2', CENTER.y);
+  hLine.setAttribute('stroke', '#ff6b9d');
+  hLine.setAttribute('stroke-width', '1.5');
+  hLine.setAttribute('stroke-dasharray', '5,3');
+  svg.appendChild(hLine);
+  
+  const vLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  vLine.setAttribute('x1', CENTER.x);
+  vLine.setAttribute('y1', 40);
+  vLine.setAttribute('x2', CENTER.x);
+  vLine.setAttribute('y2', 360);
+  vLine.setAttribute('stroke', '#ff6b9d');
+  vLine.setAttribute('stroke-width', '1.5');
+  vLine.setAttribute('stroke-dasharray', '5,3');
+  svg.appendChild(vLine);
+  
+  for (let name in animals) {
+    const a = animals[name];
+    const rad = (a.angle * Math.PI) / 180;
+    const x = CENTER.x + Math.cos(rad) * a.dist * SEG_LEN;
+    const y = CENTER.y + Math.sin(rad) * a.dist * SEG_LEN;
+    
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', CENTER.x);
+    line.setAttribute('y1', CENTER.y);
+    line.setAttribute('x2', x);
+    line.setAttribute('y2', y);
+    line.setAttribute('class', 'direction-line');
+    svg.appendChild(line);
+    
+    const marker = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    marker.setAttribute('cx', x);
+    marker.setAttribute('cy', y);
+    marker.setAttribute('r', '8');
+    marker.setAttribute('class', 'animal-marker');
+    marker.setAttribute('fill', a.color);
+    svg.appendChild(marker);
+    
+    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    label.setAttribute('x', x);
+    label.setAttribute('y', y - 15);
+    label.setAttribute('class', 'animal-label');
+    label.setAttribute('fill', a.color);
+    label.textContent = name;
+    svg.appendChild(label);
+  }
+  
+  const centerMarker = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  centerMarker.setAttribute('cx', CENTER.x);
+  centerMarker.setAttribute('cy', CENTER.y);
+  centerMarker.setAttribute('r', '10');
+  centerMarker.setAttribute('class', 'center-marker');
+  svg.appendChild(centerMarker);
+  
+  const centerLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  centerLabel.setAttribute('x', CENTER.x);
+  centerLabel.setAttribute('y', CENTER.y + 25);
+  centerLabel.setAttribute('class', 'animal-label');
+  centerLabel.setAttribute('fill', '#ff6b6b');
+  centerLabel.textContent = '小熊猫家';
+  svg.appendChild(centerLabel);
+  
+  const squirrelX = CENTER.x - 2.5 * SEG_LEN;
+  const squirrelY = CENTER.y;
+  
+  const squirrelMarker = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  squirrelMarker.setAttribute('cx', squirrelX);
+  squirrelMarker.setAttribute('cy', squirrelY);
+  squirrelMarker.setAttribute('r', '10');
+  squirrelMarker.setAttribute('class', 'squirrel-marker');
+  squirrelMarker.setAttribute('id', 'squirrelMarker');
+  svg.appendChild(squirrelMarker);
+  
+  const squirrelLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  squirrelLabel.setAttribute('x', squirrelX);
+  squirrelLabel.setAttribute('y', squirrelY - 18);
+  squirrelLabel.setAttribute('class', 'squirrel-label');
+  squirrelLabel.setAttribute('id', 'squirrelLabel');
+  squirrelLabel.textContent = '小松鼠家';
+  svg.appendChild(squirrelLabel);
+  
+  svg.addEventListener('click', handleMapClick);
+}
+
+function handleMapClick(e) {
+  if (q5done) return;
+  
+  const svg = document.getElementById('mapSvg');
+  const rect = svg.getBoundingClientRect();
+  const scaleX = 420 / rect.width;
+  const scaleY = 400 / rect.height;
+  const x = (e.clientX - rect.left) * scaleX;
+  const y = (e.clientY - rect.top) * scaleY;
+  
+  const squirrelX = CENTER.x - 2.5 * SEG_LEN;
+  const squirrelY = CENTER.y;
+  const dist = Math.sqrt((x - squirrelX) ** 2 + (y - squirrelY) ** 2);
+  
+  if (dist < 30) {
+    document.getElementById('squirrelMarker').classList.add('show');
+    document.getElementById('squirrelLabel').classList.add('show');
+    q5done = true;
+    addScore(10);
+    document.getElementById('fb5').textContent = '✅ 正确！小松鼠家在正西方向500m处';
+    document.getElementById('fb5').className = 'feedback correct';
+    document.getElementById('clickHint').textContent = '小松鼠家已标记在正西方向500m处';
+    checkComplete();
+  } else {
+    document.getElementById('fb5').textContent = `你点击的位置不对，再想想，正西方向500m是2.5段`;
+    document.getElementById('fb5').className = 'feedback wrong';
+  }
+}
+
+function verifyAnswers() {
+  if (answersDone) return;
+  
+  const a1 = document.getElementById('a1').value;
+  const a2 = document.getElementById('a2').value;
+  const a3 = document.getElementById('a3').value;
+  const a4 = document.getElementById('a4').value;
+  const a5 = document.getElementById('a5').value;
+  const a6 = document.getElementById('a6').value;
+  const a7 = document.getElementById('a7').value;
+  const a8 = document.getElementById('a8').value;
+  const a9 = document.getElementById('a9').value;
+  const a10 = document.getElementById('a10').value;
+  const a11 = document.getElementById('a11').value;
+  const a12 = document.getElementById('a12').value;
+  const a13 = document.getElementById('a13').value;
+  const a14 = document.getElementById('a14').value;
+  const a15 = document.getElementById('a15').value;
+  
+  const q1correct = a1 === '西' && a2 === '40' && a3 === '400';
+  const q2correct = ((a4 === '北' && a5 === '东') || (a4 === '东' && a5 === '北')) && a6 === '55' && a7 === '400';
+  const q3correct = ((a8 === '东' && a9 === '南') || (a8 === '南' && a9 === '东')) && a10 === '20' && a11 === '600';
+  const q4correct = ((a12 === '南' && a13 === '西') || (a12 === '西' && a13 === '南')) && a14 === '30' && a15 === '400';
+  
+  const fb = document.getElementById('fb');
+  if (q1correct && q2correct && q3correct && q4correct) {
+    fb.textContent = '✅ 全部正确！方向和距离都判断准确！';
+    fb.className = 'feedback correct';
+    answersDone = true;
+    addScore(20);
+    checkComplete();
+  } else {
+    let wrong = [];
+    if (!q1correct) wrong.push('(1)');
+    if (!q2correct) wrong.push('(2)');
+    if (!q3correct) wrong.push('(3)');
+    if (!q4correct) wrong.push('(4)');
+    fb.textContent = `❌ 第${wrong.join('、')}题有错误，再检查一下方向和距离。提示：小兔2段400m，小猴2段400m，小象3段600m，小鹿2段400m`;
+    fb.className = 'feedback wrong';
+  }
+}
+
+function checkComplete() {
+  if (answersDone && q5done) {
+    setTimeout(() => {
+      document.getElementById('completeOverlay').classList.add('show');
+    }, 1000);
+  }
+}
+
+function addScore(points) {
+  score += points;
+  document.getElementById('score').textContent = score;
+}
+
+// 双播放器逻辑
+const listenAudio = document.getElementById('listenAudio');
+const explainAudio = document.getElementById('explainAudio');
+let listenPlaying = false;
+let explainPlaying = false;
+
+function initDualPlayers() {
+  listenAudio.addEventListener('loadedmetadata', () => {
+    document.getElementById('listenTime').textContent = '0:00 / ' + formatTime(listenAudio.duration);
+  });
+  explainAudio.addEventListener('loadedmetadata', () => {
+    document.getElementById('explainTime').textContent = '0:00 / ' + formatTime(explainAudio.duration);
+  });
+  listenAudio.addEventListener('timeupdate', updateListenProgress);
+  explainAudio.addEventListener('timeupdate', updateExplainProgress);
+  listenAudio.addEventListener('ended', () => {
+    listenPlaying = false;
+    document.getElementById('listenBtn').textContent = '▶';
+    document.getElementById('listenBtn').classList.remove('playing');
+  });
+  explainAudio.addEventListener('ended', () => {
+    explainPlaying = false;
+    document.getElementById('explainBtn').textContent = '▶';
+    document.getElementById('explainBtn').classList.remove('playing');
+  });
+}
+
+function toggleListen() {
+  if (listenPlaying) {
+    listenAudio.pause();
+    listenPlaying = false;
+    document.getElementById('listenBtn').textContent = '▶';
+    document.getElementById('listenBtn').classList.remove('playing');
+  } else {
+    if (explainPlaying) toggleExplain();
+    listenAudio.play();
+    listenPlaying = true;
+    document.getElementById('listenBtn').textContent = '⏸';
+    document.getElementById('listenBtn').classList.add('playing');
+  }
+}
+
+function toggleExplain() {
+  if (explainPlaying) {
+    explainAudio.pause();
+    explainPlaying = false;
+    document.getElementById('explainBtn').textContent = '▶';
+    document.getElementById('explainBtn').classList.remove('playing');
+  } else {
+    if (listenPlaying) toggleListen();
+    explainAudio.play();
+    explainPlaying = true;
+    document.getElementById('explainBtn').textContent = '⏸';
+    document.getElementById('explainBtn').classList.add('playing');
+    if (!correctAnswersShown) showCorrectAnswers();
+  }
+}
+
+function playExplainFromOverlay() {
+  document.getElementById('completeOverlay').classList.remove('show');
+  listenAudio.pause();
+  listenAudio.currentTime = 0;
+  listenPlaying = false;
+  document.getElementById('listenBtn').textContent = '▶';
+  document.getElementById('listenBtn').classList.remove('playing');
+  explainAudio.currentTime = 0;
+  explainAudio.play();
+  explainPlaying = true;
+  document.getElementById('explainBtn').textContent = '⏸';
+  document.getElementById('explainBtn').classList.add('playing');
+  if (!correctAnswersShown) showCorrectAnswers();
+}
+
+function showCorrectAnswers() {
+  correctAnswersShown = true;
+  document.getElementById('a1').value = '西';
+  document.getElementById('a2').value = '40';
+  document.getElementById('a3').value = '400';
+  document.getElementById('a4').value = '北';
+  document.getElementById('a5').value = '东';
+  document.getElementById('a6').value = '55';
+  document.getElementById('a7').value = '400';
+  document.getElementById('a8').value = '东';
+  document.getElementById('a9').value = '南';
+  document.getElementById('a10').value = '20';
+  document.getElementById('a11').value = '600';
+  document.getElementById('a12').value = '南';
+  document.getElementById('a13').value = '西';
+  document.getElementById('a14').value = '30';
+  document.getElementById('a15').value = '400';
+  if (!q5done) {
+    document.getElementById('squirrelMarker').classList.add('show');
+    document.getElementById('squirrelLabel').classList.add('show');
+    q5done = true;
+  }
+}
+
+function seekListen(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const percent = (e.clientX - rect.left) / rect.width;
+  listenAudio.currentTime = percent * listenAudio.duration;
+}
+
+function seekExplain(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const percent = (e.clientX - rect.left) / rect.width;
+  explainAudio.currentTime = percent * explainAudio.duration;
+}
+
+function updateListenProgress() {
+  const percent = (listenAudio.currentTime / listenAudio.duration) * 100;
+  document.getElementById('listenProgress').style.width = percent + '%';
+  document.getElementById('listenTime').textContent = formatTime(listenAudio.currentTime) + ' / ' + formatTime(listenAudio.duration);
+}
+
+function updateExplainProgress() {
+  const percent = (explainAudio.currentTime / explainAudio.duration) * 100;
+  document.getElementById('explainProgress').style.width = percent + '%';
+  document.getElementById('explainTime').textContent = formatTime(explainAudio.currentTime) + ' / ' + formatTime(explainAudio.duration);
+}
+
+function formatTime(seconds) {
+  if (isNaN(seconds)) return '0:00';
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+initMap();
+initDualPlayers();
+</script>
+</body>
+</html>

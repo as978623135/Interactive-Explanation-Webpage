@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>图书室找书 - 有序数对表示位置</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: #2d1b0e;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* 16:9 容器（铺满全屏） */
+.stage {
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #3d2817 0%, #2d1b0e 50%, #1a0f08 100%);
+  border-radius: 0;
+  box-shadow: none;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 顶部栏 */
+.top-bar {
+  height: 60px;
+  background: rgba(139,90,43,0.25);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  flex-shrink: 0;
+}
+.top-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #f5deb3;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.top-title .icon { font-size: 28px; }
+.top-right { display: flex; align-items: center; gap: 16px; }
+.score-display {
+  background: linear-gradient(135deg, #d4a574, #b8860b);
+  color: #fff;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn {
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn-audio { background: rgba(255,255,255,0.15); color: #f5deb3; }
+.btn-audio:hover { background: rgba(255,255,255,0.25); }
+.btn-audio.playing { background: #8b4513; color: #fff; }
+.btn-hint { background: rgba(255,255,255,0.15); color: #f5deb3; }
+.btn-hint:hover { background: rgba(255,255,255,0.25); }
+.btn-reset { background: rgba(220,38,38,0.2); color: #fca5a5; }
+.btn-reset:hover { background: rgba(220,38,38,0.3); }
+
+/* 主内容区 */
+.main-content {
+  flex: 1;
+  display: flex;
+  padding: 20px;
+  gap: 20px;
+  overflow: hidden;
+}
+
+/* 图书室网格区域 */
+.library-area {
+  flex: 1;
+  background: rgba(0,0,0,0.3);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  --cell-size: 44px;
+}
+.library-label {
+  font-size: 14px;
+  color: rgba(245,222,179,0.6);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+/* 网格 */
+.grid-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.grid-row {
+  display: flex;
+  align-items: center;
+}
+.row-label {
+  width: 24px;
+  text-align: center;
+  font-size: 13px;
+  color: rgba(245,222,179,0.5);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.cell {
+  width: var(--cell-size);
+  height: var(--cell-size);
+  border: 1px solid rgba(212,165,116,0.3);
+  background: rgba(139,90,43,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.2s;
+  cursor: default;
+}
+.cell:hover {
+  background: rgba(212,165,116,0.15);
+}
+.cell.drag-over {
+  background: rgba(212,165,116,0.35);
+  border-color: #d4a574;
+  box-shadow: inset 0 0 10px rgba(212,165,116,0.3);
+}
+.cell.wrong-flash {
+  animation: wrongFlash 0.4s ease;
+}
+@keyframes wrongFlash {
+  0%, 100% { background: rgba(139,90,43,0.1); }
+  25% { background: rgba(220,38,38,0.4); transform: translateX(-3px); }
+  75% { background: rgba(220,38,38,0.4); transform: translateX(3px); }
+}
+.cell.clickable {
+  cursor: pointer;
+}
+.cell.clickable:hover {
+  background: rgba(212,165,116,0.25);
+  transform: scale(1.05);
+}
+
+/* 图书标签 */
+.book-tag {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  z-index: 5;
+  animation: bookAppear 0.4s ease;
+}
+@keyframes bookAppear {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.book-icon {
+  font-size: 22px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+.book-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: #f5deb3;
+  white-space: nowrap;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  background: rgba(0,0,0,0.5);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+.book-pair {
+  font-size: 10px;
+  color: #90ee90;
+  font-weight: 600;
+  background: rgba(0,0,0,0.5);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+.book-tag.reference .book-name { color: #c0c0c0; }
+.book-tag.target .book-icon { cursor: pointer; }
+.book-tag.target:hover .book-icon { transform: scale(1.2); }
+.book-tag.placed {
+  animation: placedAnim 0.5s ease;
+}
+@keyframes placedAnim {
+  0% { transform: scale(1.5); }
+  50% { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+/* 列标签 */
+.col-labels {
+  display: flex;
+  margin-left: 24px;
+  margin-top: 4px;
+}
+.col-label {
+  width: var(--cell-size);
+  text-align: center;
+  font-size: 12px;
+  color: rgba(245,222,179,0.4);
+  font-weight: 600;
+}
+
+/* 右侧任务面板 */
+.task-panel {
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.panel-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #f5deb3;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.task-section {
+  background: rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.task-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #d4a574;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 读数对任务 */
+.read-task {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: all 0.3s;
+}
+.read-task:last-child { margin-bottom: 0; }
+.read-task.done {
+  background: rgba(34,197,94,0.15);
+  border: 1px solid rgba(34,197,94,0.3);
+}
+.read-task-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #f5deb3;
+}
+.read-task-answer {
+  font-size: 15px;
+  font-weight: 700;
+  color: #999;
+  font-family: 'Courier New', monospace;
+}
+.read-task.done .read-task-answer {
+  color: #4ade80;
+}
+.read-task-hint {
+  font-size: 10px;
+  color: rgba(245,222,179,0.4);
+  margin-top: 2px;
+}
+
+/* 拖拽图书卡片 */
+.drag-book {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: rgba(255,255,255,0.08);
+  border: 2px solid rgba(212,165,116,0.3);
+  border-radius: 10px;
+  cursor: grab;
+  transition: all 0.2s;
+  margin-bottom: 8px;
+  user-select: none;
+}
+.drag-book:last-child { margin-bottom: 0; }
+.drag-book:hover {
+  background: rgba(212,165,116,0.15);
+  border-color: rgba(212,165,116,0.6);
+  transform: translateX(3px);
+}
+.drag-book:active { cursor: grabbing; }
+.drag-book.dragging { opacity: 0.4; transform: scale(0.95); }
+.drag-book.placed {
+  opacity: 0.35;
+  cursor: default;
+  pointer-events: none;
+  border-color: #22c55e;
+  background: rgba(34,197,94,0.1);
+}
+.drag-book-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #8b4513, #654321);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.drag-book-info { flex: 1; }
+.drag-book-name { font-size: 15px; font-weight: 700; color: #f5deb3; }
+.drag-book-target { font-size: 12px; color: rgba(245,222,179,0.5); margin-top: 2px; }
+.drag-book-status {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.1);
+  color: rgba(245,222,179,0.6);
+}
+.drag-book-status.done { background: rgba(34,197,94,0.2); color: #86efac; }
+
+/* 提示框 */
+.hint-box {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(10px);
+  color: #f5deb3;
+  padding: 10px 24px;
+  border-radius: 20px;
+  font-size: 14px;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  z-index: 10;
+  animation: fadeInUp 0.3s ease;
+  max-width: 80%;
+  text-align: center;
+}
+.hint-box.show { display: flex; }
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* 完成弹窗 */
+.complete-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(8px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.complete-overlay.show { display: flex; animation: fadeIn 0.5s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.complete-card {
+  background: linear-gradient(135deg, #3d2817 0%, #1a0f08 100%);
+  border: 2px solid rgba(212,165,116,0.4);
+  border-radius: 20px;
+  padding: 32px;
+  text-align: center;
+  max-width: 580px;
+  width: 90%;
+  box-shadow: 0 0 60px rgba(212,165,116,0.2);
+  animation: popIn 0.5s ease;
+}
+@keyframes popIn {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.complete-icon { font-size: 60px; margin-bottom: 12px; }
+.complete-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #f5deb3;
+  margin-bottom: 6px;
+}
+.complete-subtitle {
+  font-size: 14px;
+  color: rgba(245,222,179,0.6);
+  margin-bottom: 20px;
+}
+.complete-scores {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+.score-item {
+  background: rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 14px 20px;
+  min-width: 90px;
+}
+.score-value { font-size: 26px; font-weight: 800; color: #d4a574; }
+.score-label { font-size: 11px; color: rgba(245,222,179,0.5); margin-top: 4px; }
+
+.explanation {
+  background: rgba(139,69,19,0.15);
+  border: 1px solid rgba(139,69,19,0.3);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 18px;
+  text-align: left;
+}
+.explanation-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #d4a574;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.explanation-content {
+  font-size: 12.5px;
+  color: rgba(245,222,179,0.8);
+  line-height: 1.8;
+}
+.explanation-content .pair {
+  display: inline-block;
+  background: rgba(212,165,116,0.25);
+  color: #f5deb3;
+  padding: 1px 7px;
+  border-radius: 4px;
+  font-weight: 700;
+  margin: 0 2px;
+  font-family: 'Courier New', monospace;
+}
+.complete-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+.btn-explain {
+  background: linear-gradient(135deg, #8b4513, #654321);
+  color: #f5deb3;
+  padding: 11px 26px;
+  font-size: 14px;
+}
+.btn-explain:hover { background: linear-gradient(135deg, #a0522d, #8b4513); }
+.btn-explain.playing { background: linear-gradient(135deg, #228b22, #006400); color: #fff; }
+.btn-again {
+  background: rgba(255,255,255,0.1);
+  color: #f5deb3;
+  padding: 11px 26px;
+  font-size: 14px;
+}
+.btn-again:hover { background: rgba(255,255,255,0.2); }
+
+/* 彩带 */
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: -10px;
+  pointer-events: none;
+  z-index: 99;
+  animation: confettiFall 3s linear forwards;
+}
+@keyframes confettiFall {
+  to { transform: translateY(720px) rotate(720deg); opacity: 0; }
+}
+
+/* 得分飘字 */
+.score-popup {
+  position: absolute;
+  font-size: 22px;
+  font-weight: 800;
+  color: #d4a574;
+  pointer-events: none;
+  z-index: 50;
+  animation: scoreFloat 1s ease forwards;
+  text-shadow: 0 2px 10px rgba(212,165,116,0.5);
+}
+@keyframes scoreFloat {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-40px) scale(1.3); }
+}
+
+/* 讲解播放器 */
+.explain-card {
+  background: rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+  margin-top: 12px;
+}
+.explain-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #f5deb3;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.explain-player {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.explain-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.explain-play-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #8b4513;
+  color: #f5deb3;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.explain-play-btn:hover { background: #a0522d; transform: scale(1.05); }
+.explain-progress {
+  flex: 1;
+  height: 5px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+  cursor: pointer;
+  overflow: hidden;
+}
+.explain-progress-bar {
+  height: 100%;
+  background: #d4a574;
+  width: 0%;
+  transition: width 0.1s;
+}
+.explain-time {
+  font-size: 10px;
+  color: rgba(245,222,179,0.5);
+  min-width: 70px;
+  text-align: right;
+  font-family: 'Courier New', monospace;
+}
+.explain-segments {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.explain-seg-btn {
+  padding: 3px 8px;
+  font-size: 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.08);
+  color: rgba(245,222,179,0.6);
+  border: 1px solid rgba(255,255,255,0.1);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.explain-seg-btn:hover {
+  background: rgba(212,165,116,0.2);
+  color: #f5deb3;
+}
+.explain-seg-btn.active {
+  background: #d4a574;
+  color: #1a0f08;
+  border-color: #d4a574;
+}
+
+/* 正确答案展示 */
+.cell.has-correct {
+  background: rgba(34,197,94,0.25) !important;
+  border-color: #22c55e !important;
+  box-shadow: inset 0 0 10px rgba(34,197,94,0.3);
+}
+.correct-book {
+  animation: correctBookPop 0.5s ease;
+}
+@keyframes correctBookPop {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+  <!-- 顶部栏 -->
+  <div class="top-bar">
+    <div class="top-title">
+      <span class="icon">📚</span>
+      <span>图书室找书 · 有序数对表示位置</span>
+    </div>
+    <div class="top-right">
+      <div class="score-display">⭐ <span id="score">0</span> 分</div>
+      <button class="btn btn-hint" onclick="showHint()">💡 提示</button>
+      <button class="btn btn-reset" onclick="resetGame()">🔄 重置</button>
+    </div>
+  </div>
+
+  <!-- 主内容区 -->
+  <div class="main-content">
+    <!-- 图书室网格 -->
+    <div class="library-area" id="libraryArea">
+      <div class="library-label">📖 图书室平面位置示意图（列：从左往右，行：从下往上）</div>
+      <div class="grid-wrapper">
+        <div id="gridContainer"></div>
+        <div class="col-labels" id="colLabels"></div>
+      </div>
+      <div class="hint-box" id="hintBox">💡 用有序数对表示位置时，先列后行，如哲学类(1,3)表示第1列第3行</div>
+    </div>
+
+    <!-- 右侧任务面板 -->
+    <div class="task-panel">
+      <div class="panel-title">📋 任务清单</div>
+      
+      <!-- 任务1：读数对 -->
+      <div class="task-section">
+        <div class="task-section-title">🔍 任务一：读出图书位置</div>
+        <div class="read-task" id="task-poetry">
+          <div>
+            <div class="read-task-name">📕 诗歌类</div>
+            <div class="read-task-hint">点击图中诗歌类图书</div>
+          </div>
+          <div class="read-task-answer" id="answer-poetry">( ?, ? )</div>
+        </div>
+        <div class="read-task" id="task-novel">
+          <div>
+            <div class="read-task-name">📗 小说类</div>
+            <div class="read-task-hint">点击图中小说类图书</div>
+          </div>
+          <div class="read-task-answer" id="answer-novel">( ?, ? )</div>
+        </div>
+      </div>
+
+      <!-- 任务2：放图书 -->
+      <div class="task-section">
+        <div class="task-section-title">📦 任务二：放置图书到正确位置</div>
+        <div class="drag-book" id="book-tool" draggable="true" data-book="tool" data-col="6" data-row="4">
+          <div class="drag-book-icon">📘</div>
+          <div class="drag-book-info">
+            <div class="drag-book-name">工具类</div>
+            <div class="drag-book-target">目标位置：(6,4)</div>
+          </div>
+          <div class="drag-book-status" id="status-tool">待放置</div>
+        </div>
+        <div class="drag-book" id="book-edu" draggable="true" data-book="edu" data-col="2" data-row="9">
+          <div class="drag-book-icon">📙</div>
+          <div class="drag-book-info">
+            <div class="drag-book-name">教育类</div>
+            <div class="drag-book-target">目标位置：(2,9)</div>
+          </div>
+          <div class="drag-book-status" id="status-edu">待放置</div>
+        </div>
+      </div>
+
+      <!-- 播放器1：听题·动手做 -->
+      <div class="explain-card">
+        <div class="explain-title">🎧 听题·动手做</div>
+        <div class="explain-player">
+          <div class="explain-controls">
+            <button class="explain-play-btn" id="listenPlayBtn" onclick="toggleListen()">▶</button>
+            <div class="explain-progress" id="listenProgress" onclick="seekListen(event)">
+              <div class="explain-progress-bar" id="listenProgressBar"></div>
+            </div>
+            <div class="explain-time" id="listenTime">0:00 / 0:00</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 播放器2：听讲·老师做 -->
+      <div class="explain-card">
+        <div class="explain-title">📖 听讲·老师做</div>
+        <div class="explain-player">
+          <div class="explain-controls">
+            <button class="explain-play-btn" id="explainPlayBtn" onclick="toggleExplain()">▶</button>
+            <div class="explain-progress" id="explainProgress" onclick="seekExplain(event)">
+              <div class="explain-progress-bar" id="explainProgressBar"></div>
+            </div>
+            <div class="explain-time" id="explainTime">0:00 / 0:00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 完成弹窗 -->
+  <div class="complete-overlay" id="completeOverlay">
+    <div class="complete-card">
+      <div class="complete-icon">🎉</div>
+      <div class="complete-title">全部完成啦！</div>
+      <div class="complete-subtitle">你已经掌握了用有序数对表示位置，真棒！</div>
+      <div class="complete-scores">
+        <div class="score-item">
+          <div class="score-value" id="finalScore">40</div>
+          <div class="score-label">总得分</div>
+        </div>
+        <div class="score-item">
+          <div class="score-value">4/4</div>
+          <div class="score-label">完成任务</div>
+        </div>
+        <div class="score-item">
+          <div class="score-value">⭐⭐⭐</div>
+          <div class="score-label">获得星星</div>
+        </div>
+      </div>
+      <div class="explanation">
+        <div class="explanation-title">📖 答案解析</div>
+        <div class="explanation-content">
+          用有序数对表示位置时，<strong>第一个数表示列，第二个数表示行</strong>，先列后行。<br>
+          诗歌类：第3列第5行 → <span class="pair">(3,5)</span><br>
+          小说类：第8列第2行 → <span class="pair">(8,2)</span><br>
+          工具类：第6列第4行 → <span class="pair">(6,4)</span><br>
+          教育类：第2列第9行 → <span class="pair">(2,9)</span>
+        </div>
+      </div>
+      <div class="complete-actions">
+        <button class="btn btn-explain" id="explainBtn" onclick="playExplainFromOverlay()">📖 听讲·老师做</button>
+        <button class="btn btn-again" onclick="resetGame()">🔄 再玩一次</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<audio id="introAudio" src="audio/intro.mp3" preload="auto"></audio>
+<audio id="explainAudio" src="audio/explain.mp3" preload="auto"></audio>
+
+<script>
+// 配置
+const GRID_COLS = 10;
+const GRID_ROWS = 10;
+
+// 图书数据
+const books = {
+  philosophy: { name: '哲学类', icon: '📓', col: 1, row: 3, type: 'reference', showPair: true },
+  poetry: { name: '诗歌类', icon: '📕', col: 3, row: 5, type: 'target', taskId: 'poetry' },
+  biography: { name: '人物传记类', icon: '📔', col: 5, row: 1, type: 'reference' },
+  novel: { name: '小说类', icon: '📗', col: 8, row: 2, type: 'target', taskId: 'novel' },
+  prose: { name: '散文类', icon: '📒', col: 9, row: 7, type: 'reference' },
+  tool: { name: '工具类', icon: '📘', col: 6, row: 4, type: 'drag' },
+  edu: { name: '教育类', icon: '📙', col: 2, row: 9, type: 'drag' }
+};
+
+let score = 0;
+let completedTasks = new Set();
+let currentAudio = null;
+let draggedBook = null;
+const TOTAL_TASKS = 4;
+
+// 初始化网格
+function initGrid() {
+  const container = document.getElementById('gridContainer');
+  const colLabels = document.getElementById('colLabels');
+  container.innerHTML = '';
+  colLabels.innerHTML = '';
+
+  // 列标签
+  for (let c = 1; c <= GRID_COLS; c++) {
+    const label = document.createElement('div');
+    label.className = 'col-label';
+    label.textContent = c;
+    colLabels.appendChild(label);
+  }
+
+  // 行：从第10行（最上面）到第1行（最下面）
+  for (let r = GRID_ROWS; r >= 1; r--) {
+    const row = document.createElement('div');
+    row.className = 'grid-row';
+    
+    const rowLabel = document.createElement('div');
+    rowLabel.className = 'row-label';
+    rowLabel.textContent = r;
+    row.appendChild(rowLabel);
+
+    for (let c = 1; c <= GRID_COLS; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.dataset.col = c;
+      cell.dataset.row = r;
+      
+      // 拖拽事件
+      cell.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        cell.classList.add('drag-over');
+      });
+      cell.addEventListener('dragleave', () => {
+        cell.classList.remove('drag-over');
+      });
+      cell.addEventListener('drop', (e) => {
+        e.preventDefault();
+        cell.classList.remove('drag-over');
+        handleDrop(cell, draggedBook);
+      });
+      
+      row.appendChild(cell);
+    }
+    container.appendChild(row);
+  }
+
+  // 放置图书
+  placeBooks();
+}
+
+// 放置图书到网格
+function placeBooks() {
+  Object.entries(books).forEach(([key, book]) => {
+    if (book.type === 'drag') return; // 拖拽类图书不预先放置
+    
+    const cell = getCell(book.col, book.row);
+    if (!cell) return;
+
+    const tag = document.createElement('div');
+    tag.className = 'book-tag ' + book.type;
+    tag.dataset.book = key;
+    
+    let html = `<div class="book-icon">${book.icon}</div>`;
+    html += `<div class="book-name">${book.name}</div>`;
+    if (book.showPair) {
+      html += `<div class="book-pair">(${book.col},${book.row})</div>`;
+    }
+    tag.innerHTML = html;
+
+    // 目标类图书可点击
+    if (book.type === 'target') {
+      tag.style.cursor = 'pointer';
+      tag.addEventListener('click', () => handleBookClick(key));
+    }
+
+    cell.appendChild(tag);
+  });
+}
+
+// 获取指定格子
+function getCell(col, row) {
+  return document.querySelector(`.cell[data-col="${col}"][data-row="${row}"]`);
+}
+
+// 处理图书点击（读数对）
+function handleBookClick(bookKey) {
+  const book = books[bookKey];
+  const taskId = book.taskId;
+  
+  if (completedTasks.has(taskId)) return;
+
+  // 显示数对
+  const answerEl = document.getElementById('answer-' + taskId);
+  const taskEl = document.getElementById('task-' + taskId);
+  
+  answerEl.textContent = `(${book.col},${book.row})`;
+  taskEl.classList.add('done');
+  
+  // 在图书上显示数对
+  const tag = document.querySelector(`.book-tag[data-book="${bookKey}"]`);
+  if (tag && !tag.querySelector('.book-pair')) {
+    const pair = document.createElement('div');
+    pair.className = 'book-pair';
+    pair.textContent = `(${book.col},${book.row})`;
+    tag.appendChild(pair);
+  }
+
+  // 加分
+  completedTasks.add(taskId);
+  score += 10;
+  document.getElementById('score').textContent = score;
+  showScorePopup(tag, '+10');
+
+  showHintBox(`✅ 正确！${book.name}在第${book.col}列第${book.row}行，表示为(${book.col},${book.row})`);
+  checkComplete();
+}
+
+// 动态调整网格大小，占主展示区的80%
+function resizeGrid() {
+  const area = document.getElementById('libraryArea');
+  if (!area) return;
+  const areaW = area.clientWidth;
+  const areaH = area.clientHeight;
+  
+  // 预留空间：标签约24 + 列标签约18 + 行标签24 + padding40
+  const reservedH = 24 + 18 + 40;
+  const reservedW = 24 + 40;
+  
+  const maxW = (areaW * 0.8 - reservedW) / GRID_COLS;
+  const maxH = (areaH * 0.8 - reservedH) / GRID_ROWS;
+  
+  let cellSize = Math.floor(Math.min(maxW, maxH));
+  cellSize = Math.max(cellSize, 20);
+  
+  area.style.setProperty('--cell-size', cellSize + 'px');
+}
+
+// 初始化拖拽
+function initDrag() {
+  document.querySelectorAll('.drag-book').forEach(card => {
+    card.addEventListener('dragstart', (e) => {
+      if (card.classList.contains('placed')) {
+        e.preventDefault();
+        return;
+      }
+      draggedBook = card.dataset.book;
+      card.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    card.addEventListener('dragend', () => {
+      card.classList.remove('dragging');
+      draggedBook = null;
+    });
+  });
+}
+
+// 处理放置
+function handleDrop(cell, bookKey) {
+  if (!bookKey) return;
+  
+  const book = books[bookKey];
+  const col = parseInt(cell.dataset.col);
+  const row = parseInt(cell.dataset.row);
+  
+  // 检查格子是否已有图书
+  if (cell.querySelector('.book-tag')) {
+    showHintBox('❌ 这个位置已经有图书了，换个位置试试！');
+    return;
+  }
+
+  if (col === book.col && row === book.row) {
+    // 放对了
+    const tag = document.createElement('div');
+    tag.className = 'book-tag placed';
+    tag.innerHTML = `
+      <div class="book-icon">${book.icon}</div>
+      <div class="book-name">${book.name}</div>
+      <div class="book-pair">(${book.col},${book.row})</div>
+    `;
+    cell.appendChild(tag);
+
+    // 卡片标记
+    const card = document.getElementById('book-' + bookKey);
+    card.classList.add('placed');
+    const status = document.getElementById('status-' + bookKey);
+    status.textContent = '已放置 ✓';
+    status.classList.add('done');
+
+    // 加分
+    completedTasks.add(bookKey);
+    score += 10;
+    document.getElementById('score').textContent = score;
+    showScorePopup(cell, '+10');
+
+    showHintBox(`✅ 正确！${book.name}放在了第${book.col}列第${book.row}行`);
+    checkComplete();
+  } else {
+    // 放错了
+    cell.classList.add('wrong-flash');
+    setTimeout(() => cell.classList.remove('wrong-flash'), 400);
+    showHintBox(`❌ 不对哦，${book.name}应该在第${book.col}列第${book.row}行，再试试！`);
+  }
+}
+
+// 得分飘字
+function showScorePopup(element, text) {
+  const rect = element.getBoundingClientRect();
+  const stageRect = document.getElementById('stage').getBoundingClientRect();
+  const popup = document.createElement('div');
+  popup.className = 'score-popup';
+  popup.textContent = text;
+  popup.style.left = (rect.left - stageRect.left + rect.width / 2 - 20) + 'px';
+  popup.style.top = (rect.top - stageRect.top - 10) + 'px';
+  document.getElementById('stage').appendChild(popup);
+  setTimeout(() => popup.remove(), 1000);
+}
+
+// 检查是否全部完成
+function checkComplete() {
+  if (completedTasks.size >= TOTAL_TASKS) {
+    setTimeout(showComplete, 800);
+  }
+}
+
+// 显示提示
+function showHint() {
+  const box = document.getElementById('hintBox');
+  box.innerHTML = '💡 用有序数对表示位置时，先列后行。第一个数是列数（从左往右数），第二个数是行数（从下往上数）。';
+  box.classList.add('show');
+  setTimeout(() => box.classList.remove('show'), 5000);
+}
+
+function showHintBox(text) {
+  const box = document.getElementById('hintBox');
+  box.innerHTML = text;
+  box.classList.add('show');
+  clearTimeout(box._timer);
+  box._timer = setTimeout(() => box.classList.remove('show'), 3500);
+}
+
+// 播放引导语
+function playIntro() {
+  stopAllAudio();
+  const audio = document.getElementById('introAudio');
+  const btn = document.getElementById('introBtn');
+  audio.play();
+  currentAudio = audio;
+  btn.classList.add('playing');
+  btn.innerHTML = '⏸ 暂停';
+  audio.onended = () => {
+    btn.classList.remove('playing');
+    btn.innerHTML = '🔊 听引导';
+    currentAudio = null;
+  };
+}
+
+// 播放讲解
+function playExplain() {
+  stopAllAudio();
+  const audio = document.getElementById('explainAudio');
+  const btn = document.getElementById('explainBtn');
+  audio.play();
+  currentAudio = audio;
+  btn.classList.add('playing');
+  btn.innerHTML = '⏸ 暂停讲解';
+  audio.onended = () => {
+    btn.classList.remove('playing');
+    btn.innerHTML = '🔊 听讲解';
+    currentAudio = null;
+  };
+}
+
+function stopAllAudio() {
+  document.querySelectorAll('audio').forEach(a => {
+    a.pause();
+    a.currentTime = 0;
+  });
+  document.querySelectorAll('.btn-audio, .btn-explain').forEach(b => {
+    b.classList.remove('playing');
+    if (b.id === 'introBtn') b.innerHTML = '🔊 听引导';
+    if (b.id === 'explainBtn') b.innerHTML = '🔊 听讲解';
+  });
+  currentAudio = null;
+}
+
+// 显示完成
+function showComplete() {
+  document.getElementById('finalScore').textContent = score;
+  document.getElementById('completeOverlay').classList.add('show');
+  launchConfetti();
+}
+
+// 彩带
+function launchConfetti() {
+  const colors = ['#d4a574', '#f5deb3', '#8b4513', '#cd853f', '#daa520', '#b8860b'];
+  const stage = document.getElementById('stage');
+  for (let i = 0; i < 50; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random() * 1280 + 'px';
+    c.style.background = colors[Math.floor(Math.random() * colors.length)];
+    c.style.animationDelay = Math.random() * 1.5 + 's';
+    c.style.animationDuration = (2 + Math.random() * 2) + 's';
+    c.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+    stage.appendChild(c);
+    setTimeout(() => c.remove(), 4000);
+  }
+}
+
+// 重置
+function resetGame() {
+  stopAllAudio();
+  score = 0;
+  completedTasks.clear();
+  document.getElementById('score').textContent = '0';
+  document.getElementById('completeOverlay').classList.remove('show');
+  
+  // 重置读数对任务
+  document.querySelectorAll('.read-task').forEach(t => t.classList.remove('done'));
+  document.getElementById('answer-poetry').textContent = '( ?, ? )';
+  document.getElementById('answer-novel').textContent = '( ?, ? )';
+  
+  // 重置拖拽卡片
+  document.querySelectorAll('.drag-book').forEach(c => c.classList.remove('placed'));
+  document.querySelectorAll('.drag-book-status').forEach(s => {
+    s.textContent = '待放置';
+    s.classList.remove('done');
+  });
+  
+  initGrid();
+  resizeGrid();
+  correctAnswersShown = false;
+  if (listenAudio) { listenAudio.pause(); listenAudio.currentTime = 0; }
+  if (explainAudio) { explainAudio.pause(); explainAudio.currentTime = 0; }
+  listenPlaying = false;
+  explainPlaying = false;
+  updateListenPlayBtn();
+  updateExplainPlayBtn();
+  updateListenProgress();
+  updateExplainProgress();
+}
+
+// ============ 双播放器：听题·动手做 + 听讲·老师做 ============
+let listenAudio = null;
+let explainAudio = null;
+let listenPlaying = false;
+let explainPlaying = false;
+let correctAnswersShown = false;
+
+function initDualPlayers() {
+  listenAudio = new Audio('audio/intro.mp3');
+  explainAudio = new Audio('audio/explain.mp3');
+  
+  listenAudio.addEventListener('timeupdate', updateListenProgress);
+  listenAudio.addEventListener('loadedmetadata', updateListenProgress);
+  listenAudio.addEventListener('ended', () => {
+    listenPlaying = false;
+    updateListenPlayBtn();
+  });
+  
+  explainAudio.addEventListener('timeupdate', updateExplainProgress);
+  explainAudio.addEventListener('loadedmetadata', updateExplainProgress);
+  explainAudio.addEventListener('ended', () => {
+    explainPlaying = false;
+    updateExplainPlayBtn();
+  });
+}
+
+// 播放器1：听题·动手做
+function toggleListen() {
+  if (explainPlaying) {
+    explainAudio.pause();
+    explainPlaying = false;
+    updateExplainPlayBtn();
+  }
+  if (listenPlaying) {
+    listenAudio.pause();
+    listenPlaying = false;
+  } else {
+    listenAudio.play();
+    listenPlaying = true;
+  }
+  updateListenPlayBtn();
+}
+
+function updateListenPlayBtn() {
+  const btn = document.getElementById('listenPlayBtn');
+  if (btn) btn.innerHTML = listenPlaying ? '⏸' : '▶';
+}
+
+function updateListenProgress() {
+  if (!listenAudio) return;
+  const percent = listenAudio.duration > 0 ? (listenAudio.currentTime / listenAudio.duration) * 100 : 0;
+  const bar = document.getElementById('listenProgressBar');
+  const time = document.getElementById('listenTime');
+  if (bar) bar.style.width = percent + '%';
+  if (time) time.textContent = fmtTime(listenAudio.currentTime) + ' / ' + fmtTime(listenAudio.duration);
+}
+
+function seekListen(e) {
+  if (!listenAudio || !listenAudio.duration) return;
+  const rect = e.currentTarget.getBoundingClientRect();
+  const ratio = (e.clientX - rect.left) / rect.width;
+  listenAudio.currentTime = ratio * listenAudio.duration;
+}
+
+// 播放器2：听讲·老师做
+function toggleExplain() {
+  if (listenPlaying) {
+    listenAudio.pause();
+    listenPlaying = false;
+    updateListenPlayBtn();
+  }
+  if (explainPlaying) {
+    explainAudio.pause();
+    explainPlaying = false;
+  } else {
+    explainAudio.play();
+    explainPlaying = true;
+    if (!correctAnswersShown) {
+      showCorrectAnswers();
+      correctAnswersShown = true;
+    }
+  }
+  updateExplainPlayBtn();
+}
+
+function playExplainFromOverlay() {
+  document.getElementById('completeOverlay').classList.remove('show');
+  if (listenPlaying) {
+    listenAudio.pause();
+    listenPlaying = false;
+    updateListenPlayBtn();
+  }
+  explainAudio.currentTime = 0;
+  explainAudio.play();
+  explainPlaying = true;
+  if (!correctAnswersShown) {
+    showCorrectAnswers();
+    correctAnswersShown = true;
+  }
+  updateExplainPlayBtn();
+}
+
+function updateExplainPlayBtn() {
+  const btn = document.getElementById('explainPlayBtn');
+  if (btn) btn.innerHTML = explainPlaying ? '⏸' : '▶';
+}
+
+function updateExplainProgress() {
+  if (!explainAudio) return;
+  const percent = explainAudio.duration > 0 ? (explainAudio.currentTime / explainAudio.duration) * 100 : 0;
+  const bar = document.getElementById('explainProgressBar');
+  const time = document.getElementById('explainTime');
+  if (bar) bar.style.width = percent + '%';
+  if (time) time.textContent = fmtTime(explainAudio.currentTime) + ' / ' + fmtTime(explainAudio.duration);
+}
+
+function seekExplain(e) {
+  if (!explainAudio || !explainAudio.duration) return;
+  const rect = e.currentTarget.getBoundingClientRect();
+  const ratio = (e.clientX - rect.left) / rect.width;
+  explainAudio.currentTime = ratio * explainAudio.duration;
+}
+
+// 展示正确答案（左侧主显示区）
+function showCorrectAnswers() {
+  const books = [
+    { name: '诗歌类', icon: '📕', col: 3, row: 5 },
+    { name: '小说类', icon: '📗', col: 8, row: 2 },
+    { name: '工具类', icon: '📘', col: 6, row: 4 },
+    { name: '教育类', icon: '📙', col: 2, row: 9 }
+  ];
+  books.forEach(b => {
+    const cell = document.querySelector(`.cell[data-col="${b.col}"][data-row="${b.row}"]`);
+    if (cell && !cell.querySelector('.correct-book')) {
+      const tag = document.createElement('div');
+      tag.className = 'book-tag correct-book';
+      tag.innerHTML = `<div class="book-icon">${b.icon}</div><div class="book-name">${b.name}</div><div class="book-pair">(${b.col},${b.row})</div>`;
+      cell.appendChild(tag);
+      cell.classList.add('has-correct');
+    }
+  });
+}
+
+function fmtTime(s) {
+  if (isNaN(s) || s < 0) s = 0;
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return m + ':' + (sec < 10 ? '0' : '') + sec;
+}
+
+// 初始化
+initGrid();
+initDrag();
+resizeGrid();
+initDualPlayers();
+window.addEventListener('resize', resizeGrid);
+
+// 页面加载完成，播放器就绪（不自动播放，由用户手动点击）
+</script>
+
+</body>
+</html>

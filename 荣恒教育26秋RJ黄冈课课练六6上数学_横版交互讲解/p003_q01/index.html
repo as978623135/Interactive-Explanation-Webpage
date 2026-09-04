@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>方向与位置·选择题</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Microsoft YaHei', sans-serif;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  min-height: 100vh;
+  color: #fff;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background: rgba(0,0,0,0.3);
+}
+.header h1 {
+  font-size: 20px;
+  background: linear-gradient(90deg, #ffd700, #ff8c00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.score-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #ffd700, #ff8c00);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  color: #1a1a2e;
+}
+.main-container {
+  display: flex;
+  gap: 16px;
+  padding: 16px 24px;
+  min-height: calc(100vh - 60px);
+}
+.left-area {
+  flex: 1;
+  background: rgba(255,255,255,0.05);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+ position: relative; overflow: hidden;}
+.compass-title {
+  font-size: 18px;
+  color: #ffd700;
+  text-align: center;
+}
+.compass-container {
+  position: relative;
+  
+  
+ transform: scale(1.4); transform-origin: center;}
+.compass-svg {
+  width: 100%;
+  height: 100%;
+}
+.direction-label {
+  font-size: 16px;
+  font-weight: bold;
+  fill: #ffd700;
+  text-anchor: middle;
+}
+.angle-arc {
+  fill: none;
+  stroke: #00bfff;
+  stroke-width: 3;
+  stroke-dasharray: 5,5;
+}
+.arrow-line {
+  stroke: #ff6b9d;
+  stroke-width: 3;
+  marker-end: url(#arrowhead);
+}
+.point-marker {
+  fill: #ff6b9d;
+}
+.point-label-text {
+  font-size: 14px;
+  fill: #fff;
+  font-weight: bold;
+}
+.right-panel {
+  width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+.question-card {
+  background: rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 14px;
+  border-left: 4px solid #ffd700;
+}
+.question-card h3 {
+  font-size: 15px;
+  color: #ffd700;
+  margin-bottom: 10px;
+}
+.question-text {
+  font-size: 13px;
+  line-height: 1.7;
+  color: #ddd;
+  margin-bottom: 12px;
+}
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.option-btn {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 2px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.05);
+  color: #ddd;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+}
+.option-btn:hover {
+  border-color: #ffd700;
+  background: rgba(255,215,0,0.1);
+}
+.option-btn.correct {
+  border-color: #00ff88;
+  background: rgba(0,255,136,0.15);
+  color: #00ff88;
+}
+.option-btn.wrong {
+  border-color: #ff6b6b;
+  background: rgba(255,107,107,0.15);
+  color: #ff6b6b;
+}
+.feedback {
+  font-size: 13px;
+  margin-top: 8px;
+  min-height: 18px;
+}
+.feedback.correct { color: #00ff88; }
+.feedback.wrong { color: #ff6b6b; }
+.player-card {
+  background: rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 14px;
+}
+.player-title {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.player-title.listen { color: #00bfff; }
+.player-title.explain { color: #ff8c00; }
+.player-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.play-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #00bfff, #0080ff);
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.play-btn:hover { transform: scale(1.1); }
+.play-btn.playing { background: linear-gradient(135deg, #ff6b6b, #ee5a24); }
+.progress-bar {
+  flex: 1;
+  height: 6px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 3px;
+  cursor: pointer;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00bfff, #0080ff);
+  border-radius: 3px;
+  width: 0%;
+}
+.time-display {
+  font-size: 12px;
+  color: #aaa;
+  min-width: 80px;
+  text-align: right;
+}
+.overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.overlay.show { display: flex; }
+.overlay-content {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  border: 2px solid #ffd700;
+}
+.overlay-content h2 { font-size: 28px; color: #ffd700; margin-bottom: 16px; }
+.overlay-content p { font-size: 16px; color: #ddd; margin-bottom: 24px; }
+.overlay-btn {
+  padding: 12px 32px;
+  border-radius: 30px;
+  border: none;
+  background: linear-gradient(135deg, #ff8c00, #ff6b00);
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🧭 方向与位置·选择题</h1>
+  <div class="score-box">⭐ <span id="score">0</span> 分</div>
+</div>
+
+<div class="main-container">
+  <div class="left-area">
+    <div class="compass-title" id="compassTitle">第(1)问：学校与超市的相对位置</div>
+    <div class="compass-container">
+      <svg class="compass-svg" viewBox="0 0 320 320" id="compassSvg">
+        <defs>
+          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#ff6b9d"/>
+          </marker>
+        </defs>
+        <g id="compassBase"></g>
+        <g id="compassContent"></g>
+      </svg>
+    </div>
+    <div style="font-size:13px;color:#888;text-align:center;" id="compassHint">北偏西40° = 从正北方向向西转40°</div>
+  </div>
+
+  <div class="right-panel">
+    <div class="question-card">
+      <h3>📋 第(1)问</h3>
+      <div class="question-text">学校在超市北偏西40°方向上，那么超市在学校( )方向上。</div>
+      <div class="options">
+        <button class="option-btn" onclick="selectOption(1, 'A', this)">A. 南偏东50°</button>
+        <button class="option-btn" onclick="selectOption(1, 'B', this)">B. 南偏东40°</button>
+        <button class="option-btn" onclick="selectOption(1, 'C', this)">C. 西偏北40°</button>
+        <button class="option-btn" onclick="selectOption(1, 'D', this)">D. 西偏北50°</button>
+      </div>
+      <div class="feedback" id="fb1"></div>
+    </div>
+
+    <div class="question-card">
+      <h3>📋 第(2)问</h3>
+      <div class="question-text">李伯伯做晨练，他先面向正西方向站立，然后全身向右转了30°，这时他面向( )方向。</div>
+      <div class="options">
+        <button class="option-btn" onclick="selectOption(2, 'A', this)">A. 西偏北30°</button>
+        <button class="option-btn" onclick="selectOption(2, 'B', this)">B. 西偏南30°</button>
+        <button class="option-btn" onclick="selectOption(2, 'C', this)">C. 北偏西30°</button>
+        <button class="option-btn" onclick="selectOption(2, 'D', this)">D. 南偏西30°</button>
+      </div>
+      <div class="feedback" id="fb2"></div>
+    </div>
+
+    <div class="player-card">
+      <div class="player-title listen">🎧 听题·动手做</div>
+      <div class="player-controls">
+        <button class="play-btn" id="listenBtn" onclick="toggleListen()">▶</button>
+        <div class="progress-bar" onclick="seekListen(event)">
+          <div class="progress-fill" id="listenProgress"></div>
+        </div>
+        <div class="time-display" id="listenTime">0:00 / 0:00</div>
+      </div>
+    </div>
+
+    <div class="player-card">
+      <div class="player-title explain">📖 听讲·老师做</div>
+      <div class="player-controls">
+        <button class="play-btn" id="explainBtn" onclick="toggleExplain()">▶</button>
+        <div class="progress-bar" onclick="seekExplain(event)">
+          <div class="progress-fill" id="explainProgress"></div>
+        </div>
+        <div class="time-display" id="explainTime">0:00 / 0:00</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="completeOverlay">
+  <div class="overlay-content">
+    <h2>🎉 完成啦！</h2>
+    <p>你已经完成了所有题目，来听听老师的讲解吧！</p>
+    <button class="overlay-btn" onclick="playExplainFromOverlay()">📖 听讲·老师做</button>
+  </div>
+</div>
+
+<audio id="listenAudio" src="audio/intro.mp3" preload="metadata"></audio>
+<audio id="explainAudio" src="audio/explain.mp3" preload="metadata"></audio>
+
+<script>
+let score = 0;
+let answered = {1: false, 2: false};
+let correctAnswersShown = false;
+const correctAnswers = {1: 'B', 2: 'A'};
+
+function initCompass() {
+  const base = document.getElementById('compassBase');
+  const cx = 160, cy = 160, r = 130;
+  
+  const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  circle.setAttribute('cx', cx);
+  circle.setAttribute('cy', cy);
+  circle.setAttribute('r', r);
+  circle.setAttribute('fill', 'rgba(255,255,255,0.05)');
+  circle.setAttribute('stroke', 'rgba(255,255,255,0.2)');
+  circle.setAttribute('stroke-width', '2');
+  base.appendChild(circle);
+  
+  const directions = [
+    {name: '北', angle: -90},
+    {name: '东北', angle: -45},
+    {name: '东', angle: 0},
+    {name: '东南', angle: 45},
+    {name: '南', angle: 90},
+    {name: '西南', angle: 135},
+    {name: '西', angle: 180},
+    {name: '西北', angle: -135}
+  ];
+  
+  directions.forEach(d => {
+    const rad = d.angle * Math.PI / 180;
+    const x = cx + (r + 18) * Math.cos(rad);
+    const y = cy + (r + 18) * Math.sin(rad);
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', x);
+    text.setAttribute('y', y + 5);
+    text.setAttribute('class', 'direction-label');
+    text.textContent = d.name;
+    base.appendChild(text);
+    
+    const lx = cx + r * Math.cos(rad);
+    const ly = cy + r * Math.sin(rad);
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', cx);
+    line.setAttribute('y1', cy);
+    line.setAttribute('x2', lx);
+    line.setAttribute('y2', ly);
+    line.setAttribute('stroke', 'rgba(255,255,255,0.1)');
+    line.setAttribute('stroke-width', '1');
+    base.appendChild(line);
+  });
+  
+  const center = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  center.setAttribute('cx', cx);
+  center.setAttribute('cy', cy);
+  center.setAttribute('r', '5');
+  center.setAttribute('fill', '#ffd700');
+  base.appendChild(center);
+}
+
+function drawQ1() {
+  document.getElementById('compassTitle').textContent = '第(1)问：学校在超市北偏西40°';
+  document.getElementById('compassHint').textContent = '相对位置：方向相反，角度相同';
+  const content = document.getElementById('compassContent');
+  content.innerHTML = '';
+  const cx = 160, cy = 160, r = 100;
+  
+  const supermarket = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  supermarket.setAttribute('cx', cx);
+  supermarket.setAttribute('cy', cy);
+  supermarket.setAttribute('r', '8');
+  supermarket.setAttribute('fill', '#00bfff');
+  content.appendChild(supermarket);
+  const sLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  sLabel.setAttribute('x', cx + 15);
+  sLabel.setAttribute('y', cy + 5);
+  sLabel.setAttribute('class', 'point-label-text');
+  sLabel.textContent = '超市';
+  content.appendChild(sLabel);
+  
+  const angle = -90 - 40;
+  const rad = angle * Math.PI / 180;
+  const sx = cx + r * Math.cos(rad);
+  const sy = cy + r * Math.sin(rad);
+  
+  const school = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  school.setAttribute('cx', sx);
+  school.setAttribute('cy', sy);
+  school.setAttribute('r', '8');
+  school.setAttribute('fill', '#ff6b9d');
+  content.appendChild(school);
+  const schLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  schLabel.setAttribute('x', sx);
+  schLabel.setAttribute('y', sy - 12);
+  schLabel.setAttribute('class', 'point-label-text');
+  schLabel.setAttribute('text-anchor', 'middle');
+  schLabel.textContent = '学校';
+  content.appendChild(schLabel);
+  
+  const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  line.setAttribute('x1', cx);
+  line.setAttribute('y1', cy);
+  line.setAttribute('x2', sx);
+  line.setAttribute('y2', sy);
+  line.setAttribute('class', 'arrow-line');
+  content.appendChild(line);
+  
+  const arc = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  const arcR = 40;
+  const startRad = -90 * Math.PI / 180;
+  const endRad = angle * Math.PI / 180;
+  const x1 = cx + arcR * Math.cos(startRad);
+  const y1 = cy + arcR * Math.sin(startRad);
+  const x2 = cx + arcR * Math.cos(endRad);
+  const y2 = cy + arcR * Math.sin(endRad);
+  arc.setAttribute('d', `M ${x1} ${y1} A ${arcR} ${arcR} 0 0 0 ${x2} ${y2}`);
+  arc.setAttribute('class', 'angle-arc');
+  content.appendChild(arc);
+  
+  const angleText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  const textRad = (-90 - 20) * Math.PI / 180;
+  angleText.setAttribute('x', cx + 55 * Math.cos(textRad));
+  angleText.setAttribute('y', cy + 55 * Math.sin(textRad));
+  angleText.setAttribute('fill', '#00bfff');
+  angleText.setAttribute('font-size', '12');
+  angleText.setAttribute('text-anchor', 'middle');
+  angleText.textContent = '40°';
+  content.appendChild(angleText);
+}
+
+function drawQ2() {
+  document.getElementById('compassTitle').textContent = '第(2)问：面向正西，向右转30°';
+  document.getElementById('compassHint').textContent = '向右转 = 向北转（顺时针）';
+  const content = document.getElementById('compassContent');
+  content.innerHTML = '';
+  const cx = 160, cy = 160, r = 100;
+  
+  const westRad = Math.PI;
+  const wx = cx + r * Math.cos(westRad);
+  const wy = cy + r * Math.sin(westRad);
+  
+  const westLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  westLine.setAttribute('x1', cx);
+  westLine.setAttribute('y1', cy);
+  westLine.setAttribute('x2', wx);
+  westLine.setAttribute('y2', wy);
+  westLine.setAttribute('stroke', '#888');
+  westLine.setAttribute('stroke-width', '2');
+  westLine.setAttribute('stroke-dasharray', '5,5');
+  content.appendChild(westLine);
+  
+  const westLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  westLabel.setAttribute('x', wx - 5);
+  westLabel.setAttribute('y', wy + 5);
+  westLabel.setAttribute('fill', '#888');
+  westLabel.setAttribute('font-size', '12');
+  westLabel.setAttribute('text-anchor', 'end');
+  westLabel.textContent = '原方向(正西)';
+  content.appendChild(westLabel);
+  
+  const newAngle = 180 - 30;
+  const newRad = newAngle * Math.PI / 180;
+  const nx = cx + r * Math.cos(newRad);
+  const ny = cy + r * Math.sin(newRad);
+  
+  const newLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  newLine.setAttribute('x1', cx);
+  newLine.setAttribute('y1', cy);
+  newLine.setAttribute('x2', nx);
+  newLine.setAttribute('y2', ny);
+  newLine.setAttribute('class', 'arrow-line');
+  content.appendChild(newLine);
+  
+  const person = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  person.setAttribute('cx', cx);
+  person.setAttribute('cy', cy);
+  person.setAttribute('r', '10');
+  person.setAttribute('fill', '#ffd700');
+  content.appendChild(person);
+  const pLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  pLabel.setAttribute('x', cx + 18);
+  pLabel.setAttribute('y', cy + 20);
+  pLabel.setAttribute('class', 'point-label-text');
+  pLabel.textContent = '李伯伯';
+  content.appendChild(pLabel);
+  
+  const arc = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  const arcR = 50;
+  const x1 = cx + arcR * Math.cos(westRad);
+  const y1 = cy + arcR * Math.sin(westRad);
+  const x2 = cx + arcR * Math.cos(newRad);
+  const y2 = cy + arcR * Math.sin(newRad);
+  arc.setAttribute('d', `M ${x1} ${y1} A ${arcR} ${arcR} 0 0 1 ${x2} ${y2}`);
+  arc.setAttribute('class', 'angle-arc');
+  content.appendChild(arc);
+  
+  const angleText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  const textRad = (180 - 15) * Math.PI / 180;
+  angleText.setAttribute('x', cx + 65 * Math.cos(textRad));
+  angleText.setAttribute('y', cy + 65 * Math.sin(textRad));
+  angleText.setAttribute('fill', '#00bfff');
+  angleText.setAttribute('font-size', '12');
+  angleText.setAttribute('text-anchor', 'middle');
+  angleText.textContent = '30°';
+  content.appendChild(angleText);
+  
+  const dirLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  dirLabel.setAttribute('x', nx);
+  dirLabel.setAttribute('y', ny - 10);
+  dirLabel.setAttribute('fill', '#ff6b9d');
+  dirLabel.setAttribute('font-size', '13');
+  dirLabel.setAttribute('font-weight', 'bold');
+  dirLabel.setAttribute('text-anchor', 'middle');
+  dirLabel.textContent = '西偏北30°';
+  content.appendChild(dirLabel);
+}
+
+function selectOption(qnum, answer, btn) {
+  if (answered[qnum]) return;
+  answered[qnum] = true;
+  
+  const fb = document.getElementById('fb' + qnum);
+  if (answer === correctAnswers[qnum]) {
+    btn.classList.add('correct');
+    fb.textContent = '✅ 回答正确！';
+    fb.className = 'feedback correct';
+    addScore(10);
+  } else {
+    btn.classList.add('wrong');
+    fb.textContent = '❌ 回答错误，正确答案是' + correctAnswers[qnum];
+    fb.className = 'feedback wrong';
+    const options = btn.parentElement.querySelectorAll('.option-btn');
+    options.forEach(opt => {
+      if (opt.textContent.startsWith(correctAnswers[qnum])) opt.classList.add('correct');
+    });
+  }
+  
+  if (qnum === 1) drawQ1();
+  if (qnum === 2) drawQ2();
+  checkComplete();
+}
+
+function checkComplete() {
+  if (answered[1] && answered[2]) {
+    setTimeout(() => {
+      document.getElementById('completeOverlay').classList.add('show');
+    }, 500);
+  }
+}
+
+function addScore(points) {
+  score += points;
+  document.getElementById('score').textContent = score;
+}
+
+// 双播放器逻辑
+const listenAudio = document.getElementById('listenAudio');
+const explainAudio = document.getElementById('explainAudio');
+let listenPlaying = false;
+let explainPlaying = false;
+
+function initDualPlayers() {
+  listenAudio.addEventListener('loadedmetadata', () => {
+    document.getElementById('listenTime').textContent = '0:00 / ' + formatTime(listenAudio.duration);
+  });
+  explainAudio.addEventListener('loadedmetadata', () => {
+    document.getElementById('explainTime').textContent = '0:00 / ' + formatTime(explainAudio.duration);
+  });
+  listenAudio.addEventListener('timeupdate', updateListenProgress);
+  explainAudio.addEventListener('timeupdate', updateExplainProgress);
+  listenAudio.addEventListener('ended', () => {
+    listenPlaying = false;
+    document.getElementById('listenBtn').textContent = '▶';
+    document.getElementById('listenBtn').classList.remove('playing');
+  });
+  explainAudio.addEventListener('ended', () => {
+    explainPlaying = false;
+    document.getElementById('explainBtn').textContent = '▶';
+    document.getElementById('explainBtn').classList.remove('playing');
+  });
+}
+
+function toggleListen() {
+  if (listenPlaying) {
+    listenAudio.pause();
+    listenPlaying = false;
+    document.getElementById('listenBtn').textContent = '▶';
+    document.getElementById('listenBtn').classList.remove('playing');
+  } else {
+    if (explainPlaying) toggleExplain();
+    listenAudio.play();
+    listenPlaying = true;
+    document.getElementById('listenBtn').textContent = '⏸';
+    document.getElementById('listenBtn').classList.add('playing');
+  }
+}
+
+function toggleExplain() {
+  if (explainPlaying) {
+    explainAudio.pause();
+    explainPlaying = false;
+    document.getElementById('explainBtn').textContent = '▶';
+    document.getElementById('explainBtn').classList.remove('playing');
+  } else {
+    if (listenPlaying) toggleListen();
+    explainAudio.play();
+    explainPlaying = true;
+    document.getElementById('explainBtn').textContent = '⏸';
+    document.getElementById('explainBtn').classList.add('playing');
+    if (!correctAnswersShown) showCorrectAnswers();
+  }
+}
+
+function playExplainFromOverlay() {
+  document.getElementById('completeOverlay').classList.remove('show');
+  listenAudio.pause();
+  listenAudio.currentTime = 0;
+  listenPlaying = false;
+  document.getElementById('listenBtn').textContent = '▶';
+  document.getElementById('listenBtn').classList.remove('playing');
+  explainAudio.currentTime = 0;
+  explainAudio.play();
+  explainPlaying = true;
+  document.getElementById('explainBtn').textContent = '⏸';
+  document.getElementById('explainBtn').classList.add('playing');
+  if (!correctAnswersShown) showCorrectAnswers();
+}
+
+function showCorrectAnswers() {
+  correctAnswersShown = true;
+  drawQ1();
+  drawQ2();
+  for (let q = 1; q <= 2; q++) {
+    if (!answered[q]) {
+      const card = document.querySelectorAll('.question-card')[q-1];
+      const options = card.querySelectorAll('.option-btn');
+      options.forEach(opt => {
+        if (opt.textContent.startsWith(correctAnswers[q])) opt.classList.add('correct');
+      });
+    }
+  }
+}
+
+function seekListen(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const percent = (e.clientX - rect.left) / rect.width;
+  listenAudio.currentTime = percent * listenAudio.duration;
+}
+
+function seekExplain(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const percent = (e.clientX - rect.left) / rect.width;
+  explainAudio.currentTime = percent * explainAudio.duration;
+}
+
+function updateListenProgress() {
+  const percent = (listenAudio.currentTime / listenAudio.duration) * 100;
+  document.getElementById('listenProgress').style.width = percent + '%';
+  document.getElementById('listenTime').textContent = formatTime(listenAudio.currentTime) + ' / ' + formatTime(listenAudio.duration);
+}
+
+function updateExplainProgress() {
+  const percent = (explainAudio.currentTime / explainAudio.duration) * 100;
+  document.getElementById('explainProgress').style.width = percent + '%';
+  document.getElementById('explainTime').textContent = formatTime(explainAudio.currentTime) + ' / ' + formatTime(explainAudio.duration);
+}
+
+function formatTime(seconds) {
+  if (isNaN(seconds)) return '0:00';
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+initCompass();
+drawQ1();
+initDualPlayers();
+</script>
+</body>
+</html>

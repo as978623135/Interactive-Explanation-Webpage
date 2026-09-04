@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>描点连线·封闭图形识别</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Microsoft YaHei', sans-serif;
+  background: linear-gradient(135deg, #2e0a1a 0%, #4e1b2d 50%, #3e0a2a 100%);
+  min-height: 100vh;
+  color: #fff;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background: rgba(0,0,0,0.4);
+}
+.header h1 {
+  font-size: 20px;
+  background: linear-gradient(90deg, #f06292, #ec407a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.score-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #f06292, #ec407a);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  color: #2e0a1a;
+}
+.main-container {
+  display: flex;
+  gap: 16px;
+  padding: 16px 24px;
+  min-height: calc(100vh - 60px);
+}
+.left-area {
+  flex: 1;
+  background: rgba(240,98,146,0.05);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(240,98,146,0.15);
+ position: relative; overflow: hidden;}
+.map-title {
+  font-size: 18px;
+  color: #f06292;
+  margin-bottom: 12px;
+  text-align: center;
+}
+.grid-container {
+  position: relative;
+  
+  
+  background: rgba(255,255,255,0.95);
+  border-radius: 12px;
+  border: 2px solid #ec407a;
+  padding: 10px;
+ transform: scale(1.4); transform-origin: center;}
+.grid-svg {
+  width: 100%;
+  height: 100%;
+}
+.grid-cell {
+  fill: transparent;
+  stroke: #ec407a;
+  stroke-width: 0.5;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.grid-cell:hover {
+  fill: rgba(236,64,122,0.2);
+}
+.point-marker {
+  fill: #ec407a;
+  stroke: #fff;
+  stroke-width: 2;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.point-marker.show {
+  opacity: 1;
+}
+.point-number {
+  font-size: 10px;
+  fill: #fff;
+  font-weight: bold;
+  text-anchor: middle;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.point-number.show {
+  opacity: 1;
+}
+.connect-line {
+  stroke: #ec407a;
+  stroke-width: 2;
+  fill: none;
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  transition: stroke-dashoffset 2s ease-in-out;
+}
+.connect-line.show {
+  stroke-dashoffset: 0;
+}
+.col-label {
+  font-size: 12px;
+  fill: #333;
+  font-weight: bold;
+  text-anchor: middle;
+}
+.row-label {
+  font-size: 12px;
+  fill: #333;
+  font-weight: bold;
+  text-anchor: middle;
+}
+.btn-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.btn-action {
+  padding: 10px 20px;
+  border-radius: 20px;
+  border: none;
+  background: linear-gradient(135deg, #f06292, #ec407a);
+  color: #fff;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.btn-action:hover { transform: scale(1.05); }
+.btn-action:disabled {
+  background: #888;
+  cursor: not-allowed;
+  transform: none;
+}
+.hint-text {
+  font-size: 13px;
+  color: #ffd700;
+  margin-top: 12px;
+  text-align: center;
+}
+.right-panel {
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+.task-card {
+  background: rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 14px;
+  border-left: 4px solid #f06292;
+}
+.task-card h3 {
+  font-size: 15px;
+  color: #f06292;
+  margin-bottom: 10px;
+}
+.task-text {
+  font-size: 13px;
+  line-height: 2;
+  color: #ddd;
+  margin-bottom: 10px;
+}
+.point-list {
+  font-size: 13px;
+  line-height: 2;
+  color: #ddd;
+  background: rgba(0,0,0,0.2);
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+.point-list span {
+  display: inline-block;
+  padding: 2px 6px;
+  margin: 2px;
+  border-radius: 4px;
+  background: rgba(240,98,146,0.2);
+  color: #f06292;
+}
+.point-list span.current {
+  background: #f06292;
+  color: #fff;
+}
+.task-text input {
+  width: 100px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  border: 1px solid #555;
+  background: rgba(0,0,0,0.3);
+  color: #fff;
+  font-size: 13px;
+  text-align: center;
+  margin: 0 2px;
+}
+.task-text input:focus {
+  outline: none;
+  border-color: #f06292;
+}
+.btn-verify {
+  padding: 8px 20px;
+  border-radius: 6px;
+  border: none;
+  background: linear-gradient(135deg, #f06292, #ec407a);
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 10px;
+}
+.feedback {
+  font-size: 13px;
+  margin-top: 8px;
+  min-height: 18px;
+}
+.feedback.correct { color: #f06292; }
+.feedback.wrong { color: #ff6b6b; }
+.hint-box {
+  background: rgba(255,215,0,0.08);
+  border: 1px solid rgba(255,215,0,0.3);
+  border-radius: 8px;
+  padding: 10px;
+  margin-top: 10px;
+}
+.hint-box p {
+  font-size: 12px;
+  color: #ffd700;
+  line-height: 1.6;
+}
+.player-card {
+  background: rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 14px;
+}
+.player-title {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.player-title.listen { color: #00bfff; }
+.player-title.explain { color: #ff8c00; }
+.player-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.play-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #00bfff, #0080ff);
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.play-btn:hover { transform: scale(1.1); }
+.play-btn.playing { background: linear-gradient(135deg, #ff6b6b, #ee5a24); }
+.progress-bar {
+  flex: 1;
+  height: 6px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 3px;
+  cursor: pointer;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00bfff, #0080ff);
+  border-radius: 3px;
+  width: 0%;
+}
+.time-display {
+  font-size: 12px;
+  color: #aaa;
+  min-width: 80px;
+  text-align: right;
+}
+.overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.overlay.show { display: flex; }
+.overlay-content {
+  background: linear-gradient(135deg, #2e0a1a, #4e1b2d);
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  border: 2px solid #f06292;
+}
+.overlay-content h2 { font-size: 28px; color: #f06292; margin-bottom: 16px; }
+.overlay-content p { font-size: 16px; color: #ddd; margin-bottom: 24px; }
+.overlay-btn {
+  padding: 12px 32px;
+  border-radius: 30px;
+  border: none;
+  background: linear-gradient(135deg, #ff8c00, #ff6b00);
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>✏️ 描点连线·封闭图形识别</h1>
+  <div class="score-box">⭐ <span id="score">0</span> 分</div>
+</div>
+
+<div class="main-container">
+  <div class="left-area">
+    <div class="map-title">方格图（按顺序点击格子描点）</div>
+    <div class="grid-container">
+      <svg class="grid-svg" viewBox="0 0 380 340" id="gridSvg"></svg>
+    </div>
+    <div class="btn-group">
+      <button class="btn-action" id="autoBtn" onclick="autoDraw()">▶ 自动描点连线</button>
+      <button class="btn-action" id="resetBtn" onclick="resetGrid()">🔄 重置</button>
+    </div>
+    <div class="hint-text" id="hintText">请按顺序点击格子描点，或点击"自动描点连线"按钮</div>
+  </div>
+
+  <div class="right-panel">
+    <div class="task-card">
+      <h3>📋 点的顺序</h3>
+      <div class="point-list" id="pointList">
+        <span>(5,5)</span>→<span>(6,6)</span>→<span>(5,6)</span>→<span>(5,4)</span>→<span>(3,4)</span>→<span>(4,3)</span>→<span>(6,3)</span>→<span>(7,4)</span>→<span>(5,4)</span>
+      </div>
+    </div>
+
+    <div class="task-card">
+      <h3>📋 图形识别</h3>
+      <div class="task-text">
+        描出下列各点，并依次连成一个封闭图形，这个图形是(<input type="text" id="answer">)。
+      </div>
+      <button class="btn-verify" onclick="verifyAnswer()">验证答案</button>
+      <div class="feedback" id="fb"></div>
+      <div class="hint-box">
+        <p>💡 提示：描完点连线后，看看这个图形像什么？（提示：像一个小房子或箭头）</p>
+      </div>
+    </div>
+
+    <div class="player-card">
+      <div class="player-title listen">🎧 听题·动手做</div>
+      <div class="player-controls">
+        <button class="play-btn" id="listenBtn" onclick="toggleListen()">▶</button>
+        <div class="progress-bar" onclick="seekListen(event)">
+          <div class="progress-fill" id="listenProgress"></div>
+        </div>
+        <div class="time-display" id="listenTime">0:00 / 0:00</div>
+      </div>
+    </div>
+
+    <div class="player-card">
+      <div class="player-title explain">📖 听讲·老师做</div>
+      <div class="player-controls">
+        <button class="play-btn" id="explainBtn" onclick="toggleExplain()">▶</button>
+        <div class="progress-bar" onclick="seekExplain(event)">
+          <div class="progress-fill" id="explainProgress"></div>
+        </div>
+        <div class="time-display" id="explainTime">0:00 / 0:00</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="completeOverlay">
+  <div class="overlay-content">
+    <h2>🎉 完成啦！</h2>
+    <p>你已经完成了描点连线，来听听老师的讲解吧！</p>
+    <button class="overlay-btn" onclick="playExplainFromOverlay()">📖 听讲·老师做</button>
+  </div>
+</div>
+
+<audio id="listenAudio" src="audio/intro.mp3" preload="metadata"></audio>
+<audio id="explainAudio" src="audio/explain.mp3" preload="metadata"></audio>
+
+<script>
+const points = [
+  {x: 5, y: 5}, {x: 6, y: 6}, {x: 5, y: 6}, {x: 5, y: 4},
+  {x: 3, y: 4}, {x: 4, y: 3}, {x: 6, y: 3}, {x: 7, y: 4}, {x: 5, y: 4}
+];
+
+const CELL_SIZE = 32;
+const START_X = 40;
+const START_Y = 20;
+const COLS = 11;
+const ROWS = 9;
+
+let score = 0;
+let currentPointIndex = 0;
+let drawingComplete = false;
+let answerVerified = false;
+let correctAnswersShown = false;
+
+function initGrid() {
+  const svg = document.getElementById('gridSvg');
+  
+  for (let row = 0; row < ROWS; row++) {
+    const y = START_Y + (ROWS - 1 - row) * CELL_SIZE;
+    const rowLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    rowLabel.setAttribute('x', 20);
+    rowLabel.setAttribute('y', y + CELL_SIZE / 2 + 4);
+    rowLabel.setAttribute('class', 'row-label');
+    rowLabel.textContent = row;
+    svg.appendChild(rowLabel);
+    
+    for (let col = 0; col < COLS; col++) {
+      const x = START_X + col * CELL_SIZE;
+      const cell = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      cell.setAttribute('x', x);
+      cell.setAttribute('y', y);
+      cell.setAttribute('width', CELL_SIZE);
+      cell.setAttribute('height', CELL_SIZE);
+      cell.setAttribute('class', 'grid-cell');
+      cell.setAttribute('data-col', col);
+      cell.setAttribute('data-row', row);
+      cell.addEventListener('click', () => handleCellClick(col, row));
+      svg.appendChild(cell);
+    }
+  }
+  
+  for (let col = 0; col < COLS; col++) {
+    const x = START_X + col * CELL_SIZE + CELL_SIZE / 2;
+    const colLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    colLabel.setAttribute('x', x);
+    colLabel.setAttribute('y', START_Y + ROWS * CELL_SIZE + 15);
+    colLabel.setAttribute('class', 'col-label');
+    colLabel.textContent = col;
+    svg.appendChild(colLabel);
+  }
+  
+  const line = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+  line.setAttribute('class', 'connect-line');
+  line.setAttribute('id', 'connectLine');
+  line.setAttribute('points', '');
+  svg.appendChild(line);
+}
+
+function getCellCenter(col, row) {
+  return {
+    x: START_X + col * CELL_SIZE + CELL_SIZE / 2,
+    y: START_Y + (ROWS - 1 - row) * CELL_SIZE + CELL_SIZE / 2
+  };
+}
+
+function handleCellClick(col, row) {
+  if (drawingComplete) return;
+  
+  const expected = points[currentPointIndex];
+  if (col === expected.x && row === expected.y) {
+    drawPoint(currentPointIndex);
+    currentPointIndex++;
+    updatePointList();
+    
+    if (currentPointIndex >= points.length) {
+      completeDrawing();
+    } else {
+      document.getElementById('hintText').textContent = `已描${currentPointIndex}个点，下一个：(${points[currentPointIndex].x},${points[currentPointIndex].y})`;
+    }
+  } else {
+    document.getElementById('hintText').textContent = `点错了！应该是(${expected.x},${expected.y})，你点的是(${col},${row})`;
+  }
+}
+
+function drawPoint(index) {
+  const svg = document.getElementById('gridSvg');
+  const p = points[index];
+  const center = getCellCenter(p.x, p.y);
+  
+  const marker = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  marker.setAttribute('cx', center.x);
+  marker.setAttribute('cy', center.y);
+  marker.setAttribute('r', '8');
+  marker.setAttribute('class', 'point-marker');
+  marker.setAttribute('id', `point-${index}`);
+  svg.appendChild(marker);
+  
+  const number = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  number.setAttribute('x', center.x);
+  number.setAttribute('y', center.y + 3);
+  number.setAttribute('class', 'point-number');
+  number.textContent = index + 1;
+  svg.appendChild(number);
+  
+  setTimeout(() => {
+    marker.classList.add('show');
+    number.classList.add('show');
+  }, 50);
+}
+
+function updatePointList() {
+  const spans = document.querySelectorAll('#pointList span');
+  spans.forEach((span, i) => {
+    if (i < currentPointIndex) {
+      span.className = '';
+    } else if (i === currentPointIndex) {
+      span.className = 'current';
+    }
+  });
+}
+
+function completeDrawing() {
+  drawingComplete = true;
+  drawConnectLine();
+  addScore(15);
+  document.getElementById('hintText').textContent = '描点完成！连线后看看这个图形像什么？';
+  document.getElementById('autoBtn').disabled = true;
+  setTimeout(() => {
+    document.getElementById('completeOverlay').classList.add('show');
+  }, 2000);
+}
+
+function drawConnectLine() {
+  const line = document.getElementById('connectLine');
+  const pointsStr = points.map(p => {
+    const center = getCellCenter(p.x, p.y);
+    return `${center.x},${center.y}`;
+  }).join(' ');
+  line.setAttribute('points', pointsStr);
+  setTimeout(() => line.classList.add('show'), 100);
+}
+
+function autoDraw() {
+  if (drawingComplete) return;
+  document.getElementById('autoBtn').disabled = true;
+  
+  let i = 0;
+  function drawNext() {
+    if (i >= points.length) {
+      completeDrawing();
+      return;
+    }
+    drawPoint(i);
+    currentPointIndex = i + 1;
+    updatePointList();
+    i++;
+    setTimeout(drawNext, 400);
+  }
+  drawNext();
+}
+
+function resetGrid() {
+  const svg = document.getElementById('gridSvg');
+  document.querySelectorAll('.point-marker, .point-number').forEach(el => el.remove());
+  const line = document.getElementById('connectLine');
+  if (line) {
+    line.classList.remove('show');
+    line.setAttribute('points', '');
+  }
+  currentPointIndex = 0;
+  drawingComplete = false;
+  answerVerified = false;
+  document.getElementById('autoBtn').disabled = false;
+  document.getElementById('hintText').textContent = '请按顺序点击格子描点，或点击"自动描点连线"按钮';
+  document.querySelectorAll('#pointList span').forEach(span => span.className = '');
+  document.getElementById('fb').textContent = '';
+  document.getElementById('answer').value = '';
+}
+
+function verifyAnswer() {
+  if (answerVerified) return;
+  const answer = document.getElementById('answer').value;
+  const fb = document.getElementById('fb');
+  
+  if (answer.includes('房子') || answer.includes('小屋') || answer.includes('箭头') || answer.includes('小房子')) {
+    fb.textContent = '✅ 正确！这个封闭图形像一个小房子（或箭头）';
+    fb.className = 'feedback correct';
+    answerVerified = true;
+    addScore(10);
+    if (!drawingComplete) {
+      autoDraw();
+    }
+  } else {
+    fb.textContent = '❌ 再想想，这个图形像什么？提示：上面有个三角形屋顶，下面是长方形';
+    fb.className = 'feedback wrong';
+  }
+}
+
+function addScore(points) {
+  score += points;
+  document.getElementById('score').textContent = score;
+}
+
+// 双播放器逻辑
+const listenAudio = document.getElementById('listenAudio');
+const explainAudio = document.getElementById('explainAudio');
+let listenPlaying = false;
+let explainPlaying = false;
+
+function initDualPlayers() {
+  listenAudio.addEventListener('loadedmetadata', () => {
+    document.getElementById('listenTime').textContent = '0:00 / ' + formatTime(listenAudio.duration);
+  });
+  explainAudio.addEventListener('loadedmetadata', () => {
+    document.getElementById('explainTime').textContent = '0:00 / ' + formatTime(explainAudio.duration);
+  });
+  listenAudio.addEventListener('timeupdate', updateListenProgress);
+  explainAudio.addEventListener('timeupdate', updateExplainProgress);
+  listenAudio.addEventListener('ended', () => {
+    listenPlaying = false;
+    document.getElementById('listenBtn').textContent = '▶';
+    document.getElementById('listenBtn').classList.remove('playing');
+  });
+  explainAudio.addEventListener('ended', () => {
+    explainPlaying = false;
+    document.getElementById('explainBtn').textContent = '▶';
+    document.getElementById('explainBtn').classList.remove('playing');
+  });
+}
+
+function toggleListen() {
+  if (listenPlaying) {
+    listenAudio.pause();
+    listenPlaying = false;
+    document.getElementById('listenBtn').textContent = '▶';
+    document.getElementById('listenBtn').classList.remove('playing');
+  } else {
+    if (explainPlaying) toggleExplain();
+    listenAudio.play();
+    listenPlaying = true;
+    document.getElementById('listenBtn').textContent = '⏸';
+    document.getElementById('listenBtn').classList.add('playing');
+  }
+}
+
+function toggleExplain() {
+  if (explainPlaying) {
+    explainAudio.pause();
+    explainPlaying = false;
+    document.getElementById('explainBtn').textContent = '▶';
+    document.getElementById('explainBtn').classList.remove('playing');
+  } else {
+    if (listenPlaying) toggleListen();
+    explainAudio.play();
+    explainPlaying = true;
+    document.getElementById('explainBtn').textContent = '⏸';
+    document.getElementById('explainBtn').classList.add('playing');
+    if (!correctAnswersShown) showCorrectAnswers();
+  }
+}
+
+function playExplainFromOverlay() {
+  document.getElementById('completeOverlay').classList.remove('show');
+  listenAudio.pause();
+  listenAudio.currentTime = 0;
+  listenPlaying = false;
+  document.getElementById('listenBtn').textContent = '▶';
+  document.getElementById('listenBtn').classList.remove('playing');
+  explainAudio.currentTime = 0;
+  explainAudio.play();
+  explainPlaying = true;
+  document.getElementById('explainBtn').textContent = '⏸';
+  document.getElementById('explainBtn').classList.add('playing');
+  if (!correctAnswersShown) showCorrectAnswers();
+}
+
+function showCorrectAnswers() {
+  correctAnswersShown = true;
+  document.getElementById('answer').value = '小房子';
+  if (!drawingComplete) autoDraw();
+}
+
+function seekListen(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const percent = (e.clientX - rect.left) / rect.width;
+  listenAudio.currentTime = percent * listenAudio.duration;
+}
+
+function seekExplain(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const percent = (e.clientX - rect.left) / rect.width;
+  explainAudio.currentTime = percent * explainAudio.duration;
+}
+
+function updateListenProgress() {
+  const percent = (listenAudio.currentTime / listenAudio.duration) * 100;
+  document.getElementById('listenProgress').style.width = percent + '%';
+  document.getElementById('listenTime').textContent = formatTime(listenAudio.currentTime) + ' / ' + formatTime(listenAudio.duration);
+}
+
+function updateExplainProgress() {
+  const percent = (explainAudio.currentTime / explainAudio.duration) * 100;
+  document.getElementById('explainProgress').style.width = percent + '%';
+  document.getElementById('explainTime').textContent = formatTime(explainAudio.currentTime) + ' / ' + formatTime(explainAudio.duration);
+}
+
+function formatTime(seconds) {
+  if (isNaN(seconds)) return '0:00';
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+initGrid();
+initDualPlayers();
+</script>
+</body>
+</html>
