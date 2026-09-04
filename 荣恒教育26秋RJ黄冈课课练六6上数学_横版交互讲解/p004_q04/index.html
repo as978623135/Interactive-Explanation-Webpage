@@ -376,7 +376,52 @@ body {
 /* 旋转提示层 */
 50% { transform: rotate(90deg); }
 }
-}</style>
+}
+/* ===== 竖屏上下布局（方案C）：竖屏自动切换为上下排列，横屏保持左右布局 ===== */
+@media (orientation: portrait) and (max-width: 900px) {
+  html, body {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    height: auto !important;
+  }
+  .stage {
+    height: auto !important;
+    min-height: 100vh !important;
+    overflow: visible !important;
+    border-radius: 0 !important;
+  }
+  /* 内容容器：左右布局改上下布局 */
+  .main-content, .main-container {
+    flex-direction: column !important;
+    height: auto !important;
+    overflow: visible !important;
+    padding: 12px !important;
+    gap: 12px !important;
+  }
+  /* 左侧主展示区 */
+  .main-content > div:first-child,
+  .main-container > div:first-child,
+  .cinema-area, .left-area {
+    width: 100% !important;
+    flex: none !important;
+    min-height: 42vh !important;
+  }
+  /* 右侧边栏 */
+  .main-content > div:last-child,
+  .main-container > div:last-child,
+  .students-panel, .right-panel, .info-panel, .answer-panel, .quiz-panel {
+    width: 100% !important;
+    flex: none !important;
+  }
+  /* 顶部栏紧凑一点 */
+  .top-bar, .header {
+    padding: 8px 12px !important;
+    height: auto !important;
+    flex-shrink: 0 !important;
+  }
+}
+
+</style>
 </head>
 <body>
 <div class="hint-text">已自动旋转为横屏模式<br>建议横屏观看效果更佳</div>
