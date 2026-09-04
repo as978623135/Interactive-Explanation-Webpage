@@ -693,7 +693,7 @@ initDualPlayers();
 <!-- ===== v2 竖屏自适应：旋转+缩放+右侧滚动+触摸坐标转换+drag模拟 ===== -->
 <script>
 (function(){
-  var BASE_W = 1920, BASE_H = 1080;
+  var DESIGN_H = 720; // 设计参考高度，保证元素大小合适
   var scale = 1, isPortrait = false;
   var panelDone = false;
 
@@ -709,11 +709,11 @@ initDualPlayers();
 
     if(isPortrait){
       var availW = h, availH = w;
-      scale = availH / BASE_H; // 强制短边拉满屏幕宽度，长边上下留白
-      stage.style.width = BASE_W + 'px';
-      stage.style.height = BASE_H + 'px';
-      stage.style.marginLeft = -(BASE_W/2) + 'px';
-      stage.style.marginTop = -(BASE_H/2) + 'px';
+      scale = availH / DESIGN_H; // 短边拉满，元素按设计参考高度缩放
+      stage.style.width = (DESIGN_H * 16 / 9) + 'px';
+      stage.style.height = DESIGN_H + 'px';
+      stage.style.marginLeft = -(DESIGN_H * 16 / 9 / 2) + 'px';
+      stage.style.marginTop = -(DESIGN_H / 2) + 'px';
       stage.style.transform = 'rotate(90deg) scale(' + scale + ')';
       document.body.classList.add('portrait-mode');
       rearrangePanel();
