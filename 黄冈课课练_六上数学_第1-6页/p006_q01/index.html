@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>p006_q01 中医药橱数对</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;background:#f5f7fa;color:#333;line-height:1.8;padding-bottom:100px}
+.container{max-width:900px;margin:0 auto;padding:10px}
+.card{position:relative;background:#fff;border-radius:12px;padding:10px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+.card-title{display:inline-block;background:#667eea;color:#fff;padding:6px 16px;border-radius:8px;font-size:.95em;font-weight:bold;position:relative;top:-5px;margin-left:0;cursor:pointer;user-select:none}
+.toggle-btn{display:inline-block;margin-left:10px;padding:2px 10px;background:#ff4d4f;border:none;border-radius:6px;color:#fff;font-size:12px;cursor:pointer;vertical-align:middle;user-select:none}
+.card-header{display:flex;justify-content:space-between;align-items:flex-start;position:relative}
+.nav-btns{display:flex;gap:5px;margin-top:-3px}
+.nav-btn{padding:4px 12px;border:none;border-radius:4px;color:#fff;font-size:13px;cursor:pointer;user-select:none}
+.prev-btn{background:#1890ff}.next-btn{background:#52c41a}
+.card-content{overflow:hidden;max-height:2000px;opacity:1;transition:max-height .3s ease,opacity .3s ease}
+.card.collapsed .card-content{max-height:0;opacity:0}
+.modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);z-index:2000;justify-content:center;align-items:center;cursor:pointer}
+.modal.active{display:flex}.modal img{max-width:92%;max-height:92%;border-radius:8px}
+.question-text{font-size:1.05em;line-height:1.8}
+.question-text .q-main{font-weight:bold;color:#333;margin-bottom:8px}
+.question-text .q{margin-top:10px;padding-left:4px}
+.question-text .inline-img{display:inline-block;vertical-align:middle;width:280px;height:120px;margin:4px;border:1px solid #ddd;border-radius:4px;cursor:pointer;object-fit:cover}
+.q-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.q-tab-btn{padding:6px 14px;border:1px solid #ddd;background:#fafafa;border-radius:8px;cursor:pointer;font-size:13px}
+.q-tab-btn.active{background:#667eea;color:#fff;border-color:#667eea}
+.q-tab-panel{display:none}.q-tab-panel.active{display:block}
+.anim-content{display:flex;flex-direction:column;align-items:center;width:100%}
+.anim-stage{display:flex;justify-content:center;width:100%}
+.anim-stage svg{width:100%;max-width:800px;height:auto;display:block}
+.anim-text{margin-top:12px;font-size:15px;color:#667eea;font-weight:bold;line-height:1.7;text-align:center;background:#f0f4ff;border-radius:8px;padding:8px 12px;width:100%}
+.anim-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;justify-content:center}
+.anim-tab-btn{padding:6px 14px;border:1px solid #ddd;background:#fafafa;border-radius:8px;cursor:pointer;font-size:13px}
+.anim-tab-btn.active{background:#667eea;color:#fff;border-color:#667eea}
+.anim-scene{display:none}.anim-scene.active{display:block}
+.tab-buttons{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.tab-btn{padding:8px 16px;border:none;background:#f0f0f0;color:#333;border-radius:8px;cursor:pointer;font-size:.9em;transition:all .3s}
+.tab-btn.active{background:#667eea;color:#fff}
+.tab-content{display:none}.tab-content.active{display:block;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.step-item{margin-bottom:10px;padding:10px 12px;border-radius:8px;background:#fafafa;transition:all .3s;border-left:3px solid transparent}
+.step-item.active{background:#f6ffed;border-left-color:#52c41a;box-shadow:0 2px 8px rgba(82,196,26,.15)}
+.step-item .step-title{font-weight:bold;color:#333;margin-bottom:4px;font-size:14px}
+.step-item .step-answer{color:#52c41a;font-weight:bold;font-size:14px}
+.step-item .step-detail{color:#666;font-size:13px;margin-top:4px;line-height:1.7}
+.summary-content,.error-content,.kg-content{line-height:2;font-size:14px}
+.img-grid{display:flex;flex-wrap:wrap;gap:10px}
+.img-grid img{width:280px;height:auto;object-fit:contain;border:1px solid #ddd;border-radius:6px;cursor:pointer}
+.script-seg{margin-bottom:10px}
+.script-seg .seg-title{font-weight:bold;color:#667eea;font-size:14px;margin-bottom:4px}
+.script-seg .seg-text{color:#444;font-size:13px;line-height:1.8;white-space:pre-wrap}
+.audio-player{position:sticky;bottom:0;background:#fff;border-radius:12px 12px 0 0;padding:12px 15px;box-shadow:0 -2px 12px rgba(0,0,0,.15);z-index:100;margin-top:10px}
+.player-row1{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.play-btn{width:36px;height:36px;border-radius:50%;background:#667eea;color:#fff;border:none;cursor:pointer;font-size:1em;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.vol-btn{width:32px;height:32px;border-radius:50%;background:#f0f0f0;border:none;cursor:pointer;font-size:.9em;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.total-progress{flex:1;height:6px;background:#e0e0e0;border-radius:3px;cursor:pointer;overflow:hidden}
+.total-progress-bar{height:100%;width:0%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:3px;transition:width .1s linear}
+.time-display{font-size:.8em;color:#666;min-width:90px;text-align:right;white-space:nowrap}
+.player-row2{display:flex;flex-wrap:wrap;gap:5px}
+.seg-btn{padding:4px 10px;border:1px solid #ddd;background:#fff;border-radius:6px;cursor:pointer;font-size:.75em;transition:all .3s}
+.seg-btn.active{background:#667eea;color:#fff;border-color:#667eea}
+.seg-btn.played{background:#e8f5e9;border-color:#4caf50}
+@media(max-width:600px){.container{padding:6px}body{font-size:14px}.card{padding:8px}.card-title{font-size:.9em;padding:5px 12px}}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="card collapsed" id="qCard">
+<div class="card-header">
+<span class="card-title" onclick="toggleCard('qCard')">题目原文<span class="toggle-btn" onclick="event.stopPropagation();toggleCard('qCard')">展开</span></span>
+<div class="nav-btns"><button class="nav-btn prev-btn" id="prevBtn" onclick="goPrev()">上一题</button><button class="nav-btn next-btn" id="nextBtn" onclick="goNext()">下一题</button></div>
+</div>
+<div class="card-content"><div class="question-text">
+<div class="q-main">一、中医是我国的四大国粹之一。下面是一个中医药橱。</div>
+<img src="images/p006_q01_图1.png" class="inline-img" onclick="showImage(this.src)" alt="药橱图">
+<div class="q-tabs" style="margin-top:10px;">
+<button class="q-tab-btn active" onclick="switchQTab(0)">第(1)问</button>
+<button class="q-tab-btn" onclick="switchQTab(1)">第(2)问</button>
+<button class="q-tab-btn" onclick="switchQTab(2)">第(3)问</button>
+</div>
+<div class="q-tab-panel active" id="qtab0"><div class="q">(1)如果当归的位置用有序数对(8,5)表示，那么菊花的位置用有序数对表示是(&nbsp;,&nbsp;)。</div></div>
+<div class="q-tab-panel" id="qtab1"><div class="q">(2)一味中药的位置是(4,4)，它是(&nbsp;&nbsp;&nbsp;&nbsp;)。（填中药名）</div></div>
+<div class="q-tab-panel" id="qtab2"><div class="q">(3)三七的位置是(10,6)，请你在图中标出来。</div></div>
+</div></div></div>
+
+<div class="card" id="animCard">
+<span class="card-title" onclick="toggleCard('animCard')">动画演示<span class="toggle-btn" onclick="event.stopPropagation();toggleCard('animCard')">折叠</span></span>
+<div class="card-content"><div class="anim-content">
+<div class="anim-tabs"><button class="anim-tab-btn active" onclick="switchAnimScene(0)">中医药橱</button></div>
+<div class="anim-stage"><div class="anim-scene active">
+<svg viewBox="0 0 420 260">
+<text x="210" y="14" text-anchor="middle" font-size="13" font-weight="bold" fill="#333">中医药橱（先列后行）</text>
+<g id="grid">
+<rect x="40" y="30" width="340" height="180" fill="none" stroke="#ccc" stroke-width="1"/>
+<g stroke="#ccc" stroke-width="0.5">
+<line x1="74" y1="30" x2="74" y2="210"/><line x1="108" y1="30" x2="108" y2="210"/>
+<line x1="142" y1="30" x2="142" y2="210"/><line x1="176" y1="30" x2="176" y2="210"/>
+<line x1="210" y1="30" x2="210" y2="210"/><line x1="244" y1="30" x2="244" y2="210"/>
+<line x1="278" y1="30" x2="278" y2="210"/><line x1="312" y1="30" x2="312" y2="210"/>
+<line x1="346" y1="30" x2="346" y2="210"/>
+<line x1="40" y1="60" x2="380" y2="60"/><line x1="40" y1="90" x2="380" y2="90"/>
+<line x1="40" y1="120" x2="380" y2="120"/><line x1="40" y1="150" x2="380" y2="150"/>
+<line x1="40" y1="180" x2="380" y2="180"/>
+</g>
+<g font-size="9" fill="#999" text-anchor="middle">
+<text x="57" y="225">1</text><text x="91" y="225">2</text><text x="125" y="225">3</text>
+<text x="159" y="225">4</text><text x="193" y="225">5</text><text x="227" y="225">6</text>
+<text x="261" y="225">7</text><text x="295" y="225">8</text><text x="329" y="225">9</text>
+<text x="363" y="225">10</text>
+</g>
+<g font-size="9" fill="#999" text-anchor="end">
+<text x="35" y="50">6</text><text x="35" y="80">5</text><text x="35" y="110">4</text>
+<text x="35" y="140">3</text><text x="35" y="170">2</text><text x="35" y="200">1</text>
+</g>
+<g font-size="9" fill="#333" text-anchor="middle">
+<text x="57" y="80">大枣</text><text x="227" y="50">菊花</text><text x="295" y="80">当归</text>
+<text x="159" y="110">五味子</text><text x="329" y="110">黄连</text>
+<text x="91" y="140">陈皮</text><text x="227" y="140">山药</text><text x="295" y="140">金银花</text>
+<text x="125" y="200">麦冬</text>
+</g>
+</g>
+<g id="hl1" style="display:none;"><rect x="210" y="30" width="34" height="30" fill="#52c41a" opacity="0.4"/><rect x="210" y="30" width="34" height="30" fill="none" stroke="#52c41a" stroke-width="2"/></g>
+<g id="hl2" style="display:none;"><rect x="142" y="90" width="34" height="30" fill="#1890ff" opacity="0.4"/><rect x="142" y="90" width="34" height="30" fill="none" stroke="#1890ff" stroke-width="2"/></g>
+<g id="hl3" style="display:none;"><rect x="346" y="30" width="34" height="30" fill="#ff9800" opacity="0.4"/><rect x="346" y="30" width="34" height="30" fill="none" stroke="#ff9800" stroke-width="2"/><text x="363" y="50" font-size="9" fill="#ff9800" font-weight="bold" text-anchor="middle">三七</text></g>
+<g id="hint0"><rect x="120" y="238" width="200" height="18" rx="6" fill="#667eea" opacity="0.15"/><text x="220" y="251" text-anchor="middle" font-size="11" fill="#667eea" font-weight="bold">数对：先列后行（列,行）</text></g>
+</svg>
+</div></div>
+<div class="anim-text" id="animText">数对：先列后行（列,行）</div>
+</div></div></div>
+
+<div class="card" id="explainCard">
+<span class="card-title" onclick="toggleCard('explainCard')">讲解内容<span class="toggle-btn" onclick="event.stopPropagation();toggleCard('explainCard')">折叠</span></span>
+<div class="card-content">
+<div class="tab-buttons">
+<button class="tab-btn active" onclick="switchTab(0)">题目讲解</button>
+<button class="tab-btn" onclick="switchTab(1)">总结</button>
+<button class="tab-btn" onclick="switchTab(2)">易错点</button>
+<button class="tab-btn" onclick="switchTab(3)">知识图谱</button>
+<button class="tab-btn" onclick="switchTab(4)">原题图片</button>
+<button class="tab-btn" onclick="switchTab(5)">讲解原文</button>
+</div>
+<div class="tab-content active" id="tab0">
+<div class="step-item" id="sq1">
+<div class="step-title">第(1)问</div>
+<div class="step-answer">菊花的位置是(6,6)</div>
+<div class="step-detail">数对先列后行。菊花在第6列第6行→(6,6)。</div>
+</div>
+<div class="step-item" id="sq2">
+<div class="step-title">第(2)问</div>
+<div class="step-answer">五味子</div>
+<div class="step-detail">(4,4)表示第4列第4行，该位置的中药是五味子。</div>
+</div>
+<div class="step-item" id="sq3">
+<div class="step-title">第(3)问</div>
+<div class="step-answer">三七在第10列第6行</div>
+<div class="step-detail">(10,6)表示第10列第6行，在该格子标出三七。</div>
+</div>
+</div>
+<div class="tab-content" id="tab1"><div class="summary-content">
+<p>用数对表示位置：<strong>先列后行</strong>，格式为(列,行)。</p>
+<p>列数从左往右数，行数从下往上数。</p>
+<p>找位置时先找列再找行，交叉点就是目标。</p>
+</div></div>
+<div class="tab-content" id="tab2"><div class="error-content">
+<p style="color:#ff4d4f;font-weight:bold;">易错点1：列和行搞反</p>
+<p>数对是先列后行，不是先行后列。</p>
+<p style="color:#ff4d4f;font-weight:bold;margin-top:10px;">易错点2：行数方向搞反</p>
+<p>行数从下往上数，第1行在最下面，第6行在最上面。</p>
+</div></div>
+<div class="tab-content" id="tab3"><div class="kg-content">
+<p><strong>学科：</strong>数学</p>
+<p><strong>年级：</strong>六年级上册</p>
+<p><strong>教材：</strong>人教版（RJ）</p>
+<p><strong>单元：</strong>第二单元 位置与方向（二）</p>
+<p><strong>知识点：</strong>用数对确定位置</p>
+<p><strong>核心方法：</strong>先列后行，(列数,行数)</p>
+</div></div>
+<div class="tab-content" id="tab4"><div class="img-grid">
+<img src="images/p006_q01.png" onclick="showImage(this.src)" alt="原题">
+<img src="images/p006_q01_图1.png" onclick="showImage(this.src)" alt="药橱图">
+</div></div>
+<div class="tab-content" id="tab5">
+<div class="script-seg"><div class="seg-title">引导语</div><div class="seg-text">同学们，大家好，跟着老师来做这道题。</div></div>
+<div class="script-seg"><div class="seg-title">题目朗读</div><div class="seg-text">一、中医是我国的四大国粹之一。下面是一个中医药橱。</div></div>
+<div class="script-seg"><div class="seg-title">第(1)问</div><div class="seg-text">菊花在第6列第6行，位置是(6,6)。</div></div>
+<div class="script-seg"><div class="seg-title">第(2)问</div><div class="seg-text">(4,4)是第4列第4行，中药是五味子。</div></div>
+<div class="script-seg"><div class="seg-title">第(3)问</div><div class="seg-text">三七(10,6)在第10列第6行，标出即可。</div></div>
+<div class="script-seg"><div class="seg-title">总结</div><div class="seg-text">数对先列后行，列从左往右，行从下往上。</div></div>
+<div class="script-seg"><div class="seg-title">易错点</div><div class="seg-text">易错点一是列行搞反。易错点二是行数方向搞反。</div></div>
+</div>
+</div></div>
+
+<div class="card audio-player" id="playerCard">
+<div class="card-title" style="cursor:default;">讲解播放器</div>
+<div class="player-row1">
+<button class="play-btn" onclick="togglePlay()" id="playBtn">▶</button>
+<button class="vol-btn" onclick="toggleMute()" id="volBtn">🔊</button>
+<div class="total-progress" id="totalProgress" onclick="seekTotal(event)"><div class="total-progress-bar" id="totalProgressBar"></div></div>
+<div class="time-display"><span id="currentTime">00:00</span> / <span id="totalTime">00:00</span></div>
+</div>
+<div class="player-row2">
+<button class="seg-btn active" onclick="jumpToSegment(0)">引导语</button>
+<button class="seg-btn" onclick="jumpToSegment(1)">题目朗读</button>
+<button class="seg-btn" onclick="jumpToSegment(2)">第(1)问</button>
+<button class="seg-btn" onclick="jumpToSegment(3)">第(2)问</button>
+<button class="seg-btn" onclick="jumpToSegment(4)">第(3)问</button>
+<button class="seg-btn" onclick="jumpToSegment(5)">总结</button>
+<button class="seg-btn" onclick="jumpToSegment(6)">易错点</button>
+</div>
+</div>
+</div>
+
+<div class="modal" id="imageModal" onclick="closeModal()"><img id="modalImage" src="" alt="放大图片"></div>
+<audio id="audioPlayer"></audio>
+
+<script>
+const segments=[
+{src:'audio/segment0.mp3',name:'引导语',tab:-1,highlight:null,anim_scene:-1,anim_step:0},
+{src:'audio/segment1.mp3',name:'题目朗读',tab:-1,highlight:null,anim_scene:-1,anim_step:0},
+{src:'audio/segment2.mp3',name:'第(1)问',tab:0,highlight:'sq1',anim_scene:0,anim_step:1},
+{src:'audio/segment3.mp3',name:'第(2)问',tab:0,highlight:'sq2',anim_scene:0,anim_step:2},
+{src:'audio/segment4.mp3',name:'第(3)问',tab:0,highlight:'sq3',anim_scene:0,anim_step:3},
+{src:'audio/segment5.mp3',name:'总结',tab:1,highlight:null,anim_scene:-1,anim_step:0},
+{src:'audio/segment6.mp3',name:'易错点',tab:2,highlight:null,anim_scene:-1,anim_step:0}
+];
+let currentSegment=0,isPlaying=false,segmentDurations=[0,0,0,0,0,0,0],totalDuration=0,loadedCount=0;
+const audio=document.getElementById('audioPlayer'),playBtn=document.getElementById('playBtn'),volBtn=document.getElementById('volBtn');
+const totalProgressBar=document.getElementById('totalProgressBar'),currentTimeEl=document.getElementById('currentTime'),totalTimeEl=document.getElementById('totalTime');
+const segBtns=document.querySelectorAll('.seg-btn'),tabBtns=document.querySelectorAll('.tab-btn'),tabContents=document.querySelectorAll('.tab-content');
+segments.forEach((s,i)=>{const t=new Audio(s.src);t.addEventListener('loadedmetadata',()=>{segmentDurations[i]=t.duration;loadedCount++;if(loadedCount===segments.length){totalDuration=segmentDurations.reduce((a,b)=>a+b,0);totalTimeEl.textContent=formatTime(totalDuration);}});});
+function toggleCard(id){const c=document.getElementById(id);if(!c)return;c.classList.toggle('collapsed');const b=c.querySelector('.toggle-btn');if(b)b.textContent=c.classList.contains('collapsed')?'展开':'折叠';}
+const prevUrl='../p005_q04/index.html',nextUrl='../p006_q02/index.html';
+function goPrev(){if(prevUrl)window.location.href=prevUrl;}function goNext(){if(nextUrl)window.location.href=nextUrl;}
+document.addEventListener('DOMContentLoaded',()=>{if(!prevUrl)document.getElementById('prevBtn').style.display='none';if(!nextUrl)document.getElementById('nextBtn').style.display='none';});
+function switchTab(i){tabBtns.forEach((b,idx)=>b.classList.toggle('active',idx===i));tabContents.forEach((c,idx)=>c.classList.toggle('active',idx===i));}
+function switchQTab(i){document.querySelectorAll('.q-tab-btn').forEach((b,idx)=>b.classList.toggle('active',idx===i));document.querySelectorAll('.q-tab-panel').forEach((p,idx)=>p.classList.toggle('active',idx===i));}
+function switchAnimScene(i){document.querySelectorAll('.anim-tab-btn').forEach((b,idx)=>b.classList.toggle('active',idx===i));document.querySelectorAll('.anim-scene').forEach((s,idx)=>s.classList.toggle('active',idx===i));}
+function loadSegment(index){
+document.querySelectorAll('.step-item').forEach(el=>el.classList.remove('active'));
+currentSegment=index;audio.src=segments[index].src;updateSegButtons();
+if(segments[index].tab>=0)switchTab(segments[index].tab);
+if(segments[index].anim_scene>=0)switchAnimScene(segments[index].anim_scene);
+applyAnimStep(segments[index]);
+const h=segments[index].highlight;if(h){const el=document.getElementById(h);if(el)el.classList.add('active');}
+if(index===2)switchQTab(0);if(index===3)switchQTab(1);if(index===4)switchQTab(2);
+}
+function togglePlay(){if(isPlaying){audio.pause();playBtn.textContent='▶';isPlaying=false;}else{audio.play();playBtn.textContent='⏸';isPlaying=true;}}
+function toggleMute(){audio.muted=!audio.muted;volBtn.textContent=audio.muted?'🔇':'🔊';}
+function jumpToSegment(i){loadSegment(i);if(isPlaying)audio.play();}
+function updateSegButtons(){segBtns.forEach((b,i)=>{b.classList.remove('active');b.classList.toggle('played',i<currentSegment);});if(segBtns[currentSegment])segBtns[currentSegment].classList.add('active');}
+audio.addEventListener('ended',()=>{if(currentSegment<segments.length-1)jumpToSegment(currentSegment+1);else{playBtn.textContent='▶';isPlaying=false;}});
+audio.addEventListener('timeupdate',()=>{if(totalDuration>0){const before=segmentDurations.slice(0,currentSegment).reduce((a,b)=>a+b,0);const elapsed=before+audio.currentTime;totalProgressBar.style.width=(elapsed/totalDuration*100)+'%';currentTimeEl.textContent=formatTime(elapsed);}});
+function seekTotal(e){const r=e.currentTarget.getBoundingClientRect();const pct=(e.clientX-r.left)/r.width;const tt=pct*totalDuration;let acc=0;for(let i=0;i<segments.length;i++){if(tt<acc+segmentDurations[i]){loadSegment(i);audio.currentTime=tt-acc;if(isPlaying)audio.play();break;}acc+=segmentDurations[i];}}
+function formatTime(s){const m=Math.floor(s/60),sec=Math.floor(s%60);return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;}
+function showImage(src){document.getElementById('modalImage').src=src;document.getElementById('imageModal').classList.add('active');}
+function closeModal(){document.getElementById('imageModal').classList.remove('active');}
+function applyAnimStep(seg){
+const step=seg.anim_step;
+['hl1','hl2','hl3'].forEach(id=>document.getElementById(id).style.display='none');
+document.getElementById('hint0').style.display='block';
+const at=document.getElementById('animText');
+if(step===1){document.getElementById('hl1').style.display='block';document.getElementById('hint0').style.display='none';at.textContent='菊花：第6列第6行 → (6,6)';}
+else if(step===2){document.getElementById('hl2').style.display='block';document.getElementById('hint0').style.display='none';at.textContent='(4,4)：第4列第4行 → 五味子';}
+else if(step===3){document.getElementById('hl3').style.display='block';document.getElementById('hint0').style.display='none';at.textContent='三七(10,6)：第10列第6行';}
+else at.textContent='数对：先列后行（列,行）';
+}
+document.querySelectorAll('.question-text img').forEach(img=>img.addEventListener('click',()=>showImage(img.src)));
+loadSegment(0);
+</script>
+</body>
+</html>
