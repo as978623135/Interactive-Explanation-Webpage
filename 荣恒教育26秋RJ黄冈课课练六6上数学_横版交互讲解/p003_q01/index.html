@@ -266,8 +266,9 @@ body {
 /* ===== v2 竖屏自适应（JS控制旋转+整体缩放） ===== */
 body.portrait-mode {
   background: #000 !important;
-  overflow: hidden !important;
+  overflow: visible !important;
 }
+html { overflow: hidden !important; }
 body.portrait-mode .stage {
   position: absolute !important;
   top: 50% !important;
