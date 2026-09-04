@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>p004_q04 对称与三角形面积</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;background:#f5f7fa;color:#333;line-height:1.8;padding-bottom:100px}
+.container{max-width:900px;margin:0 auto;padding:10px}
+.card{position:relative;background:#fff;border-radius:12px;padding:10px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+.card-title{display:inline-block;background:#667eea;color:#fff;padding:6px 16px;border-radius:8px;font-size:.95em;font-weight:bold;position:relative;top:-5px;margin-left:0;cursor:pointer;user-select:none}
+.toggle-btn{display:inline-block;margin-left:10px;padding:2px 10px;background:#ff4d4f;border:none;border-radius:6px;color:#fff;font-size:12px;cursor:pointer;vertical-align:middle;user-select:none}
+.card-header{display:flex;justify-content:space-between;align-items:flex-start;position:relative}
+.nav-btns{display:flex;gap:5px;margin-top:-3px}
+.nav-btn{padding:4px 12px;border:none;border-radius:4px;color:#fff;font-size:13px;cursor:pointer;user-select:none}
+.prev-btn{background:#1890ff}.next-btn{background:#52c41a}
+.card-content{overflow:hidden;max-height:2000px;opacity:1;transition:max-height .3s ease,opacity .3s ease}
+.card.collapsed .card-content{max-height:0;opacity:0}
+.modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);z-index:2000;justify-content:center;align-items:center;cursor:pointer}
+.modal.active{display:flex}.modal img{max-width:92%;max-height:92%;border-radius:8px}
+.question-text{font-size:1.05em;line-height:1.8}
+.question-text .q-main{font-weight:bold;color:#333;margin-bottom:8px}
+.question-text .q{margin-top:10px;padding-left:4px}
+.question-text .inline-img{display:inline-block;vertical-align:middle;width:160px;height:140px;margin:4px;border:1px solid #ddd;border-radius:4px;cursor:pointer;object-fit:cover}
+.q-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.q-tab-btn{padding:6px 14px;border:1px solid #ddd;background:#fafafa;border-radius:8px;cursor:pointer;font-size:13px}
+.q-tab-btn.active{background:#667eea;color:#fff;border-color:#667eea}
+.q-tab-panel{display:none}.q-tab-panel.active{display:block}
+.anim-content{display:flex;flex-direction:column;align-items:center;width:100%}
+.anim-stage{display:flex;justify-content:center;width:100%}
+.anim-stage svg{width:100%;max-width:800px;height:auto;display:block}
+.anim-text{margin-top:12px;font-size:15px;color:#667eea;font-weight:bold;line-height:1.7;text-align:center;background:#f0f4ff;border-radius:8px;padding:8px 12px;width:100%}
+.anim-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;justify-content:center}
+.anim-tab-btn{padding:6px 14px;border:1px solid #ddd;background:#fafafa;border-radius:8px;cursor:pointer;font-size:13px}
+.anim-tab-btn.active{background:#667eea;color:#fff;border-color:#667eea}
+.anim-scene{display:none}.anim-scene.active{display:block}
+.tab-buttons{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.tab-btn{padding:8px 16px;border:none;background:#f0f0f0;color:#333;border-radius:8px;cursor:pointer;font-size:.9em;transition:all .3s}
+.tab-btn.active{background:#667eea;color:#fff}
+.tab-content{display:none}.tab-content.active{display:block;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.step-item{margin-bottom:10px;padding:10px 12px;border-radius:8px;background:#fafafa;transition:all .3s;border-left:3px solid transparent}
+.step-item.active{background:#f6ffed;border-left-color:#52c41a;box-shadow:0 2px 8px rgba(82,196,26,.15)}
+.step-item .step-title{font-weight:bold;color:#333;margin-bottom:4px;font-size:14px}
+.step-item .step-answer{color:#52c41a;font-weight:bold;font-size:14px}
+.step-item .step-detail{color:#666;font-size:13px;margin-top:4px;line-height:1.7}
+.calc-box{background:#f0f7ff;border-radius:8px;padding:10px;margin-top:8px;font-size:13px;line-height:1.8}
+.calc-box .formula{color:#1890ff;font-weight:bold}
+.summary-content,.error-content,.kg-content{line-height:2;font-size:14px}
+.img-grid{display:flex;flex-wrap:wrap;gap:10px}
+.img-grid img{width:200px;height:auto;object-fit:contain;border:1px solid #ddd;border-radius:6px;cursor:pointer}
+.script-seg{margin-bottom:10px}
+.script-seg .seg-title{font-weight:bold;color:#667eea;font-size:14px;margin-bottom:4px}
+.script-seg .seg-text{color:#444;font-size:13px;line-height:1.8;white-space:pre-wrap}
+.audio-player{position:sticky;bottom:0;background:#fff;border-radius:12px 12px 0 0;padding:12px 15px;box-shadow:0 -2px 12px rgba(0,0,0,.15);z-index:100;margin-top:10px}
+.player-row1{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.play-btn{width:36px;height:36px;border-radius:50%;background:#667eea;color:#fff;border:none;cursor:pointer;font-size:1em;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.vol-btn{width:32px;height:32px;border-radius:50%;background:#f0f0f0;border:none;cursor:pointer;font-size:.9em;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.total-progress{flex:1;height:6px;background:#e0e0e0;border-radius:3px;cursor:pointer;overflow:hidden}
+.total-progress-bar{height:100%;width:0%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:3px;transition:width .1s linear}
+.time-display{font-size:.8em;color:#666;min-width:90px;text-align:right;white-space:nowrap}
+.player-row2{display:flex;flex-wrap:wrap;gap:5px}
+.seg-btn{padding:4px 10px;border:1px solid #ddd;background:#fff;border-radius:6px;cursor:pointer;font-size:.75em;transition:all .3s}
+.seg-btn.active{background:#667eea;color:#fff;border-color:#667eea}
+.seg-btn.played{background:#e8f5e9;border-color:#4caf50}
+@media(max-width:600px){.container{padding:6px}body{font-size:14px}.card{padding:8px}.card-title{font-size:.9em;padding:5px 12px}}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="card collapsed" id="qCard">
+<div class="card-header">
+<span class="card-title" onclick="toggleCard('qCard')">题目原文<span class="toggle-btn" onclick="event.stopPropagation();toggleCard('qCard')">展开</span></span>
+<div class="nav-btns"><button class="nav-btn prev-btn" id="prevBtn" onclick="goPrev()">上一题</button><button class="nav-btn next-btn" id="nextBtn" onclick="goNext()">下一题</button></div>
+</div>
+<div class="card-content"><div class="question-text">
+<div class="q-main">四、根据要求画图并填空。B点在A点的东偏南45°方向200m处。如果以南北方向为对称轴，那么C点正好是B点的对应点。</div>
+<img src="images/p004_q04_图1.png" class="inline-img" onclick="showImage(this.src)" alt="坐标图">
+<div class="q-tabs" style="margin-top:10px;">
+<button class="q-tab-btn active" onclick="switchQTab(0)">第(1)问</button>
+<button class="q-tab-btn" onclick="switchQTab(1)">第(2)问</button>
+</div>
+<div class="q-tab-panel active" id="qtab0"><div class="q">(1)请在图中标出B点和C点。</div></div>
+<div class="q-tab-panel" id="qtab1"><div class="q">(2)将A、B、C三点顺次连成封闭图形，这是一个(&nbsp;&nbsp;&nbsp;&nbsp;)三角形。这个三角形的实际面积是(&nbsp;)m²。</div></div>
+</div></div></div>
+
+<div class="card" id="animCard">
+<span class="card-title" onclick="toggleCard('animCard')">动画演示<span class="toggle-btn" onclick="event.stopPropagation();toggleCard('animCard')">折叠</span></span>
+<div class="card-content"><div class="anim-content">
+<div class="anim-tabs"><button class="anim-tab-btn active" onclick="switchAnimScene(0)">对称与三角形</button></div>
+<div class="anim-stage"><div class="anim-scene active">
+<svg viewBox="0 0 420 280">
+<text x="210" y="16" text-anchor="middle" font-size="13" font-weight="bold" fill="#333">对称点与三角形（1段=100m）</text>
+<line x1="210" y1="40" x2="210" y2="240" stroke="#e91e63" stroke-width="1.5"/>
+<line x1="80" y1="140" x2="340" y2="140" stroke="#e91e63" stroke-width="1.5"/>
+<polygon points="210,35 206,45 214,45" fill="#e91e63"/>
+<polygon points="75,140 85,136 85,144" fill="#e91e63"/>
+<polygon points="345,140 335,136 335,144" fill="#e91e63"/>
+<polygon points="210,245 206,235 214,235" fill="#e91e63"/>
+<text x="210" y="32" text-anchor="middle" font-size="11" fill="#e91e63">北</text>
+<text x="70" y="144" text-anchor="middle" font-size="11" fill="#e91e63">西</text>
+<text x="350" y="144" text-anchor="middle" font-size="11" fill="#e91e63">东</text>
+<text x="210" y="258" text-anchor="middle" font-size="11" fill="#e91e63">南</text>
+<line x1="210" y1="40" x2="210" y2="240" stroke="#1890ff" stroke-width="1" stroke-dasharray="4,2" opacity="0.5"/>
+<text x="220" y="55" font-size="9" fill="#1890ff">对称轴(南北)</text>
+<circle cx="210" cy="140" r="5" fill="#333"/>
+<text x="195" y="135" font-size="13" font-weight="bold" fill="#333">A</text>
+<line x1="300" y1="250" x2="340" y2="250" stroke="#333" stroke-width="1.5"/>
+<text x="320" y="265" text-anchor="middle" font-size="10" fill="#333">100m</text>
+<g id="step1" style="display:none;">
+<line x1="210" y1="140" x2="267" y2="197" stroke="#52c41a" stroke-width="2"/>
+<circle cx="267" cy="197" r="6" fill="#52c41a"/>
+<text x="275" y="200" font-size="13" font-weight="bold" fill="#52c41a">B</text>
+<text x="240" y="165" font-size="10" fill="#52c41a">东偏南45°</text>
+<text x="245" y="178" font-size="10" fill="#52c41a">2段=200m</text>
+<line x1="210" y1="140" x2="153" y2="197" stroke="#ff9800" stroke-width="2"/>
+<circle cx="153" cy="197" r="6" fill="#ff9800"/>
+<text x="135" y="200" font-size="13" font-weight="bold" fill="#ff9800">C</text>
+<text x="155" y="165" font-size="10" fill="#ff9800">西偏南45°</text>
+<text x="150" y="178" font-size="10" fill="#ff9800">2段=200m</text>
+</g>
+<g id="step2" style="display:none;">
+<polygon points="210,140 267,197 153,197" fill="rgba(102,126,234,0.15)" stroke="#667eea" stroke-width="2"/>
+<text x="210" y="185" text-anchor="middle" font-size="11" fill="#667eea" font-weight="bold">等腰直角三角形</text>
+<text x="210" y="200" text-anchor="middle" font-size="10" fill="#667eea">面积=½×200×200=20000m²</text>
+<text x="235" y="165" font-size="9" fill="#667eea">200m</text>
+<text x="175" y="165" font-size="9" fill="#667eea">200m</text>
+<path d="M 210 155 L 220 155 L 220 145" fill="none" stroke="#667eea" stroke-width="1"/>
+</g>
+<g id="hint0"><rect x="120" y="268" width="200" height="18" rx="6" fill="#667eea" opacity="0.15"/><text x="220" y="281" text-anchor="middle" font-size="11" fill="#667eea" font-weight="bold">南北轴对称：东西互换，南北不变</text></g>
+</svg>
+</div></div>
+<div class="anim-text" id="animText">南北轴对称：东西互换，南北不变</div>
+</div></div></div>
+
+<div class="card" id="explainCard">
+<span class="card-title" onclick="toggleCard('explainCard')">讲解内容<span class="toggle-btn" onclick="event.stopPropagation();toggleCard('explainCard')">折叠</span></span>
+<div class="card-content">
+<div class="tab-buttons">
+<button class="tab-btn active" onclick="switchTab(0)">题目讲解</button>
+<button class="tab-btn" onclick="switchTab(1)">总结</button>
+<button class="tab-btn" onclick="switchTab(2)">易错点</button>
+<button class="tab-btn" onclick="switchTab(3)">知识图谱</button>
+<button class="tab-btn" onclick="switchTab(4)">原题图片</button>
+<button class="tab-btn" onclick="switchTab(5)">讲解原文</button>
+</div>
+<div class="tab-content active" id="tab0">
+<div class="step-item" id="sq1">
+<div class="step-title">第(1)问</div>
+<div class="step-answer">B：A点东偏南45°200m；C：B关于南北轴的对称点（西偏南45°200m）</div>
+<div class="step-detail">B点：从A向东偏南45°量2段(200m)。C点：以南北方向(纵轴)为对称轴，B的对称点→西偏南45°，距离不变。</div>
+</div>
+<div class="step-item" id="sq2">
+<div class="step-title">第(2)问</div>
+<div class="step-answer">等腰直角三角形，面积20000m²</div>
+<div class="calc-box">
+<span class="formula">边长：</span>AB=AC=200m（对称）<br>
+<span class="formula">角A：</span>45°+45°=90°<br>
+<span class="formula">类型：</span>等腰直角三角形<br>
+<span class="formula">面积：</span>½×底×高 = ½×200×200 = <strong>20000 m²</strong>
+</div>
+</div>
+</div>
+<div class="tab-content" id="tab1"><div class="summary-content">
+<p>关于<strong>南北方向对称</strong>：东西互换，南北不变。东偏南→西偏南。</p>
+<p>对称点到对称轴距离相等，所以AB=AC。</p>
+<p>等腰直角三角形面积=½×直角边×直角边。</p>
+</div></div>
+<div class="tab-content" id="tab2"><div class="error-content">
+<p style="color:#ff4d4f;font-weight:bold;">易错点1：对称方向搞反</p>
+<p>关于南北轴对称是东西互换（东↔西），不是南北互换。</p>
+<p style="color:#ff4d4f;font-weight:bold;margin-top:10px;">易错点2：三角形类型判断错误</p>
+<p>角A=45°+45°=90°，且AB=AC，是<strong>等腰直角</strong>三角形，不是普通等腰三角形。</p>
+</div></div>
+<div class="tab-content" id="tab3"><div class="kg-content">
+<p><strong>学科：</strong>数学</p>
+<p><strong>年级：</strong>六年级上册</p>
+<p><strong>教材：</strong>人教版（RJ）</p>
+<p><strong>单元：</strong>第二单元 位置与方向（二）</p>
+<p><strong>知识点：</strong>方向距离定位、轴对称、三角形面积</p>
+<p><strong>核心方法：</strong>南北轴对称→东西互换；等腰直角三角形面积=½a²</p>
+</div></div>
+<div class="tab-content" id="tab4"><div class="img-grid">
+<img src="images/p004_q04.png" onclick="showImage(this.src)" alt="原题">
+<img src="images/p004_q04_图1.png" onclick="showImage(this.src)" alt="坐标图">
+</div></div>
+<div class="tab-content" id="tab5">
+<div class="script-seg"><div class="seg-title">引导语</div><div class="seg-text">同学们，大家好，跟着老师来做这道题。</div></div>
+<div class="script-seg"><div class="seg-title">题目朗读</div><div class="seg-text">四、B在A东偏南45°200m处，以南北为对称轴，C是B的对应点。</div></div>
+<div class="script-seg"><div class="seg-title">第(1)问</div><div class="seg-text">B：东偏南45°2段=200m。C：南北轴对称→西偏南45°200m。</div></div>
+<div class="script-seg"><div class="seg-title">第(2)问</div><div class="seg-text">AB=AC=200m，角A=90°，等腰直角三角形。面积=½×200×200=20000m²。</div></div>
+<div class="script-seg"><div class="seg-title">总结</div><div class="seg-text">南北轴对称：东西互换。等腰直角三角形面积=½×直角边²。</div></div>
+<div class="script-seg"><div class="seg-title">易错点</div><div class="seg-text">易错点一是对称方向搞反。易错点二是三角形类型判断错误，是等腰直角三角形。</div></div>
+</div>
+</div></div>
+
+<div class="card audio-player" id="playerCard">
+<div class="card-title" style="cursor:default;">讲解播放器</div>
+<div class="player-row1">
+<button class="play-btn" onclick="togglePlay()" id="playBtn">▶</button>
+<button class="vol-btn" onclick="toggleMute()" id="volBtn">🔊</button>
+<div class="total-progress" id="totalProgress" onclick="seekTotal(event)"><div class="total-progress-bar" id="totalProgressBar"></div></div>
+<div class="time-display"><span id="currentTime">00:00</span> / <span id="totalTime">00:00</span></div>
+</div>
+<div class="player-row2">
+<button class="seg-btn active" onclick="jumpToSegment(0)">引导语</button>
+<button class="seg-btn" onclick="jumpToSegment(1)">题目朗读</button>
+<button class="seg-btn" onclick="jumpToSegment(2)">第(1)问</button>
+<button class="seg-btn" onclick="jumpToSegment(3)">第(2)问</button>
+<button class="seg-btn" onclick="jumpToSegment(4)">总结</button>
+<button class="seg-btn" onclick="jumpToSegment(5)">易错点</button>
+</div>
+</div>
+</div>
+
+<div class="modal" id="imageModal" onclick="closeModal()"><img id="modalImage" src="" alt="放大图片"></div>
+<audio id="audioPlayer"></audio>
+
+<script>
+const segments=[
+{src:'audio/segment0.mp3',name:'引导语',tab:-1,highlight:null,anim_scene:-1,anim_step:0},
+{src:'audio/segment1.mp3',name:'题目朗读',tab:-1,highlight:null,anim_scene:-1,anim_step:0},
+{src:'audio/segment2.mp3',name:'第(1)问',tab:0,highlight:'sq1',anim_scene:0,anim_step:1},
+{src:'audio/segment3.mp3',name:'第(2)问',tab:0,highlight:'sq2',anim_scene:0,anim_step:2},
+{src:'audio/segment4.mp3',name:'总结',tab:1,highlight:null,anim_scene:-1,anim_step:0},
+{src:'audio/segment5.mp3',name:'易错点',tab:2,highlight:null,anim_scene:-1,anim_step:0}
+];
+let currentSegment=0,isPlaying=false,segmentDurations=[0,0,0,0,0,0],totalDuration=0,loadedCount=0;
+const audio=document.getElementById('audioPlayer'),playBtn=document.getElementById('playBtn'),volBtn=document.getElementById('volBtn');
+const totalProgressBar=document.getElementById('totalProgressBar'),currentTimeEl=document.getElementById('currentTime'),totalTimeEl=document.getElementById('totalTime');
+const segBtns=document.querySelectorAll('.seg-btn'),tabBtns=document.querySelectorAll('.tab-btn'),tabContents=document.querySelectorAll('.tab-content');
+segments.forEach((s,i)=>{const t=new Audio(s.src);t.addEventListener('loadedmetadata',()=>{segmentDurations[i]=t.duration;loadedCount++;if(loadedCount===segments.length){totalDuration=segmentDurations.reduce((a,b)=>a+b,0);totalTimeEl.textContent=formatTime(totalDuration);}});});
+function toggleCard(id){const c=document.getElementById(id);if(!c)return;c.classList.toggle('collapsed');const b=c.querySelector('.toggle-btn');if(b)b.textContent=c.classList.contains('collapsed')?'展开':'折叠';}
+const prevUrl='../p004_q03/index.html',nextUrl='../p005_q01/index.html';
+function goPrev(){if(prevUrl)window.location.href=prevUrl;}function goNext(){if(nextUrl)window.location.href=nextUrl;}
+document.addEventListener('DOMContentLoaded',()=>{if(!prevUrl)document.getElementById('prevBtn').style.display='none';if(!nextUrl)document.getElementById('nextBtn').style.display='none';});
+function switchTab(i){tabBtns.forEach((b,idx)=>b.classList.toggle('active',idx===i));tabContents.forEach((c,idx)=>c.classList.toggle('active',idx===i));}
+function switchQTab(i){document.querySelectorAll('.q-tab-btn').forEach((b,idx)=>b.classList.toggle('active',idx===i));document.querySelectorAll('.q-tab-panel').forEach((p,idx)=>p.classList.toggle('active',idx===i));}
+function switchAnimScene(i){document.querySelectorAll('.anim-tab-btn').forEach((b,idx)=>b.classList.toggle('active',idx===i));document.querySelectorAll('.anim-scene').forEach((s,idx)=>s.classList.toggle('active',idx===i));}
+function loadSegment(index){
+document.querySelectorAll('.step-item').forEach(el=>el.classList.remove('active'));
+currentSegment=index;audio.src=segments[index].src;updateSegButtons();
+if(segments[index].tab>=0)switchTab(segments[index].tab);
+if(segments[index].anim_scene>=0)switchAnimScene(segments[index].anim_scene);
+applyAnimStep(segments[index]);
+const h=segments[index].highlight;if(h){const el=document.getElementById(h);if(el)el.classList.add('active');}
+if(index===2)switchQTab(0);if(index===3)switchQTab(1);
+}
+function togglePlay(){if(isPlaying){audio.pause();playBtn.textContent='▶';isPlaying=false;}else{audio.play();playBtn.textContent='⏸';isPlaying=true;}}
+function toggleMute(){audio.muted=!audio.muted;volBtn.textContent=audio.muted?'🔇':'🔊';}
+function jumpToSegment(i){loadSegment(i);if(isPlaying)audio.play();}
+function updateSegButtons(){segBtns.forEach((b,i)=>{b.classList.remove('active');b.classList.toggle('played',i<currentSegment);});if(segBtns[currentSegment])segBtns[currentSegment].classList.add('active');}
+audio.addEventListener('ended',()=>{if(currentSegment<segments.length-1)jumpToSegment(currentSegment+1);else{playBtn.textContent='▶';isPlaying=false;}});
+audio.addEventListener('timeupdate',()=>{if(totalDuration>0){const before=segmentDurations.slice(0,currentSegment).reduce((a,b)=>a+b,0);const elapsed=before+audio.currentTime;totalProgressBar.style.width=(elapsed/totalDuration*100)+'%';currentTimeEl.textContent=formatTime(elapsed);}});
+function seekTotal(e){const r=e.currentTarget.getBoundingClientRect();const pct=(e.clientX-r.left)/r.width;const tt=pct*totalDuration;let acc=0;for(let i=0;i<segments.length;i++){if(tt<acc+segmentDurations[i]){loadSegment(i);audio.currentTime=tt-acc;if(isPlaying)audio.play();break;}acc+=segmentDurations[i];}}
+function formatTime(s){const m=Math.floor(s/60),sec=Math.floor(s%60);return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;}
+function showImage(src){document.getElementById('modalImage').src=src;document.getElementById('imageModal').classList.add('active');}
+function closeModal(){document.getElementById('imageModal').classList.remove('active');}
+function applyAnimStep(seg){
+const step=seg.anim_step;
+document.getElementById('step1').style.display='none';
+document.getElementById('step2').style.display='none';
+document.getElementById('hint0').style.display='block';
+const at=document.getElementById('animText');
+if(step===1){document.getElementById('step1').style.display='block';document.getElementById('hint0').style.display='none';at.textContent='B：东偏南45°200m；C：南北轴对称→西偏南45°200m';}
+else if(step===2){document.getElementById('step1').style.display='block';document.getElementById('step2').style.display='block';document.getElementById('hint0').style.display='none';at.textContent='△ABC：等腰直角三角形，面积=½×200×200=20000m²';}
+else at.textContent='南北轴对称：东西互换，南北不变';
+}
+document.querySelectorAll('.question-text img').forEach(img=>img.addEventListener('click',()=>showImage(img.src)));
+loadSegment(0);
+</script>
+</body>
+</html>
