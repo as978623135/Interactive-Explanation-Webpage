@@ -709,7 +709,7 @@ initDualPlayers();
 
     if(isPortrait){
       var availW = h, availH = w;
-      scale = Math.min(availW / BASE_H, availH / BASE_W);
+      scale = availH / BASE_H; // 强制短边拉满屏幕宽度，长边上下留白
       stage.style.width = BASE_W + 'px';
       stage.style.height = BASE_H + 'px';
       stage.style.marginLeft = -(BASE_W/2) + 'px';
