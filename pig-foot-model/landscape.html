@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>模型1 "猪蹄"模型</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+    background: #FFF3E0;
+  }
+  .stage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1920px;
+    height: 1080px;
+    background: #FFF3E0;
+    transform: translate(-50%, -50%) scale(1);
+    transform-origin: center center;
+  }
+  .canvas {
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    width: 80%;
+    height: 80%;
+    display: flex;
+    flex-direction: column;
+  }
+  /* 顶部通栏 */
+  .top-bar {
+    background: linear-gradient(135deg, #4CAF50, #66BB6A);
+    color: #fff;
+    text-align: center;
+    padding: 28px 40px 24px;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+    flex: 0 0 auto;
+  }
+  .title-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    margin-bottom: 12px;
+  }
+  .top-bar h1 {
+    font-size: 44px;
+    font-weight: 700;
+    letter-spacing: 3px;
+  }
+  .audio-btn {
+    background: rgba(255,255,255,0.2);
+    border: 2px solid rgba(255,255,255,0.6);
+    color: #fff;
+    font-size: 22px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.25s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .audio-btn:hover {
+    background: rgba(255,255,255,0.35);
+    transform: scale(1.1);
+  }
+  .audio-btn.playing {
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.6); }
+    50% { box-shadow: 0 0 0 12px rgba(255,255,255,0); }
+  }
+  .top-bar .subtitle {
+    font-size: 20px;
+    opacity: 0.95;
+    line-height: 1.8;
+  }
+  .top-bar .subtitle strong {
+    background: rgba(255,255,255,0.2);
+    padding: 2px 10px;
+    border-radius: 5px;
+    margin: 0 2px;
+  }
+  /* 主内容区 */
+  .main-content {
+    flex: 1;
+    display: flex;
+    gap: 28px;
+    padding-top: 28px;
+    min-height: 0;
+  }
+  .panel {
+    flex: 1;
+    background: #fff;
+    border-radius: 14px;
+    padding: 22px 24px 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .panel h2 {
+    font-size: 24px;
+    color: #2E7D32;
+    margin-bottom: 10px;
+    text-align: center;
+    border-bottom: 3px solid #A5D6A7;
+    padding-bottom: 8px;
+    flex: 0 0 auto;
+  }
+  .panel.right-panel h2 { color: #E65100; border-bottom-color: #FFCC80; }
+  svg {
+    flex: 1;
+    width: 100%;
+    display: block;
+    user-select: none;
+    min-height: 0;
+    touch-action: none;
+  }
+  .drag-hit, .point-hit { touch-action: none; }
+  .verify-box {
+    margin-top: 12px;
+    padding: 12px 18px;
+    background: #E8F5E9;
+    border-radius: 10px;
+    border-left: 5px solid #4CAF50;
+    font-size: 19px;
+    color: #1B5E20;
+    line-height: 1.8;
+    text-align: center;
+    flex: 0 0 auto;
+  }
+  .verify-box .formula { font-weight: 700; font-size: 21px; }
+  .verify-box .equal { color: #C62828; font-weight: 700; }
+  .hint-text {
+    margin-top: 8px;
+    font-size: 14px;
+    color: #999;
+    text-align: center;
+    line-height: 1.6;
+    flex: 0 0 auto;
+  }
+  .ext-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 10px;
+    flex: 0 0 auto;
+  }
+  .ext-controls button {
+    padding: 10px 28px;
+    font-size: 18px;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #fff;
+  }
+  .ext-controls button:hover { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(0,0,0,0.2); }
+  .ext-controls button:active { transform: translateY(0); }
+  #addBtn { background: #4CAF50; }
+  #removeBtn { background: #EF5350; }
+  #removeBtn:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+  .ext-count {
+    font-size: 17px;
+    color: #E65100;
+    font-weight: 600;
+    background: #FFF3E0;
+    padding: 6px 16px;
+    border-radius: 6px;
+  }
+  .conclusion-box {
+    margin-top: 12px;
+    padding: 12px 18px;
+    background: #FFF3E0;
+    border-radius: 10px;
+    border-left: 5px solid #FF9800;
+    font-size: 17px;
+    color: #BF360C;
+    line-height: 1.8;
+    text-align: center;
+    flex: 0 0 auto;
+  }
+  .conclusion-box .title { font-weight: 700; margin-bottom: 4px; font-size: 18px; }
+  .drag-hit { cursor: ns-resize; }
+  .point-hit { cursor: pointer; }
+
+  /* 横屏提示遮罩 */
+  .rotate-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(135deg, #2E7D32, #388E3C);
+    display: none; justify-content: center; align-items: center;
+    flex-direction: column; color: #fff; text-align: center;
+    z-index: 100000;
+  }
+  .rotate-overlay.show { display: flex; }
+  .rotate-icon { font-size: 72px; margin-bottom: 20px; animation: rotatePhone 2s ease-in-out infinite; }
+  @keyframes rotatePhone {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(90deg); }
+  }
+  .rotate-overlay h2 { font-size: 32px; margin-bottom: 12px; font-weight: 700; }
+  .rotate-overlay p { font-size: 18px; line-height: 1.8; opacity: 0.9; }
+
+  /* 播放锁定浮窗 */
+  .lock-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.55);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+  }
+  .lock-overlay.show { display: flex; }
+  .lock-dialog {
+    background: #fff;
+    border-radius: 16px;
+    padding: 36px 48px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.35);
+    max-width: 460px;
+    animation: popIn 0.25s ease-out;
+  }
+  @keyframes popIn {
+    from { transform: scale(0.85); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .lock-dialog h3 {
+    font-size: 22px;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  .lock-dialog p {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 26px;
+    line-height: 1.6;
+  }
+  .lock-dialog .btn-group {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+  }
+  .lock-dialog button {
+    padding: 12px 28px;
+    font-size: 17px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: all 0.2s;
+    color: #fff;
+  }
+  .lock-dialog button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+  .btn-continue { background: #4CAF50; }
+  .btn-stop { background: #EF5350; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="canvas">
+    <header class="top-bar">
+      <div class="title-row">
+        <h1>模型 1 &nbsp;"猪蹄" 模型</h1>
+        <button id="audioBtn" class="audio-btn" title="播放讲解音频">🔊</button>
+      </div>
+      <p class="subtitle">
+        <strong>模型构建</strong> AB ∥ CD，E 是平行线间一点（内拐点），连接 EB、ED，且两条线段凹进去
+        &nbsp;&nbsp;
+        <strong>相关结论</strong> ∠B + ∠D = ∠BED
+      </p>
+    </header>
+
+    <div class="main-content">
+      <div class="panel left-panel">
+        <h2>基础模型（交互）</h2>
+        <svg id="baseSvg" viewBox="0 0 520 400"></svg>
+        <div class="verify-box" id="verifyBox"></div>
+        <p class="hint-text">提示：拖动 AB / CD 线可上下移动 · 拖动 E 点可上下移动 · 单击 E 点显示/隐藏辅助线 EF</p>
+      </div>
+      <div class="panel right-panel">
+        <h2>模型拓展（交互）</h2>
+        <div class="ext-controls">
+          <button id="addBtn">+ 增加一对拐点</button>
+          <button id="removeBtn">− 减少一对拐点</button>
+          <span class="ext-count" id="extCount">拐点数量：5</span>
+        </div>
+        <svg id="extSvg" viewBox="0 0 520 400"></svg>
+        <div class="conclusion-box" id="conclusionBox"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 播放锁定浮窗 -->
+<div class="lock-overlay" id="lockOverlay">
+  <div class="lock-dialog">
+    <h3>⚠️ 正在自动讲解中</h3>
+    <p>讲解播放期间图形会自动演示。<br>你希望怎么处理？</p>
+    <div class="btn-group">
+      <button class="btn-continue" id="btnContinue">不操作，继续播放</button>
+      <button class="btn-stop" id="btnStop">停止播放，我操作</button>
+    </div>
+  </div>
+</div>
+
+<!-- 横屏提示遮罩 -->
+<div class="rotate-overlay" id="rotateOverlay">
+  <div class="rotate-content">
+    <div class="rotate-icon">📱</div>
+    <h2>请横屏使用</h2>
+    <p>本课件为 16:9 横屏设计<br>请旋转手机以获得最佳体验</p>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   16:9 画布等比缩放
+============================================================ */
+const stage = document.getElementById("stage");
+function fitStage() {
+  const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+  stage.style.transform = `translate(-50%, -50%) scale(${scale})`;
+}
+window.addEventListener("resize", fitStage);
+fitStage();
+
+/* 横屏检测：手机竖屏时强制提示 */
+function checkOrientation() {
+  const overlay = document.getElementById("rotateOverlay");
+  const isPhone = window.innerWidth < 768;
+  const isPortrait = window.innerHeight > window.innerWidth;
+  if (isPhone && isPortrait) overlay.classList.add("show");
+  else overlay.classList.remove("show");
+}
+window.addEventListener("resize", checkOrientation);
+window.addEventListener("orientationchange", checkOrientation);
+checkOrientation();
+
+/* ============================================================
+   工具函数
+============================================================ */
+const SVG_NS = "http://www.w3.org/2000/svg";
+function el(tag, attrs) {
+  const e = document.createElementNS(SVG_NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+function getSvgPoint(svg, clientX, clientY) {
+  const rect = svg.getBoundingClientRect();
+  const vb = svg.viewBox.baseVal;
+  return {
+    x: (clientX - rect.left) / rect.width * vb.width,
+    y: (clientY - rect.top) / rect.height * vb.height
+  };
+}
+function getClientXY(e) {
+  if (e.touches && e.touches.length > 0) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  if (e.changedTouches && e.changedTouches.length > 0) return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+  return { x: e.clientX, y: e.clientY };
+}
+function dirAngle(vertex, p) { return Math.atan2(p.y - vertex.y, p.x - vertex.x); }
+function angleDeg(p1, vertex, p2) {
+  const a1 = dirAngle(vertex, p1);
+  const a2 = dirAngle(vertex, p2);
+  let diff = Math.abs(a1 - a2);
+  if (diff > Math.PI) diff = 2 * Math.PI - diff;
+  return diff * 180 / Math.PI;
+}
+function sectorPath(cx, cy, r, angleA, angleB) {
+  let cw = ((angleB - angleA) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+  let start, end, sweep;
+  if (cw <= Math.PI) { start = angleA; end = angleB; sweep = 1; }
+  else { start = angleB; end = angleA; sweep = 1; }
+  const x1 = cx + r * Math.cos(start), y1 = cy + r * Math.sin(start);
+  const x2 = cx + r * Math.cos(end), y2 = cy + r * Math.sin(end);
+  return `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 0 ${sweep} ${x2} ${y2} Z`;
+}
+function bisectorAngle(angleA, angleB) {
+  let cw = ((angleB - angleA) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+  if (cw <= Math.PI) return angleA + cw / 2;
+  return angleB + (2 * Math.PI - cw) / 2;
+}
+
+/* ============================================================
+   基础模型
+============================================================ */
+const baseSvg = document.getElementById("baseSvg");
+const verifyBox = document.getElementById("verifyBox");
+const baseState = {
+  yAB: 100, yCD: 320, yE: 210, efVisible: false,
+  xA: 70, xB: 290, xC: 70, xD: 290, xE: 180, xF: 470,
+};
+const INITIAL_BASE = { yAB: 100, yCD: 320, yE: 210, efVisible: false };
+
+function renderBase() {
+  baseSvg.innerHTML = "";
+  const s = baseState;
+  const A = {x: s.xA, y: s.yAB}, B = {x: s.xB, y: s.yAB};
+  const C = {x: s.xC, y: s.yCD}, D = {x: s.xD, y: s.yCD};
+  const E = {x: s.xE, y: s.yE}, F = {x: s.xF, y: s.yE};
+  const angBRaw = angleDeg(A, B, E), angDRaw = angleDeg(C, D, E), angBEDRaw = angleDeg(B, E, D);
+  const angB = Math.round(angBRaw), angD = Math.round(angDRaw), angBED = Math.round(angBEDRaw);
+
+  if (s.efVisible) {
+    baseSvg.appendChild(el("line", {x1:E.x,y1:E.y,x2:F.x,y2:F.y,stroke:"#9E9E9E","stroke-width":2,"stroke-dasharray":"6,4"}));
+    baseSvg.appendChild(el("text",{x:F.x+4,y:F.y+5,"font-size":16,fill:"#666","font-weight":"600"})).textContent="F";
+    baseSvg.appendChild(el("text",{x:(E.x+F.x)/2,y:E.y-8,"font-size":12,fill:"#9E9E9E","text-anchor":"middle"})).textContent="EF ∥ AB";
+  }
+  const rB=28, rD=28, rE=32;
+  const aB_BA=dirAngle(B,A), aB_BE=dirAngle(B,E);
+  baseSvg.appendChild(el("path",{d:sectorPath(B.x,B.y,rB,aB_BA,aB_BE),fill:"rgba(33,150,243,0.35)",stroke:"#1565C0","stroke-width":1}));
+  const aD_DC=dirAngle(D,C), aD_DE=dirAngle(D,E);
+  baseSvg.appendChild(el("path",{d:sectorPath(D.x,D.y,rD,aD_DC,aD_DE),fill:"rgba(33,150,243,0.35)",stroke:"#1565C0","stroke-width":1}));
+  const aE_EB=dirAngle(E,B), aE_ED=dirAngle(E,D);
+  baseSvg.appendChild(el("path",{d:sectorPath(E.x,E.y,rE,aE_EB,aE_ED),fill:"rgba(244,67,54,0.3)",stroke:"#C62828","stroke-width":1}));
+  baseSvg.appendChild(el("line",{x1:A.x,y1:A.y,x2:B.x,y2:B.y,stroke:"#333","stroke-width":2.5}));
+  baseSvg.appendChild(el("line",{x1:C.x,y1:C.y,x2:D.x,y2:D.y,stroke:"#333","stroke-width":2.5}));
+  baseSvg.appendChild(el("line",{x1:E.x,y1:E.y,x2:B.x,y2:B.y,stroke:"#333","stroke-width":2.5}));
+  baseSvg.appendChild(el("line",{x1:E.x,y1:E.y,x2:D.x,y2:D.y,stroke:"#333","stroke-width":2.5}));
+  function drawPM(y,xp){baseSvg.appendChild(el("line",{x1:xp,y1:y-5,x2:xp+3,y2:y,stroke:"#666","stroke-width":1.5}));baseSvg.appendChild(el("line",{x1:xp+3,y1:y,x2:xp,y2:y+5,stroke:"#666","stroke-width":1.5}));}
+  drawPM(s.yAB,170); drawPM(s.yCD,170);
+  function lab(t,x,y,dx,dy){const o=el("text",{x:x+dx,y:y+dy,"font-size":17,fill:"#222","font-weight":"700"});o.textContent=t;baseSvg.appendChild(o);}
+  lab("A",A.x,A.y,-16,5); lab("B",B.x,B.y,8,5); lab("C",C.x,C.y,-16,5); lab("D",D.x,D.y,8,5); lab("E",E.x,E.y,-18,5);
+  function angL(val,cx,cy,r,a1,a2,color){const bis=bisectorAngle(a1,a2);const tx=cx+(r+16)*Math.cos(bis),ty=cy+(r+16)*Math.sin(bis);const o=el("text",{x:tx,y:ty,"font-size":13,fill:color,"font-weight":"700","text-anchor":"middle","dominant-baseline":"middle"});o.textContent=val+"°";baseSvg.appendChild(o);}
+  angL(angB,B.x,B.y,rB,aB_BA,aB_BE,"#1565C0");
+  angL(angD,D.x,D.y,rD,aD_DC,aD_DE,"#1565C0");
+  angL(angBED,E.x,E.y,rE,aE_EB,aE_ED,"#C62828");
+  const eCircle=el("circle",{cx:E.x,cy:E.y,r:8,fill:"#FFC107",stroke:"#F57F17","stroke-width":2,class:"point-hit"});
+  baseSvg.appendChild(eCircle);
+  const abHit=el("line",{x1:A.x,y1:A.y,x2:B.x,y2:B.y,stroke:"transparent","stroke-width":18,class:"drag-hit"});
+  baseSvg.appendChild(abHit);
+  const cdHit=el("line",{x1:C.x,y1:C.y,x2:D.x,y2:D.y,stroke:"transparent","stroke-width":18,class:"drag-hit"});
+  baseSvg.appendChild(cdHit);
+  const sum=angB+angD;
+  const isEqual=Math.abs((angBRaw+angDRaw)-angBEDRaw)<0.01;
+  verifyBox.innerHTML=`<div class="formula">∠B + ∠D = ${angB}° + ${angD}° = <span class="equal">${sum}°</span>&nbsp;&nbsp;|&nbsp;&nbsp; ∠BED = <span class="equal">${angBED}°</span></div><div>${isEqual?'✅ ∠B + ∠D = ∠BED，二者相等':'⚠️ 当前不相等（拖动后自动验证）'}</div>`;
+  setupDrag(abHit,"yAB"); setupDrag(cdHit,"yCD"); setupEPoint(eCircle);
+}
+
+function setupDrag(hitEl, prop) {
+  let startY, startVal;
+  function onStart(e) {
+    if (playbackState.isPlaying) { showLockDialog(); e.preventDefault(); return; }
+    e.preventDefault();
+    const p = getClientXY(e);
+    startY = p.y; startVal = baseState[prop];
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onEnd);
+    document.addEventListener("touchmove", onMove, { passive: false });
+    document.addEventListener("touchend", onEnd);
+  }
+  function onMove(e) {
+    e.preventDefault();
+    const p = getClientXY(e);
+    const pt = getSvgPoint(baseSvg, p.x, p.y);
+    const sp = getSvgPoint(baseSvg, p.x, startY);
+    let nv = startVal + (pt.y - sp.y);
+    nv = Math.max(40, Math.min(370, nv));
+    baseState[prop] = nv; renderBase();
+  }
+  function onEnd() {
+    document.removeEventListener("mousemove", onMove);
+    document.removeEventListener("mouseup", onEnd);
+    document.removeEventListener("touchmove", onMove);
+    document.removeEventListener("touchend", onEnd);
+  }
+  hitEl.addEventListener("mousedown", onStart);
+  hitEl.addEventListener("touchstart", onStart, { passive: false });
+}
+
+function setupEPoint(pointEl) {
+  let startY, startYE, moved;
+  function onStart(e) {
+    if (playbackState.isPlaying) { showLockDialog(); e.preventDefault(); return; }
+    e.preventDefault();
+    const p = getClientXY(e);
+    startY = p.y; startYE = baseState.yE; moved = false;
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onEnd);
+    document.addEventListener("touchmove", onMove, { passive: false });
+    document.addEventListener("touchend", onEnd);
+  }
+  function onMove(e) {
+    e.preventDefault();
+    const p = getClientXY(e);
+    if (Math.abs(p.y - startY) > 3) moved = true;
+    const pt = getSvgPoint(baseSvg, p.x, p.y);
+    const sp = getSvgPoint(baseSvg, p.x, startY);
+    let ny = startYE + (pt.y - sp.y);
+    ny = Math.max(50, Math.min(360, ny));
+    baseState.yE = ny; renderBase();
+  }
+  function onEnd() {
+    document.removeEventListener("mousemove", onMove);
+    document.removeEventListener("mouseup", onEnd);
+    document.removeEventListener("touchmove", onMove);
+    document.removeEventListener("touchend", onEnd);
+    if (!moved) { baseState.efVisible = !baseState.efVisible; renderBase(); }
+  }
+  pointEl.addEventListener("mousedown", onStart);
+  pointEl.addEventListener("touchstart", onStart, { passive: false });
+}
+
+/* ============================================================
+   拓展模型
+============================================================ */
+const extSvg = document.getElementById("extSvg");
+const conclusionBox = document.getElementById("conclusionBox");
+const extCountEl = document.getElementById("extCount");
+const addBtn = document.getElementById("addBtn");
+const removeBtn = document.getElementById("removeBtn");
+let extN = 5;
+const INITIAL_EXTN = 5;
+
+function renderExt() {
+  extSvg.innerHTML = "";
+  const n = extN;
+  const yTop=70, yBot=350, xLeft=80, xRight=480;
+  const A={x:xLeft,y:yTop}, M={x:xRight,y:yTop}, B={x:xLeft,y:yBot}, N={x:xRight,y:yBot};
+  const points=[];
+  const yStart=110, yEnd=310;
+  for (let i=0;i<n;i++){const y=yStart+(yEnd-yStart)*(i+1)/(n+1);const x=(i%2===0)?210:25;points.push({x,y,label:`P${i+1}`});}
+  const verts=[A,...points,B];
+  extSvg.appendChild(el("line",{x1:A.x,y1:A.y,x2:M.x,y2:M.y,stroke:"#333","stroke-width":2.5}));
+  extSvg.appendChild(el("line",{x1:B.x,y1:B.y,x2:N.x,y2:N.y,stroke:"#333","stroke-width":2.5}));
+  function dPM(y,xp){extSvg.appendChild(el("line",{x1:xp,y1:y-5,x2:xp+3,y2:y,stroke:"#666","stroke-width":1.5}));extSvg.appendChild(el("line",{x1:xp+3,y1:y,x2:xp,y2:y+5,stroke:"#666","stroke-width":1.5}));}
+  dPM(yTop,260); dPM(yBot,260);
+  const extR=22;
+  function extSec(v,p1,p2,fill,stroke){
+    const a1=dirAngle(v,p1),a2=dirAngle(v,p2);
+    extSvg.appendChild(el("path",{d:sectorPath(v.x,v.y,extR,a1,a2),fill,stroke,"stroke-width":1}));
+    const deg=Math.round(angleDeg(p1,v,p2));
+    const bis=bisectorAngle(a1,a2);
+    const tx=v.x+(extR+14)*Math.cos(bis),ty=v.y+(extR+14)*Math.sin(bis);
+    const o=el("text",{x:tx,y:ty,"font-size":12,fill:stroke,"font-weight":"700","text-anchor":"middle","dominant-baseline":"middle"});
+    o.textContent=deg+"°"; extSvg.appendChild(o);
+  }
+  extSec(A,M,verts[1],"rgba(76,175,80,0.3)","#2E7D32");
+  extSec(B,N,verts[n],"rgba(76,175,80,0.3)","#2E7D32");
+  for(let j=1;j<=n;j++){const odd=((j-1)%2===0);const fill=odd?"rgba(244,67,54,0.3)":"rgba(33,150,243,0.3)";const stroke=odd?"#C62828":"#1565C0";extSec(verts[j],verts[j-1],verts[j+1],fill,stroke);}
+  for(let i=0;i<verts.length-1;i++){extSvg.appendChild(el("line",{x1:verts[i].x,y1:verts[i].y,x2:verts[i+1].x,y2:verts[i+1].y,stroke:"#E65100","stroke-width":2.5}));}
+  function dot(p,c){extSvg.appendChild(el("circle",{cx:p.x,cy:p.y,r:4.5,fill:c,stroke:"#fff","stroke-width":1.5}));}
+  dot(A,"#4CAF50"); dot(B,"#4CAF50");
+  points.forEach((p,i)=>dot(p,i%2===0?"#F44336":"#2196F3"));
+  function lb(t,x,y,dx,dy,c){const o=el("text",{x:x+dx,y:y+dy,"font-size":15,fill:c||"#222","font-weight":"700"});o.textContent=t;extSvg.appendChild(o);}
+  lb("A",A.x,A.y,-14,5,"#2E7D32"); lb("M",M.x,M.y,6,5,"#2E7D32");
+  lb("B",B.x,B.y,-14,5,"#2E7D32"); lb("N",N.x,N.y,6,5,"#2E7D32");
+  points.forEach((p,i)=>{const dx=(i%2===0)?8:-22;lb(p.label,p.x,p.y,dx,5,i%2===0?"#C62828":"#1565C0");});
+  extCountEl.textContent=`拐点数量：${n}`;
+  removeBtn.disabled=(n<=3);
+  let left=["∠A","∠B"], right=[];
+  for(let i=1;i<=n;i++){if(i%2===0)left.push(`∠P${i}`);else right.push(`∠P${i}`);}
+  conclusionBox.innerHTML=`<div class="title">已知条件：AM ∥ BN</div><div><strong>结论：</strong>${left.join(" + ")} = ${right.join(" + ")}</div><div style="font-size:13px;color:#999;margin-top:4px;">（朝一侧的角之和 = 朝另一侧的角之和）</div>`;
+}
+
+addBtn.addEventListener("click", () => {
+  if (playbackState.isPlaying) { showLockDialog(); return; }
+  extN += 2; renderExt();
+});
+removeBtn.addEventListener("click", () => {
+  if (playbackState.isPlaying) { showLockDialog(); return; }
+  if (extN > 3) { extN -= 2; renderExt(); }
+});
+
+/* ============================================================
+   音频播放 + 自动动画调度
+============================================================ */
+const audioBtn = document.getElementById("audioBtn");
+const lockOverlay = document.getElementById("lockOverlay");
+const audio = new Audio();
+const SEG_COUNT = 7;
+
+const playbackState = {
+  isPlaying: false,
+  isPaused: false,
+  currentSeg: 0,
+};
+
+// 每段音频对应的自动动作：触发时间(秒) + 动作函数
+// 基于音频播放进度触发，暂停时进度停止，动作也暂停
+const segActions = [
+  null, // seg1: 开场+模型构建，无动作
+  { triggerAt: 3.0, action: autoDragAll },      // seg2: 说到"拖动AB线"时自动拖动
+  { triggerAt: 4.0, action: autoClickE },        // seg3: 说到"单击E点"时显示EF
+  null, // seg4: 推导证明，无动作
+  { triggerAt: 8.0, action: autoAddCorner },     // seg5: 说到"增加一对拐点"时
+  { triggerAt: 2.0, action: autoRemoveCorner },  // seg6: 说到"减少一对拐点"时
+  null, // seg7: 总结，无动作
+];
+let currentActionTriggered = false;
+
+function playSegment(index) {
+  if (index >= SEG_COUNT) { finishPlayback(); return; }
+  playbackState.currentSeg = index;
+  currentActionTriggered = false;
+  audio.src = `audio/seg${index + 1}.mp3`;
+  audio.play().catch(e => {
+    console.error("播放失败:", e);
+    playbackState.isPlaying = false;
+    playbackState.isPaused = false;
+  });
+}
+
+audio.addEventListener("timeupdate", () => {
+  const cfg = segActions[playbackState.currentSeg];
+  if (cfg && !currentActionTriggered && audio.currentTime >= cfg.triggerAt) {
+    currentActionTriggered = true;
+    cfg.action();
+  }
+});
+
+audio.addEventListener("ended", () => {
+  playSegment(playbackState.currentSeg + 1);
+});
+
+audio.addEventListener("play", () => {
+  playbackState.isPlaying = true;
+  playbackState.isPaused = false;
+  audioBtn.textContent = "⏸";
+  audioBtn.classList.add("playing");
+});
+
+audio.addEventListener("pause", () => {
+  if (!playbackState.isPlaying) return;
+  playbackState.isPaused = true;
+  audioBtn.textContent = "▶";
+  audioBtn.classList.remove("playing");
+});
+
+audioBtn.addEventListener("click", () => {
+  if (playbackState.isPlaying && !playbackState.isPaused) {
+    audio.pause();
+  } else if (playbackState.isPaused) {
+    audio.play();
+  } else {
+    resetAll();
+    playSegment(0);
+  }
+});
+
+/* ---- 自动动画 ---- */
+function animateProp(prop, from, to, duration, callback) {
+  const start = performance.now();
+  function step(now) {
+    const t = Math.min((now - start) / duration, 1);
+    baseState[prop] = from + (to - from) * t;
+    renderBase();
+    if (t < 1) requestAnimationFrame(step);
+    else if (callback) callback();
+  }
+  requestAnimationFrame(step);
+}
+
+function autoDragAll() {
+  // AB上下 → CD上下 → E上下，依次执行
+  animateProp("yAB", 100, 145, 600, () => {
+    animateProp("yAB", 145, 100, 600, () => {
+      animateProp("yCD", 320, 275, 600, () => {
+        animateProp("yCD", 275, 320, 600, () => {
+          animateProp("yE", 210, 255, 600, () => {
+            animateProp("yE", 255, 210, 600);
+          });
+        });
+      });
+    });
+  });
+}
+
+function autoClickE() {
+  baseState.efVisible = true;
+  renderBase();
+}
+
+function autoAddCorner() {
+  extN += 2;
+  renderExt();
+}
+
+function autoRemoveCorner() {
+  if (extN > 3) { extN -= 2; renderExt(); }
+}
+
+/* ---- 播放锁定浮窗 ---- */
+function showLockDialog() {
+  audio.pause();
+  lockOverlay.classList.add("show");
+}
+
+document.getElementById("btnContinue").addEventListener("click", () => {
+  lockOverlay.classList.remove("show");
+  audio.play();
+});
+
+document.getElementById("btnStop").addEventListener("click", () => {
+  lockOverlay.classList.remove("show");
+  stopPlayback();
+});
+
+/* ---- 停止 & 重置 ---- */
+function stopPlayback() {
+  audio.pause();
+  audio.currentTime = 0;
+  playbackState.isPlaying = false;
+  playbackState.isPaused = false;
+  playbackState.currentSeg = 0;
+  currentActionTriggered = false;
+  audioBtn.textContent = "🔊";
+  audioBtn.classList.remove("playing");
+  resetAll();
+}
+
+function finishPlayback() {
+  playbackState.isPlaying = false;
+  playbackState.isPaused = false;
+  playbackState.currentSeg = 0;
+  currentActionTriggered = false;
+  audioBtn.textContent = "🔊";
+  audioBtn.classList.remove("playing");
+  // 播放完毕1秒后自动重置图形
+  setTimeout(() => { if (!playbackState.isPlaying) resetAll(); }, 1200);
+}
+
+function resetAll() {
+  baseState.yAB = INITIAL_BASE.yAB;
+  baseState.yCD = INITIAL_BASE.yCD;
+  baseState.yE = INITIAL_BASE.yE;
+  baseState.efVisible = INITIAL_BASE.efVisible;
+  extN = INITIAL_EXTN;
+  renderBase();
+  renderExt();
+}
+
+/* ============================================================
+   初始化
+============================================================ */
+renderBase();
+renderExt();
+</script>
+</body>
+</html>
