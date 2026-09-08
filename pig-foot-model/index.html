@@ -41,40 +41,40 @@
   /* ===== 顶部通栏 ===== */
   .top-bar {
     background: linear-gradient(135deg, #4CAF50, #66BB6A);
-    color: #fff; text-align: center;
-    padding: 28px 40px 24px; border-radius: 14px;
+    color: #fff;
+    padding: 24px 40px 20px; border-radius: 14px;
     box-shadow: 0 4px 14px rgba(0,0,0,0.15);
     flex: 0 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 24px;
   }
-  .stage-v .top-bar { padding: 20px 24px 16px; border-radius: 12px; }
-  .title-row {
-    display: flex; align-items: center; justify-content: center;
-    gap: 18px; margin-bottom: 12px;
-  }
-  .stage-v .title-row { gap: 12px; margin-bottom: 8px; }
-  .top-bar h1 { font-size: 44px; font-weight: 700; letter-spacing: 3px; }
-  .stage-v .top-bar h1 { font-size: 36px; letter-spacing: 2px; }
+  .stage-v .top-bar { padding: 18px 24px 14px; border-radius: 12px; gap: 16px; }
+  .header-content { flex: 1; text-align: center; min-width: 0; }
+  .top-bar h1 { font-size: 48px; font-weight: 700; letter-spacing: 3px; margin-bottom: 10px; }
+  .stage-v .top-bar h1 { font-size: 40px; letter-spacing: 2px; margin-bottom: 6px; }
   .audio-btn {
-    background: rgba(255,255,255,0.2);
-    border: 2px solid rgba(255,255,255,0.6);
-    color: #fff; font-size: 22px;
-    width: 50px; height: 50px; border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    border: 3px solid #fff;
+    color: #fff; font-size: 42px;
+    width: 100px; height: 100px; border-radius: 50%;
     cursor: pointer; transition: all 0.25s;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
+    box-shadow: 0 0 18px rgba(255,255,255,0.45);
   }
-  .stage-v .audio-btn { width: 44px; height: 44px; font-size: 20px; }
-  .audio-btn:hover { background: rgba(255,255,255,0.35); transform: scale(1.1); }
+  .stage-v .audio-btn { width: 80px; height: 80px; font-size: 34px; }
+  .audio-btn:hover { background: rgba(255,255,255,0.4); transform: scale(1.08); }
+  .audio-btn:active { transform: scale(0.95); }
   .audio-btn.playing { animation: pulse 1.5s infinite; }
   @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.6); }
-    50% { box-shadow: 0 0 0 12px rgba(255,255,255,0); }
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.7), 0 0 18px rgba(255,255,255,0.45); }
+    50% { box-shadow: 0 0 0 14px rgba(255,255,255,0), 0 0 30px rgba(255,255,255,0.7); }
   }
-  .top-bar .subtitle { font-size: 20px; opacity: 0.95; line-height: 1.8; }
-  .stage-v .top-bar .subtitle { font-size: 17px; line-height: 1.6; }
+  .top-bar .subtitle { font-size: 22px; opacity: 0.95; line-height: 1.8; }
+  .stage-v .top-bar .subtitle { font-size: 19px; line-height: 1.6; }
   .top-bar .subtitle strong {
     background: rgba(255,255,255,0.2);
-    padding: 2px 10px; border-radius: 5px; margin: 0 2px;
+    padding: 3px 12px; border-radius: 6px; margin: 0 3px;
   }
   /* ===== 主内容区 ===== */
   .main-content-h {
@@ -87,18 +87,18 @@
   }
   .panel {
     flex: 1; background: #fff; border-radius: 14px;
-    padding: 22px 24px 20px;
+    padding: 20px 24px 18px;
     box-shadow: 0 2px 12px rgba(0,0,0,0.08);
     display: flex; flex-direction: column; min-height: 0;
   }
-  .stage-v .panel { padding: 14px 16px 12px; border-radius: 12px; }
+  .stage-v .panel { padding: 12px 16px 10px; border-radius: 12px; }
   .panel h2 {
-    font-size: 24px; color: #2E7D32;
+    font-size: 26px; color: #2E7D32;
     margin-bottom: 10px; text-align: center;
     border-bottom: 3px solid #A5D6A7;
     padding-bottom: 8px; flex: 0 0 auto;
   }
-  .stage-v .panel h2 { font-size: 20px; margin-bottom: 6px; padding-bottom: 5px; }
+  .stage-v .panel h2 { font-size: 22px; margin-bottom: 6px; padding-bottom: 5px; }
   .panel.right-panel h2 { color: #E65100; border-bottom-color: #FFCC80; }
   svg {
     flex: 1; width: 100%; display: block;
@@ -107,54 +107,82 @@
   .drag-hit, .point-hit { touch-action: none; }
   /* ===== 验证框 ===== */
   .verify-box {
-    margin-top: 12px; padding: 12px 18px;
+    margin-top: 12px; padding: 14px 20px;
     background: #E8F5E9; border-radius: 10px;
     border-left: 5px solid #4CAF50;
-    font-size: 17px; line-height: 1.8; text-align: center;
+    font-size: 19px; line-height: 1.8; text-align: center;
     flex: 0 0 auto;
   }
-  .stage-v .verify-box { margin-top: 8px; padding: 8px 12px; font-size: 15px; line-height: 1.6; }
-  .verify-box .formula { font-weight: 700; font-size: 19px; }
-  .stage-v .verify-box .formula { font-size: 16px; }
+  .stage-v .verify-box { margin-top: 8px; padding: 10px 14px; font-size: 17px; line-height: 1.6; }
+  .verify-box .formula { font-weight: 700; font-size: 22px; }
+  .stage-v .verify-box .formula { font-size: 19px; }
   .verify-box .equal { color: #C62828; }
   .hint-text {
-    margin-top: 8px; font-size: 14px; color: #999;
+    margin-top: 8px; font-size: 15px; color: #999;
     text-align: center; line-height: 1.6; flex: 0 0 auto;
   }
-  .stage-v .hint-text { font-size: 12px; margin-top: 5px; }
+  .stage-v .hint-text { font-size: 13px; margin-top: 5px; }
   /* ===== 拓展控制 ===== */
   .ext-controls {
     display: flex; align-items: center; justify-content: center;
-    gap: 16px; margin-bottom: 10px; flex: 0 0 auto;
+    gap: 18px; margin-bottom: 10px; flex: 0 0 auto;
   }
-  .stage-v .ext-controls { gap: 10px; margin-bottom: 6px; }
+  .stage-v .ext-controls { gap: 12px; margin-bottom: 6px; }
   .ext-controls button {
-    padding: 10px 28px; font-size: 18px; font-weight: 700;
-    border: none; border-radius: 8px; cursor: pointer;
+    padding: 14px 36px; font-size: 22px; font-weight: 700;
+    border: 3px solid #fff; border-radius: 10px; cursor: pointer;
     transition: all 0.2s; color: #fff;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
   }
-  .stage-v .ext-controls button { padding: 8px 18px; font-size: 15px; }
-  .ext-controls button:hover { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(0,0,0,0.2); }
-  .ext-controls button:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+  .stage-v .ext-controls button { padding: 12px 28px; font-size: 19px; }
+  .ext-controls button:hover { transform: translateY(-2px); box-shadow: 0 5px 14px rgba(0,0,0,0.25); }
+  .ext-controls button:active { transform: scale(0.96); }
+  .ext-controls button:disabled { background: #ccc !important; cursor: not-allowed; transform: none; box-shadow: none; border-color: #ddd; }
   .btn-add { background: #4CAF50; }
   .btn-remove { background: #EF5350; }
   .ext-count {
-    font-size: 17px; color: #E65100; font-weight: 600;
-    background: #FFF3E0; padding: 6px 16px; border-radius: 6px;
+    font-size: 19px; color: #E65100; font-weight: 600;
+    background: #FFF3E0; padding: 8px 18px; border-radius: 8px;
   }
-  .stage-v .ext-count { font-size: 14px; padding: 4px 10px; }
+  .stage-v .ext-count { font-size: 16px; padding: 6px 12px; }
   .conclusion-box {
-    margin-top: 10px; padding: 12px 18px;
+    margin-top: 10px; padding: 14px 20px;
     background: #FFF3E0; border-radius: 10px;
     border-left: 5px solid #FF9800;
-    font-size: 16px; line-height: 1.8; color: #BF360C;
+    font-size: 18px; line-height: 1.8; color: #BF360C;
     flex: 0 0 auto;
   }
-  .stage-v .conclusion-box { margin-top: 6px; padding: 8px 12px; font-size: 14px; line-height: 1.6; }
-  .conclusion-box .title { font-weight: 700; margin-bottom: 4px; font-size: 18px; }
-  .stage-v .conclusion-box .title { font-size: 15px; }
+  .stage-v .conclusion-box { margin-top: 6px; padding: 10px 14px; font-size: 15px; line-height: 1.6; }
+  .conclusion-box .title { font-weight: 700; margin-bottom: 4px; font-size: 20px; }
+  .stage-v .conclusion-box .title { font-size: 17px; }
   .drag-hit { cursor: ns-resize; }
   .point-hit { cursor: pointer; }
+
+  /* ===== 闪烁动画 ===== */
+  @keyframes flashLine {
+    0%, 100% { stroke: #333; stroke-width: 2.5; opacity: 1; }
+    50% { stroke: #FF1744; stroke-width: 5.5; opacity: 0.75; }
+  }
+  .flash-line { animation: flashLine 0.5s ease-in-out 3; }
+
+  @keyframes flashSector {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 1; }
+  }
+  .flash-sector { animation: flashSector 0.45s ease-in-out 4; }
+
+  @keyframes flashPoint {
+    0%, 100% { stroke-width: 2; opacity: 1; }
+    50% { stroke-width: 5; opacity: 0.85; }
+  }
+  .flash-point { animation: flashPoint 0.4s ease-in-out 3; }
+
+  @keyframes flashBtn {
+    0%, 100% { box-shadow: 0 3px 10px rgba(0,0,0,0.2); }
+    50% { box-shadow: 0 0 0 5px #fff, 0 0 24px rgba(255,255,255,0.9); }
+  }
+  .flash-btn { animation: flashBtn 0.5s ease-in-out 3; }
+
   /* ===== 播放锁定浮窗 ===== */
   .lock-overlay {
     position: fixed; top: 0; left: 0; right: 0; bottom: 0;
@@ -173,7 +201,7 @@
   .lock-dialog p { font-size: 16px; color: #666; margin-bottom: 26px; line-height: 1.6; }
   .lock-dialog .btn-group { display: flex; gap: 20px; justify-content: center; }
   .lock-dialog button {
-    padding: 12px 28px; font-size: 17px; border: none;
+    padding: 14px 32px; font-size: 18px; border: none;
     border-radius: 10px; cursor: pointer; font-weight: 700;
     transition: all 0.2s; color: #fff;
   }
@@ -188,20 +216,20 @@
 <div class="stage-h" id="stageH">
   <div class="canvas-h">
     <header class="top-bar">
-      <div class="title-row">
+      <div class="header-content">
         <h1>模型 1 &nbsp;"猪蹄" 模型</h1>
-        <button id="audioBtnH" class="audio-btn" title="播放讲解音频">🔊</button>
+        <p class="subtitle">
+          <strong>模型构建</strong> AB ∥ CD，E 是平行线间一点（内拐点），连接 EB、ED，且两条线段凹进去
+          &nbsp;&nbsp;
+          <strong>相关结论</strong> ∠B + ∠D = ∠BED
+        </p>
       </div>
-      <p class="subtitle">
-        <strong>模型构建</strong> AB ∥ CD，E 是平行线间一点（内拐点），连接 EB、ED，且两条线段凹进去
-        &nbsp;&nbsp;
-        <strong>相关结论</strong> ∠B + ∠D = ∠BED
-      </p>
+      <button id="audioBtnH" class="audio-btn" title="播放讲解音频">🔊</button>
     </header>
     <div class="main-content-h">
       <div class="panel left-panel">
         <h2>基础模型（交互）</h2>
-        <svg id="baseSvgH" viewBox="0 0 520 400"></svg>
+        <svg id="baseSvgH" viewBox="0 60 520 280"></svg>
         <div class="verify-box" id="verifyBoxH"></div>
         <p class="hint-text">提示：拖动 AB / CD 线可上下移动 · 拖动 E 点可上下移动 · 单击 E 点显示/隐藏辅助线 EF</p>
       </div>
@@ -212,7 +240,7 @@
           <button id="removeBtnH" class="btn-remove">− 减少一对拐点</button>
           <span class="ext-count" id="extCountH">拐点数量：5</span>
         </div>
-        <svg id="extSvgH" viewBox="0 0 520 400"></svg>
+        <svg id="extSvgH" viewBox="0 40 520 340"></svg>
         <div class="conclusion-box" id="conclusionBoxH"></div>
       </div>
     </div>
@@ -223,18 +251,18 @@
 <div class="stage-v" id="stageV">
   <div class="canvas-v">
     <header class="top-bar">
-      <div class="title-row">
+      <div class="header-content">
         <h1>模型 1 "猪蹄" 模型</h1>
-        <button id="audioBtnV" class="audio-btn" title="播放讲解音频">🔊</button>
+        <p class="subtitle">
+          <strong>构建</strong> AB ∥ CD，E 内拐点 &nbsp; <strong>结论</strong> ∠B + ∠D = ∠BED
+        </p>
       </div>
-      <p class="subtitle">
-        <strong>构建</strong> AB ∥ CD，E 内拐点 &nbsp; <strong>结论</strong> ∠B + ∠D = ∠BED
-      </p>
+      <button id="audioBtnV" class="audio-btn" title="播放讲解音频">🔊</button>
     </header>
     <div class="main-content-v">
       <div class="panel left-panel">
         <h2>基础模型（交互）</h2>
-        <svg id="baseSvgV" viewBox="0 0 380 380"></svg>
+        <svg id="baseSvgV" viewBox="0 60 380 280"></svg>
         <div class="verify-box" id="verifyBoxV"></div>
       </div>
       <div class="panel right-panel">
@@ -244,7 +272,7 @@
           <button id="removeBtnV" class="btn-remove">− 减少</button>
           <span class="ext-count" id="extCountV">5个</span>
         </div>
-        <svg id="extSvgV" viewBox="0 0 340 360"></svg>
+        <svg id="extSvgV" viewBox="0 30 340 320"></svg>
         <div class="conclusion-box" id="conclusionBoxV"></div>
       </div>
     </div>
@@ -301,8 +329,8 @@ function getSvgPoint(svg, clientX, clientY) {
   const rect = svg.getBoundingClientRect();
   const vb = svg.viewBox.baseVal;
   return {
-    x: (clientX - rect.left) / rect.width * vb.width,
-    y: (clientY - rect.top) / rect.height * vb.height
+    x: vb.x + (clientX - rect.left) / rect.width * vb.width,
+    y: vb.y + (clientY - rect.top) / rect.height * vb.height
   };
 }
 function getClientXY(e) {
@@ -353,21 +381,28 @@ function renderBaseTo(svg, verifyBoxEl, xF, labelSize) {
   const E = {x: s.xE, y: s.yE}, F = {x: xF, y: s.yE};
   const angBRaw = angleDeg(A, B, E), angDRaw = angleDeg(C, D, E), angBEDRaw = angleDeg(B, E, D);
   const angB = Math.round(angBRaw), angD = Math.round(angDRaw), angBED = Math.round(angBEDRaw);
-  const ls = labelSize || 17;
+  const ls = labelSize || 20;
 
   if (s.efVisible) {
-    svg.appendChild(el("line", {x1:E.x,y1:E.y,x2:F.x,y2:F.y,stroke:"#9E9E9E","stroke-width":2,"stroke-dasharray":"6,4"}));
+    svg.appendChild(el("line", {x1:E.x,y1:E.y,x2:F.x,y2:F.y,stroke:"#9E9E9E","stroke-width":2,"stroke-dasharray":"6,4",class:"flash-ef"}));
     const ft = el("text",{x:F.x+4,y:F.y+5,"font-size":ls-1,fill:"#666","font-weight":"600"}); ft.textContent="F"; svg.appendChild(ft);
     const et = el("text",{x:(E.x+F.x)/2,y:E.y-8,"font-size":ls-4,fill:"#9E9E9E","text-anchor":"middle"}); et.textContent="EF ∥ AB"; svg.appendChild(et);
   }
   const rB=28, rD=28, rE=32;
-  svg.appendChild(el("path",{d:sectorPath(B.x,B.y,rB,dirAngle(B,A),dirAngle(B,E)),fill:"rgba(33,150,243,0.35)",stroke:"#1565C0","stroke-width":1}));
-  svg.appendChild(el("path",{d:sectorPath(D.x,D.y,rD,dirAngle(D,C),dirAngle(D,E)),fill:"rgba(33,150,243,0.35)",stroke:"#1565C0","stroke-width":1}));
-  svg.appendChild(el("path",{d:sectorPath(E.x,E.y,rE,dirAngle(E,B),dirAngle(E,D)),fill:"rgba(244,67,54,0.3)",stroke:"#C62828","stroke-width":1}));
-  [["A","B"],["C","D"],["E","B"],["E","D"]].forEach(([a,b])=>{
-    const pa={A,B,C,D,E}[a], pb={A,B,C,D,E}[b];
-    svg.appendChild(el("line",{x1:pa.x,y1:pa.y,x2:pb.x,y2:pb.y,stroke:"#333","stroke-width":2.5}));
+  svg.appendChild(el("path",{d:sectorPath(B.x,B.y,rB,dirAngle(B,A),dirAngle(B,E)),fill:"rgba(33,150,243,0.35)",stroke:"#1565C0","stroke-width":1,class:"flash-angB"}));
+  svg.appendChild(el("path",{d:sectorPath(D.x,D.y,rD,dirAngle(D,C),dirAngle(D,E)),fill:"rgba(33,150,243,0.35)",stroke:"#1565C0","stroke-width":1,class:"flash-angD"}));
+  svg.appendChild(el("path",{d:sectorPath(E.x,E.y,rE,dirAngle(E,B),dirAngle(E,D)),fill:"rgba(244,67,54,0.3)",stroke:"#C62828","stroke-width":1,class:"flash-angBED"}));
+
+  const lineDefs = [
+    {pa:A, pb:B, cls:"flash-ab"},
+    {pa:C, pb:D, cls:"flash-cd"},
+    {pa:E, pb:B, cls:"flash-eb"},
+    {pa:E, pb:D, cls:"flash-ed"},
+  ];
+  lineDefs.forEach(({pa,pb,cls})=>{
+    svg.appendChild(el("line",{x1:pa.x,y1:pa.y,x2:pb.x,y2:pb.y,stroke:"#333","stroke-width":2.5,class:cls}));
   });
+
   [s.yAB, s.yCD].forEach(y=>{
     svg.appendChild(el("line",{x1:170,y1:y-5,x2:173,y2:y,stroke:"#666","stroke-width":1.5}));
     svg.appendChild(el("line",{x1:173,y1:y,x2:170,y2:y+5,stroke:"#666","stroke-width":1.5}));
@@ -380,7 +415,7 @@ function renderBaseTo(svg, verifyBoxEl, xF, labelSize) {
     const o=el("text",{x:p.x+(r+16)*Math.cos(bis),y:p.y+(r+16)*Math.sin(bis),"font-size":ls-3,fill:color,"font-weight":"700","text-anchor":"middle","dominant-baseline":"middle"});
     o.textContent=val+"°"; svg.appendChild(o);
   });
-  const eCircle=el("circle",{cx:E.x,cy:E.y,r:8,fill:"#FFC107",stroke:"#F57F17","stroke-width":2,class:"point-hit"});
+  const eCircle=el("circle",{cx:E.x,cy:E.y,r:8,fill:"#FFC107",stroke:"#F57F17","stroke-width":2,class:"point-hit flash-e"});
   svg.appendChild(eCircle);
   const abHit=el("line",{x1:A.x,y1:A.y,x2:B.x,y2:B.y,stroke:"transparent","stroke-width":18,class:"drag-hit"});
   svg.appendChild(abHit);
@@ -395,8 +430,8 @@ function renderBaseTo(svg, verifyBoxEl, xF, labelSize) {
 }
 
 function renderBase() {
-  renderBaseTo(baseSvgH, verifyBoxH, 470, 17);
-  renderBaseTo(baseSvgV, verifyBoxV, 350, 15);
+  renderBaseTo(baseSvgH, verifyBoxH, 470, 20);
+  renderBaseTo(baseSvgV, verifyBoxV, 350, 18);
 }
 
 function setupDrag(svg, hitEl, prop) {
@@ -417,7 +452,7 @@ function setupDrag(svg, hitEl, prop) {
     const pt = getSvgPoint(svg, p.x, p.y);
     const sp = getSvgPoint(svg, p.x, startY);
     let nv = startVal + (pt.y - sp.y);
-    nv = Math.max(40, Math.min(370, nv));
+    nv = Math.max(75, Math.min(325, nv));
     baseState[prop] = nv; renderBase();
   }
   function onEnd() {
@@ -449,7 +484,7 @@ function setupEPoint(svg, pointEl) {
     const pt = getSvgPoint(svg, p.x, p.y);
     const sp = getSvgPoint(svg, p.x, startY);
     let ny = startYE + (pt.y - sp.y);
-    ny = Math.max(50, Math.min(360, ny));
+    ny = Math.max(85, Math.min(315, ny));
     baseState.yE = ny; renderBase();
   }
   function onEnd() {
@@ -489,35 +524,39 @@ function renderExtTo(svg, conclusionBoxEl, extCountEl, removeBtnEl, cfg) {
     points.push({x,y,label:`P${i+1}`});
   }
   const verts=[A,...points,B];
-  svg.appendChild(el("line",{x1:A.x,y1:A.y,x2:M.x,y2:M.y,stroke:"#333","stroke-width":2.5}));
-  svg.appendChild(el("line",{x1:B.x,y1:B.y,x2:N.x,y2:N.y,stroke:"#333","stroke-width":2.5}));
+  svg.appendChild(el("line",{x1:A.x,y1:A.y,x2:M.x,y2:M.y,stroke:"#333","stroke-width":2.5,class:"flash-am"}));
+  svg.appendChild(el("line",{x1:B.x,y1:B.y,x2:N.x,y2:N.y,stroke:"#333","stroke-width":2.5,class:"flash-bn"}));
   [cfg.yTop, cfg.yBot].forEach(y=>{
     svg.appendChild(el("line",{x1:cfg.pmX,y1:y-5,x2:cfg.pmX+3,y2:y,stroke:"#666","stroke-width":1.5}));
     svg.appendChild(el("line",{x1:cfg.pmX+3,y1:y,x2:cfg.pmX,y2:y+5,stroke:"#666","stroke-width":1.5}));
   });
   const extR=cfg.extR || 22;
-  function extSec(v,p1,p2,fill,stroke){
+  function extSec(v,p1,p2,fill,stroke,cls){
     const a1=dirAngle(v,p1),a2=dirAngle(v,p2);
-    svg.appendChild(el("path",{d:sectorPath(v.x,v.y,extR,a1,a2),fill,stroke,"stroke-width":1}));
+    svg.appendChild(el("path",{d:sectorPath(v.x,v.y,extR,a1,a2),fill,stroke,"stroke-width":1,class:cls}));
     const deg=Math.round(angleDeg(p1,v,p2));
     const bis=bisectorAngle(a1,a2);
-    const o=el("text",{x:v.x+(extR+14)*Math.cos(bis),y:v.y+(extR+14)*Math.sin(bis),"font-size":cfg.labelSize||12,fill:stroke,"font-weight":"700","text-anchor":"middle","dominant-baseline":"middle"});
+    const o=el("text",{x:v.x+(extR+14)*Math.cos(bis),y:v.y+(extR+14)*Math.sin(bis),"font-size":cfg.labelSize||15,fill:stroke,"font-weight":"700","text-anchor":"middle","dominant-baseline":"middle"});
     o.textContent=deg+"°"; svg.appendChild(o);
   }
-  extSec(A,M,verts[1],"rgba(76,175,80,0.3)","#2E7D32");
-  extSec(B,N,verts[n],"rgba(76,175,80,0.3)","#2E7D32");
+  extSec(A,M,verts[1],"rgba(76,175,80,0.3)","#2E7D32","flash-angA");
+  extSec(B,N,verts[n],"rgba(76,175,80,0.3)","#2E7D32","flash-angBext");
   for(let j=1;j<=n;j++){
     const odd=((j-1)%2===0);
+    const pCls = `flash-p${j} ${odd?"flash-odd":"flash-even"}`;
     extSec(verts[j],verts[j-1],verts[j+1],
       odd?"rgba(244,67,54,0.3)":"rgba(33,150,243,0.3)",
-      odd?"#C62828":"#1565C0");
+      odd?"#C62828":"#1565C0", pCls);
   }
   for(let i=0;i<verts.length-1;i++){
     svg.appendChild(el("line",{x1:verts[i].x,y1:verts[i].y,x2:verts[i+1].x,y2:verts[i+1].y,stroke:"#E65100","stroke-width":2.5}));
   }
-  svg.appendChild(el("circle",{cx:A.x,cy:A.y,r:4.5,fill:"#4CAF50",stroke:"#fff","stroke-width":1.5}));
-  svg.appendChild(el("circle",{cx:B.x,cy:B.y,r:4.5,fill:"#4CAF50",stroke:"#fff","stroke-width":1.5}));
-  points.forEach((p,i)=>svg.appendChild(el("circle",{cx:p.x,cy:p.y,r:4.5,fill:i%2===0?"#F44336":"#2196F3",stroke:"#fff","stroke-width":1.5})));
+  svg.appendChild(el("circle",{cx:A.x,cy:A.y,r:4.5,fill:"#4CAF50",stroke:"#fff","stroke-width":1.5,class:"flash-angA"}));
+  svg.appendChild(el("circle",{cx:B.x,cy:B.y,r:4.5,fill:"#4CAF50",stroke:"#fff","stroke-width":1.5,class:"flash-angBext"}));
+  points.forEach((p,i)=>{
+    const pCls = `flash-p${i+1} ${i%2===0?"flash-odd":"flash-even"}`;
+    svg.appendChild(el("circle",{cx:p.x,cy:p.y,r:4.5,fill:i%2===0?"#F44336":"#2196F3",stroke:"#fff","stroke-width":1.5,class:pCls}));
+  });
   const ls=cfg.labelSize || 15;
   [["A",A,-14,"#2E7D32"],["M",M,6,"#2E7D32"],["B",B,-14,"#2E7D32"],["N",N,6,"#2E7D32"]].forEach(([t,p,dx,c])=>{
     const o=el("text",{x:p.x+dx,y:p.y+5,"font-size":ls,fill:c,"font-weight":"700"}); o.textContent=t; svg.appendChild(o);
@@ -531,11 +570,11 @@ function renderExtTo(svg, conclusionBoxEl, extCountEl, removeBtnEl, cfg) {
   removeBtnEl.disabled=(n<=3);
   let left=["∠A","∠B"], right=[];
   for(let i=1;i<=n;i++){if(i%2===0)left.push(`∠P${i}`);else right.push(`∠P${i}`);}
-  conclusionBoxEl.innerHTML=`<div class="title">已知条件：AM ∥ BN</div><div><strong>结论：</strong>${left.join(" + ")} = ${right.join(" + ")}</div><div style="font-size:13px;color:#999;margin-top:4px;">（朝一侧的角之和 = 朝另一侧的角之和）</div>`;
+  conclusionBoxEl.innerHTML=`<div class="title">已知条件：AM ∥ BN</div><div><strong>结论：</strong>${left.join(" + ")} = ${right.join(" + ")}</div><div style="font-size:14px;color:#999;margin-top:4px;">（朝一侧的角之和 = 朝另一侧的角之和）</div>`;
 }
 
-const EXT_CFG_H = { yTop:70, yBot:350, xLeft:80, xRight:480, yStart:110, yEnd:310, xOdd:210, xEven:25, pmX:260, extR:22, labelSize:12 };
-const EXT_CFG_V = { yTop:60, yBot:320, xLeft:50, xRight:320, yStart:90, yEnd:290, xOdd:180, xEven:20, pmX:170, extR:20, labelSize:11, countFormat: n=>`${n}个` };
+const EXT_CFG_H = { yTop:70, yBot:350, xLeft:80, xRight:480, yStart:110, yEnd:310, xOdd:210, xEven:25, pmX:260, extR:22, labelSize:15 };
+const EXT_CFG_V = { yTop:60, yBot:320, xLeft:50, xRight:320, yStart:90, yEnd:290, xOdd:180, xEven:20, pmX:170, extR:20, labelSize:14, countFormat: n=>`${n}个` };
 
 function renderExt() {
   renderExtTo(extSvgH, conclusionBoxH, extCountH, removeBtnH, EXT_CFG_H);
@@ -557,10 +596,12 @@ document.getElementById("removeBtnH").addEventListener("click", removeCorner);
 document.getElementById("removeBtnV").addEventListener("click", removeCorner);
 
 /* ============================================================
-   音频播放 + 自动动画调度
+   音频播放 + 自动动画调度 + 同步闪烁
 ============================================================ */
 const audioBtnH = document.getElementById("audioBtnH");
 const audioBtnV = document.getElementById("audioBtnV");
+const addBtnH = document.getElementById("addBtnH");
+const addBtnV = document.getElementById("addBtnV");
 const lockOverlay = document.getElementById("lockOverlay");
 const audio = new Audio();
 const SEG_COUNT = 7;
@@ -578,6 +619,53 @@ const segActions = [
 ];
 let currentActionTriggered = false;
 
+/* ---- 闪烁时间轴（seg从0开始，time为该段内的秒数） ---- */
+const flashTimeline = [
+  // 第1段：开场+构建
+  { seg: 0, time: 12, targets: ["flash-ab","flash-cd"], type: "line" },
+  { seg: 0, time: 30, targets: ["flash-e"], type: "point" },
+  { seg: 0, time: 32, targets: ["flash-eb","flash-ed"], type: "line" },
+  { seg: 0, time: 35, targets: ["flash-angBED"], type: "sector" },
+  // 第2段：引导拖动
+  { seg: 1, time: 3, targets: ["flash-ab"], type: "line" },
+  { seg: 1, time: 6, targets: ["flash-cd"], type: "line" },
+  { seg: 1, time: 8, targets: ["flash-e"], type: "point" },
+  { seg: 1, time: 11, targets: ["flash-angB"], type: "sector" },
+  { seg: 1, time: 13, targets: ["flash-angD"], type: "sector" },
+  { seg: 1, time: 15, targets: ["flash-angBED"], type: "sector" },
+  // 第3段：辅助线
+  { seg: 2, time: 7, targets: ["flash-e"], type: "point" },
+  { seg: 2, time: 10, targets: ["flash-ef"], type: "line" },
+  // 第4段：推导证明
+  { seg: 3, time: 16, targets: ["flash-angB"], type: "sector" },
+  { seg: 3, time: 24, targets: ["flash-angD"], type: "sector" },
+  { seg: 3, time: 32, targets: ["flash-angBED"], type: "sector" },
+  // 第5段：拓展模型
+  { seg: 4, time: 8, targets: ["flash-am","flash-bn"], type: "line" },
+  { seg: 4, time: 12, targets: ["flash-p1","flash-p2","flash-p3","flash-p4","flash-p5"], type: "point", stagger: 300 },
+  { seg: 4, time: 22, targets: ["btn-add"], type: "button" },
+  // 第6段：拓展结论
+  { seg: 5, time: 3, targets: ["btn-remove"], type: "button" },
+  { seg: 5, time: 25, targets: ["flash-angA","flash-angBext"], type: "sector" },
+  { seg: 5, time: 28, targets: ["flash-even"], type: "sector" },
+  { seg: 5, time: 31, targets: ["flash-odd"], type: "sector" },
+  // 第7段：总结
+  { seg: 6, time: 12, targets: ["flash-angB","flash-angD","flash-angBED"], type: "sector" },
+];
+let flashIndex = 0;
+
+function flashTargets(targets, type) {
+  const animClass = type === "line" ? "flash-line" : type === "sector" ? "flash-sector" : type === "point" ? "flash-point" : "flash-btn";
+  targets.forEach(cls => {
+    document.querySelectorAll("." + cls).forEach(el => {
+      el.classList.remove("flash-line","flash-sector","flash-point","flash-btn");
+      void el.offsetWidth;
+      el.classList.add(animClass);
+      setTimeout(() => el.classList.remove(animClass), 2000);
+    });
+  });
+}
+
 function updateAudioBtns(text, playing) {
   audioBtnH.textContent = text; audioBtnV.textContent = text;
   if (playing) { audioBtnH.classList.add("playing"); audioBtnV.classList.add("playing"); }
@@ -588,6 +676,8 @@ function playSegment(index) {
   if (index >= SEG_COUNT) { finishPlayback(); return; }
   playbackState.currentSeg = index;
   currentActionTriggered = false;
+  flashIndex = flashTimeline.findIndex(f => f.seg >= index);
+  if (flashIndex < 0) flashIndex = flashTimeline.length;
   audio.src = `audio/seg${index + 1}.mp3`;
   audio.play().catch(e => {
     console.error("播放失败:", e);
@@ -596,8 +686,21 @@ function playSegment(index) {
 }
 
 audio.addEventListener("timeupdate", () => {
-  const cfg = segActions[playbackState.currentSeg];
-  if (cfg && !currentActionTriggered && audio.currentTime >= cfg.triggerAt) {
+  const seg = playbackState.currentSeg;
+  const t = audio.currentTime;
+  /* 闪烁调度 */
+  while (flashIndex < flashTimeline.length && flashTimeline[flashIndex].seg === seg && flashTimeline[flashIndex].time <= t) {
+    const item = flashTimeline[flashIndex];
+    if (item.stagger) {
+      item.targets.forEach((cls, i) => setTimeout(() => flashTargets([cls], item.type), i * item.stagger));
+    } else {
+      flashTargets(item.targets, item.type);
+    }
+    flashIndex++;
+  }
+  /* 原有动作调度 */
+  const cfg = segActions[seg];
+  if (cfg && !currentActionTriggered && t >= cfg.triggerAt) {
     currentActionTriggered = true; cfg.action();
   }
 });
@@ -651,12 +754,14 @@ function stopPlayback() {
   audio.pause(); audio.currentTime = 0;
   playbackState.isPlaying = false; playbackState.isPaused = false;
   playbackState.currentSeg = 0; currentActionTriggered = false;
+  flashIndex = 0;
   updateAudioBtns("🔊", false);
   resetAll();
 }
 function finishPlayback() {
   playbackState.isPlaying = false; playbackState.isPaused = false;
   playbackState.currentSeg = 0; currentActionTriggered = false;
+  flashIndex = 0;
   updateAudioBtns("🔊", false);
   setTimeout(() => { if (!playbackState.isPlaying) resetAll(); }, 1200);
 }
