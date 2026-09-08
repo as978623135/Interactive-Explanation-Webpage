@@ -125,7 +125,9 @@
     display: block;
     user-select: none;
     min-height: 0;
+    touch-action: none;
   }
+  .drag-hit, .point-hit { touch-action: none; }
   .verify-box {
     margin-top: 12px;
     padding: 12px 18px;
@@ -157,7 +159,7 @@
     flex: 0 0 auto;
   }
   .ext-controls button {
-    padding: 8px 24px;
+    padding: 10px 28px;
     font-size: 18px;
     font-weight: 700;
     border: none;
@@ -194,6 +196,23 @@
   .conclusion-box .title { font-weight: 700; margin-bottom: 4px; font-size: 18px; }
   .drag-hit { cursor: ns-resize; }
   .point-hit { cursor: pointer; }
+
+  /* 横屏提示遮罩 */
+  .rotate-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(135deg, #2E7D32, #388E3C);
+    display: none; justify-content: center; align-items: center;
+    flex-direction: column; color: #fff; text-align: center;
+    z-index: 100000;
+  }
+  .rotate-overlay.show { display: flex; }
+  .rotate-icon { font-size: 72px; margin-bottom: 20px; animation: rotatePhone 2s ease-in-out infinite; }
+  @keyframes rotatePhone {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(90deg); }
+  }
+  .rotate-overlay h2 { font-size: 32px; margin-bottom: 12px; font-weight: 700; }
+  .rotate-overlay p { font-size: 18px; line-height: 1.8; opacity: 0.9; }
 
   /* 播放锁定浮窗 */
   .lock-overlay {
@@ -298,6 +317,15 @@
   </div>
 </div>
 
+<!-- 横屏提示遮罩 -->
+<div class="rotate-overlay" id="rotateOverlay">
+  <div class="rotate-content">
+    <div class="rotate-icon">📱</div>
+    <h2>请横屏使用</h2>
+    <p>本课件为 16:9 横屏设计<br>请旋转手机以获得最佳体验</p>
+  </div>
+</div>
+
 <script>
 /* ============================================================
    16:9 画布等比缩放
@@ -309,6 +337,18 @@ function fitStage() {
 }
 window.addEventListener("resize", fitStage);
 fitStage();
+
+/* 横屏检测：手机竖屏时强制提示 */
+function checkOrientation() {
+  const overlay = document.getElementById("rotateOverlay");
+  const isPhone = window.innerWidth < 768;
+  const isPortrait = window.innerHeight > window.innerWidth;
+  if (isPhone && isPortrait) overlay.classList.add("show");
+  else overlay.classList.remove("show");
+}
+window.addEventListener("resize", checkOrientation);
+window.addEventListener("orientationchange", checkOrientation);
+checkOrientation();
 
 /* ============================================================
    工具函数
@@ -326,6 +366,11 @@ function getSvgPoint(svg, clientX, clientY) {
     x: (clientX - rect.left) / rect.width * vb.width,
     y: (clientY - rect.top) / rect.height * vb.height
   };
+}
+function getClientXY(e) {
+  if (e.touches && e.touches.length > 0) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  if (e.changedTouches && e.changedTouches.length > 0) return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+  return { x: e.clientX, y: e.clientY };
 }
 function dirAngle(vertex, p) { return Math.atan2(p.y - vertex.y, p.x - vertex.x); }
 function angleDeg(p1, vertex, p2) {
@@ -407,44 +452,67 @@ function renderBase() {
 }
 
 function setupDrag(hitEl, prop) {
-  let startMouseY, startVal, moved;
-  hitEl.addEventListener("mousedown", (e) => {
+  let startY, startVal;
+  function onStart(e) {
     if (playbackState.isPlaying) { showLockDialog(); e.preventDefault(); return; }
     e.preventDefault();
-    startMouseY = e.clientY; startVal = baseState[prop]; moved = false;
-    const onMove = (ev) => {
-      const pt = getSvgPoint(baseSvg, ev.clientX, ev.clientY);
-      const sp = getSvgPoint(baseSvg, ev.clientX, startMouseY);
-      if (Math.abs(ev.clientY - startMouseY) > 3) moved = true;
-      let nv = startVal + (pt.y - sp.y);
-      nv = Math.max(40, Math.min(370, nv));
-      baseState[prop] = nv; renderBase();
-    };
-    const onUp = () => { document.removeEventListener("mousemove", onMove); document.removeEventListener("mouseup", onUp); };
-    document.addEventListener("mousemove", onMove); document.addEventListener("mouseup", onUp);
-  });
+    const p = getClientXY(e);
+    startY = p.y; startVal = baseState[prop];
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onEnd);
+    document.addEventListener("touchmove", onMove, { passive: false });
+    document.addEventListener("touchend", onEnd);
+  }
+  function onMove(e) {
+    e.preventDefault();
+    const p = getClientXY(e);
+    const pt = getSvgPoint(baseSvg, p.x, p.y);
+    const sp = getSvgPoint(baseSvg, p.x, startY);
+    let nv = startVal + (pt.y - sp.y);
+    nv = Math.max(40, Math.min(370, nv));
+    baseState[prop] = nv; renderBase();
+  }
+  function onEnd() {
+    document.removeEventListener("mousemove", onMove);
+    document.removeEventListener("mouseup", onEnd);
+    document.removeEventListener("touchmove", onMove);
+    document.removeEventListener("touchend", onEnd);
+  }
+  hitEl.addEventListener("mousedown", onStart);
+  hitEl.addEventListener("touchstart", onStart, { passive: false });
 }
 
 function setupEPoint(pointEl) {
-  let startMouseY, startYE, moved;
-  pointEl.addEventListener("mousedown", (e) => {
+  let startY, startYE, moved;
+  function onStart(e) {
     if (playbackState.isPlaying) { showLockDialog(); e.preventDefault(); return; }
-    e.preventDefault(); e.stopPropagation();
-    startMouseY = e.clientY; startYE = baseState.yE; moved = false;
-    const onMove = (ev) => {
-      if (Math.abs(ev.clientY - startMouseY) > 3) moved = true;
-      const pt = getSvgPoint(baseSvg, ev.clientX, ev.clientY);
-      const sp = getSvgPoint(baseSvg, ev.clientX, startMouseY);
-      let ny = startYE + (pt.y - sp.y);
-      ny = Math.max(50, Math.min(360, ny));
-      baseState.yE = ny; renderBase();
-    };
-    const onUp = () => {
-      document.removeEventListener("mousemove", onMove); document.removeEventListener("mouseup", onUp);
-      if (!moved) { baseState.efVisible = !baseState.efVisible; renderBase(); }
-    };
-    document.addEventListener("mousemove", onMove); document.addEventListener("mouseup", onUp);
-  });
+    e.preventDefault();
+    const p = getClientXY(e);
+    startY = p.y; startYE = baseState.yE; moved = false;
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onEnd);
+    document.addEventListener("touchmove", onMove, { passive: false });
+    document.addEventListener("touchend", onEnd);
+  }
+  function onMove(e) {
+    e.preventDefault();
+    const p = getClientXY(e);
+    if (Math.abs(p.y - startY) > 3) moved = true;
+    const pt = getSvgPoint(baseSvg, p.x, p.y);
+    const sp = getSvgPoint(baseSvg, p.x, startY);
+    let ny = startYE + (pt.y - sp.y);
+    ny = Math.max(50, Math.min(360, ny));
+    baseState.yE = ny; renderBase();
+  }
+  function onEnd() {
+    document.removeEventListener("mousemove", onMove);
+    document.removeEventListener("mouseup", onEnd);
+    document.removeEventListener("touchmove", onMove);
+    document.removeEventListener("touchend", onEnd);
+    if (!moved) { baseState.efVisible = !baseState.efVisible; renderBase(); }
+  }
+  pointEl.addEventListener("mousedown", onStart);
+  pointEl.addEventListener("touchstart", onStart, { passive: false });
 }
 
 /* ============================================================
